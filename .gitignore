@@ -82,11 +82,13 @@ buildNumber.properties
 ### Node ###
 # Logs
 logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
+pnpm-debug.log*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
@@ -224,6 +226,9 @@ dist
 **/*.back.*
 
 node_modules
+dist
+dist-ssr
+*.local
 
 *.sublime*
 
@@ -275,3 +280,11 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Editor directories and files
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
