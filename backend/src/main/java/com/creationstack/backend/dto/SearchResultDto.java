@@ -11,11 +11,11 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ContentSearchResultListDto { // 콘텐츠 검색 결과 Dto
+public class SearchResultDto { // 콘텐츠 검색 결과 Dto
 
     private Long contentId; // 콘텐츠 ID
     private String title; // 제목
-    private ContentCreatorSearchDto creator; // 크리에이터 정보
+    private SearchCreatorDto creator; // 크리에이터 정보
     private String thumbnailUrl;
     private AccessType accessType; // 유/무료
     private int viewCount; // 조회수
