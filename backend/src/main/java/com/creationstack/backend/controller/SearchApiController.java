@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
-public class SearchRestController { // 검색 컨트롤러
+public class SearchApiController { // 검색 api 컨트롤러
 
     private final SearchService searchService;
 
