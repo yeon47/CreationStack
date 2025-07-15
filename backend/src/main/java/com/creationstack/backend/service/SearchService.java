@@ -25,7 +25,9 @@ public class SearchService { // 검색 서비스
     private final ContentRepository contentRepository; // 콘텐츠 레포지토리
 
     // 통합 검색
-    public IntegratedSearchResponse searchIntegrated(SearchDto dto, String sortType) {
+    public IntegratedSearchResponse searchIntegrated(
+            SearchDto dto, // 검색 조건 Dto
+            String sortType) { // 정렬 기준
 
         // 크리에이터 3개
         Pageable creatorPageable = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, sortType));
