@@ -1,3 +1,4 @@
+
 /* layout.module.css */
 
 .navbarCreator {
@@ -220,5 +221,76 @@
   .createContentButton {
     padding: 6px 12px;
     font-size: 12px;
+
+/* Layout container */
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Navbar */
+.nav_container {
+  height: var(--navbar-height);
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 0 var(--padding-horizontal);
+}
+
+/* Main content area */
+.main {
+  flex: 1;
+  max-width: var(--max-width);
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem var(--padding-horizontal);
+  box-sizing: border-box;
+  background-color: #ffffff;
+}
+
+/* Footer */
+.footer {
+  height: var(--footer-height);
+  background-color: #f1f1f1;
+  color: #666;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--padding-horizontal);
+  box-sizing: border-box;
+  border-top: 1px solid #ddd;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .main {
+    padding: 1.5rem 1rem;
+  }
+
+  .nav_container {
+    padding: 0 1rem;
+  }
+
+  .footer {
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .main {
+    padding: 1rem 0.5rem;
+  }
+
+  .nav_container,
+  .footer {
+    padding: 0 0.5rem;
+
   }
 }
