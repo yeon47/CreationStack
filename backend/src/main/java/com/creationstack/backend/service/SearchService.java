@@ -25,13 +25,21 @@ public class SearchService { // 검색 서비스
     private final ContentRepository contentRepository; // 콘텐츠 레포지토리
 
     // 통합 검색
-    public SearchResponse<SearchResultDto> searchAll(
-            SearchDto dto, // 검색 조건 Dto
-            Pageable pageable, // 페이징 정보
-            String sortType) { // 정렬 기준
+    public IntegratedSearchResponse searchIntegrated(SearchDto dto, String sortType) {
 
-        dto.setSearchMode(SearchMode.ALL);
-        return searchFilter(dto, pageable, sortType);
+        // 크리에이터 3개
+        Pageable creatorPageable = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, sortType));
+        SearchResponse<SearchResultDto> creatorResult = searchCreator(dto, creatorPageable, sortType);
+        //콘텐츠 6개
+        Pageable contentPageable = PageRequest.of(0, 6, Sort.by(Sort.Direction.DESC, sortType));
+        SearchResponse<SearchResultDto> contentResult = searchContent(dto, contentPageable, sortType);
+
+        //결과 묶기
+        IntegratedSearchResponse response = new IntegratedSearchResponse();
+        response.setCreators(creatorResult.getContents());
+        response.setContents(contentResult.getContents());
+
+        return response;
     }
 
     // 콘텐츠 + 크리에이터의 콘텐츠 검색
@@ -53,6 +61,18 @@ public class SearchService { // 검색 서비스
         dto.setSearchMode(SearchMode.CREATOR_ONLY);
         return searchFilter(dto, pageable, sortType);
     }
+
+    /*
+    // 전체 검색
+    public SearchResponse<SearchResultDto> searchAll(
+            SearchDto dto, // 검색 조건 Dto
+            Pageable pageable, // 페이징 정보
+            String sortType) { // 정렬 기준
+
+        dto.setSearchMode(SearchMode.ALL);
+        return searchFilter(dto, pageable, sortType);
+    }
+    */
 
     // 검색조건으로 필터링 메소드, ContentSearchResponse<ContentListDto>로 반환
     public SearchResponse<SearchResultDto> searchFilter(
