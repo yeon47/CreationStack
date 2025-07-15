@@ -76,7 +76,7 @@ public class SearchController {
     @GetMapping("/contents/search")
     public String search(
             @ModelAttribute SearchDto dto, // 검색 조건
-            @PageableDefault(size = 12) Pageable pageable, // 페이징
+            @PageableDefault(size = 9) Pageable pageable, // 페이징
             @RequestParam(value = "sort", defaultValue = "createdAt") String sortType, // 정렬 조건
             Model model) { // 모델
 

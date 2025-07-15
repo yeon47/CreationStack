@@ -71,6 +71,6 @@ public class SearchApiController { // 검색 api 컨트롤러
 
         return searchService.searchContent(dto, pageable, sortType);
     }
-     */
+    */
 
 }
