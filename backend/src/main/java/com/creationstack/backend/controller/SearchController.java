@@ -1,14 +1,12 @@
 package com.creationstack.backend.controller;
 
-import com.creationstack.backend.dto.IntegratedSearchResponse;
-import com.creationstack.backend.dto.SearchDto;
-import com.creationstack.backend.dto.SearchResponse;
-import com.creationstack.backend.dto.SearchResultDto;
+import com.creationstack.backend.dto.search.IntegratedSearchResponse;
+import com.creationstack.backend.dto.search.SearchDto;
+import com.creationstack.backend.dto.search.SearchResponse;
+import com.creationstack.backend.dto.search.SearchResultDto;
 import com.creationstack.backend.service.SearchService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

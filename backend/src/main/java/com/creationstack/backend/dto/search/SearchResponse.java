@@ -1,4 +1,4 @@
-package com.creationstack.backend.dto;
+package com.creationstack.backend.dto.search;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

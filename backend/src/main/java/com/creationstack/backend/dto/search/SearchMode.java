@@ -1,4 +1,4 @@
-package com.creationstack.backend.dto;
+package com.creationstack.backend.dto.search;
 
 public enum SearchMode {
     CONTENT_ONLY,
