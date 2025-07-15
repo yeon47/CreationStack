@@ -31,7 +31,7 @@ public @Entity class Content { // 콘텐츠 테이블
     private String title; // 콘텐츠 제목
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content; // TEXT 타입 콘텐츠 내용
 
     @Column(name = "thumbnail_url", length = 512, nullable = false)

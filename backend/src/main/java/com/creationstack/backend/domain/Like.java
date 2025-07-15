@@ -9,7 +9,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-@Table(name = "likes")
+@Table(name = "likes",
+        uniqueConstraints = @UniqueConstraint(name = "uq_user_content", columnNames = {"user_id", "content_id"}),
+        indexes = @Index(name = "idx_content_user", columnList = "user_id, is_active, created_at"))
 @NoArgsConstructor
 @AllArgsConstructor
 public @Entity class Like { // 좋아요 테이블
@@ -30,4 +32,7 @@ public @Entity class Like { // 좋아요 테이블
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt; // 좋아요 누른 시간
+
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true; // 좋아요 여부
 }

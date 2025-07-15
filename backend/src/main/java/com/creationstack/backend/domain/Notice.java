@@ -25,7 +25,7 @@ public @Entity class Notice { // 공지 테이블
     private User creator; // 공지 쓴 크리에이터
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content; // 공지 내용
 
     @Column(name = "thumbnail_url", length = 512)

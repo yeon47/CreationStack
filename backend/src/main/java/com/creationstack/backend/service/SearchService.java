@@ -153,10 +153,10 @@ public class SearchService { // 검색 서비스
                         .creator( // 크리에이터 정보
                                 SearchCreatorDto.builder()
                                         .userId(content.getCreator().getUserId()) // 크리에이터 ID
-                                        .nickname(content.getCreator().getNickname()) // 크리에이터 닉네임
-                                        .profileImageUrl(content.getCreator().getProfileImageUrl()) // 크리에이터 섬네일
-                                        .job(content.getCreator().getJob()) // 크리에이터 직업
-                                        .bio(content.getCreator().getBio()) // 크리에이터 간단 자기소개
+                                        .nickname(content.getCreator().getUserDetail().getNickname()) // 크리에이터 닉네임
+                                        .profileImageUrl(content.getCreator().getUserDetail().getProfileImageUrl()) // 크리에이터 섬네일
+                                        .job(content.getCreator().getJob().getName()) // 크리에이터 직업
+                                        .bio(content.getCreator().getUserDetail().getBio()) // 크리에이터 간단 자기소개
                                         .build())
 
                         .thumbnailUrl(content.getThumbnailUrl()) // 섬네일 Url

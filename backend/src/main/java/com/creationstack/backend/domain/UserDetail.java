@@ -20,6 +20,16 @@ public @Entity class UserDetail { // 유저 개인정보 테이블
     @Column(length = 50, nullable = false)
     private String username; // 유저 실명
 
+    @Column(length = 50, nullable = false)
+    private String nickname; // 유저 닉네임
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String bio; // TEXT 타입 간단한 소개글
+
+    @Column(name = "profile_image_url", length = 255)
+    private String profileImageUrl; // 프로필 사진 Url
+
     @Column(name = "platform_id", length = 255)
     private String platformId;
 

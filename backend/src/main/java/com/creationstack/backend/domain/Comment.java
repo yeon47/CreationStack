@@ -29,10 +29,16 @@ public @Entity class Comment { // 댓글 테이블
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
-    private Comment parentComment; // 자기참조 대댓글용 부모댓글 식별값
+    private Comment parentComment; // 부모 댓글 참조
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "root_comment_id")
+    private Comment rootComment; // 최상위 댓글 참조
+
+    private int depth = 0; // 댓글 깊이
 
     @Lob
-    @Column(nullable = false)
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String contentText; // 댓글 내용
 
     @Column(name = "like_count")
@@ -44,4 +50,7 @@ public @Entity class Comment { // 댓글 테이블
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt; // 댓글 단 시간
+
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false; // soft delete 처리용
 }

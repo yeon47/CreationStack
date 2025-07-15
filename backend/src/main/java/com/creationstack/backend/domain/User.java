@@ -20,21 +20,13 @@ public @Entity class User { // 유저 테이블
     @Column(name = "user_id")
     private Long userId; // 유저 테이블 기본키
 
-    @Column(length = 50, nullable = false)
-    private String nickname; // 유저 닉네임
-
-    @Column(length = 50, nullable = false)
-    private String job; // 유저 직업
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role; // USER, CREATOR 둘 중 하나
 
-    @Column(name = "profile_image_url", length = 255)
-    private String profileImageUrl; // 프로필 사진 Url
-
-    @Lob
-    private String bio; // TEXT 타입 간단한 소개글
+    @ManyToOne
+    @JoinColumn(name = "job_id")
+    private Job job; // 유저 직업
 
     @Column(name = "is_active")
     private boolean isActive = true; // 활동 여부
@@ -46,5 +38,8 @@ public @Entity class User { // 유저 테이블
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt; // 업데이트 시점마다 자동 갱신
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private UserDetail userDetail; // 유저디테일 매핑
 
 }
