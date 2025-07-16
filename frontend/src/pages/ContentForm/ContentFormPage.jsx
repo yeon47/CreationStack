@@ -4,12 +4,6 @@ import styles from "./contentForm.module.css"; // contentForm.module.css 임포�
 import { Editor } from '@toast-ui/react-editor';
 import '@toast-ui/editor/dist/toastui-editor.css'; // Editor's default style
 
-// Check 아이콘 컴포넌트 (사용자 코드에 정의되지 않아 임시 SVG로 대체)
-const CheckIcon = (props) => (
-  <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-  </svg>
-);
 
 const ContentFormPage = () => {
   const [title, setTitle] = useState("");
@@ -17,10 +11,16 @@ const ContentFormPage = () => {
   const [isSubscriberOnly, setIsSubscriberOnly] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [attachedFiles, setAttachedFiles] = useState([]);
+  const [attachedFiles, setAttachedFiles] = useState([]); // 첨부파일
+    const [thumbnailFile, setThumbnailFile] = useState(null); // 썸네일 이미지 파일
+  const [isDragging, setIsDragging] = useState(false); // 드래그 중인지 여부
 
+  // 드롭다운 외부 클릭 감지를 위한 ref
+  const dropdownRef = useRef(null);
   // Toast UI Editor 인스턴스에 접근하기 위한 ref
   const editorRef = useRef(null);
+  // 드래그앤드롭 영역 ref
+  const dragAreaRef = useRef(null); 
 
   /// ---------- 카테고리 드롭다운 관련
 
@@ -44,9 +44,6 @@ const ContentFormPage = () => {
   const removeCategoryTag = (categoryToRemove) => {
     setSelectedCategories(prev => prev.filter(c => c !== categoryToRemove));
   };
-
-  // 드롭다운 외부 클릭 감지를 위한 ref
-  const dropdownRef = useRef(null);
 
   // 드롭다운 외부 클릭 시 닫히는 로직
   useEffect(() => {
@@ -80,29 +77,76 @@ const ContentFormPage = () => {
     setAttachedFiles(prev => prev.filter(file => file.id !== fileId));
   };
 
-  // 저장 버튼 핸들러
-  const handleSave = () => {
-    // Toast UI Editor에서 현재 마크다운 콘텐츠를 가져옵니다.
-    const editorInstance = editorRef.current.getInstance();
-    const markdownContent = editorInstance.getMarkdown();
+  // ----------- 썸네일 이미지
+    // 썸네일 이미지 업로드 핸들러 (drag-and-drop)
+  const handleThumbnailUpload = (file) => {
+    if (file && file.type.startsWith('image/')) {
+      setThumbnailFile(file);
+    } else {
+      console.warn("이미지 파일만 업로드할 수 있습니다.");
+    }
+  };
 
-    console.log("저장:", { title, content: markdownContent, isSubscriberOnly, selectedCategories, attachedFiles });
+  // 드래그 오버 이벤트 핸들러
+  const handleDragOver = (e) => {
+    e.preventDefault(); // 기본 동작 방지 (파일 열림 방지)
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  // 드래그 리브 이벤트 핸들러
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  // 드롭 이벤트 핸들러
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      handleThumbnailUpload(files[0]); // 첫 번째 파일만 썸네일로 처리
+    }
+  };
+
+  // --------------- 컨텐츠 저장/작성취소
+ // 저장 버튼 핸들러
+  const handleSave = () => {
+    let markdownContent = "";
+    if (editorRef.current) {
+      const editorInstance = editorRef.current.getInstance();
+      markdownContent = editorInstance.getMarkdown();
+    }
+
+    console.log("저장:", {
+      title,
+      content: markdownContent,
+      isSubscriberOnly,
+      selectedCategories,
+      thumbnailFile, // 썸네일 파일 포함
+      attachedFiles // 일반 첨부파일 포함
+    });
     // 여기에 실제 저장 로직 (예: API 호출)을 구현합니다.
   };
 
   // 작성 취소 버튼 핸들러
   const handleCancel = () => {
     console.log("작성 취소");
-    // 폼 필드 및 에디터 내용 초기화
     setTitle('');
-    setContent(''); // content 상태 초기화
+    setContent('');
     setIsSubscriberOnly(false);
     setSelectedCategories([]);
     setAttachedFiles([]);
+    setThumbnailFile(null); // 썸네일 파일 초기화
     if (editorRef.current) {
-      editorRef.current.getInstance().setMarkdown(''); // 에디터 내용 초기화
+      editorRef.current.getInstance().setMarkdown('');
     }
   };
+
 
   return (
     <div className={styles.contentFormPageContainer}> {/* 새로운 클래스 적용 */}
@@ -218,16 +262,54 @@ const ContentFormPage = () => {
         />
       </div>
 
-     {/* 썸네일 이미지 드래그앤드랍 영역 */}
-<div className={styles.dragAndDropArea}>
-  <div className={styles.dragAndDropContent}>
-    <svg className={styles.dragAndDropIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-    </svg>
-    <p className={styles.dragAndDropText}>drag and drop</p>
-    <p className={styles.dragAndDropSubText}>썸네일 이미지를 드래그앤드랍하세요.</p>
-  </div>
-</div>
+      {/* 썸네일 이미지 드래그앤드랍 영역 */}
+      <div
+        className={`${styles.dragAndDropArea} ${isDragging ? styles.dragOver : ''}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        ref={dragAreaRef}
+      >
+        <div className={styles.dragAndDropContent}>
+          {thumbnailFile ? (
+            <img
+              src={URL.createObjectURL(thumbnailFile)} // 파일 객체에서 URL 생성
+              alt="Thumbnail Preview"
+              className={styles.thumbnailPreview}
+            />
+          ) : (
+            <>
+              <svg className={styles.dragAndDropIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <p className={styles.dragAndDropText}>drag and drop</p>
+              <p className={styles.dragAndDropSubText}>썸네일 이미지는 한개만 등록 가능합니다.</p>
+            </>
+          )}
+          <input
+            type="file"
+            onChange={(e) => handleThumbnailUpload(e.target.files[0])}
+            className="hidden"
+            id="thumbnail-upload"
+            accept="image/*"
+          />
+          <label
+            htmlFor="thumbnail-upload"
+            className={styles.fileSelectButton}
+          >
+            썸네일 등록
+          </label>
+          {thumbnailFile && (
+            <button
+              type="button"
+              className={styles.removeThumbnailButton}
+              onClick={() => setThumbnailFile(null)}
+            >
+              썸네일 제거
+            </button>
+          )}
+        </div>
+      </div>
 
 {/* 첨부파일 섹션 - 항상 렌더링 */}
       <div className={styles.fileSection}>
@@ -295,7 +377,6 @@ const ContentFormPage = () => {
           className={styles.storeButton}
         >
           <span className={styles.textWrapper3}>저장</span>
-          <CheckIcon className={styles.checkInstance} />
         </button>
       </div>
     </div>
