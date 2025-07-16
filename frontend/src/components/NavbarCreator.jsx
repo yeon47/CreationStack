@@ -111,3 +111,4 @@ export const NavbarCreator = () => {
     </nav>
   );
 };
+export default NavbarCreator;
