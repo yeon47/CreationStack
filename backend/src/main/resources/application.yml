@@ -17,3 +17,8 @@ logging:
   level:
     org.springframework.web: DEBUG
 
+
+portone:
+  apisecret: ${PORTONE_API_SECRET}
+  hostname: ${PORTONE_HOSTNAME}
+
