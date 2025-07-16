@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import styles from "../styles/layout.module.css";
+import { useNavigate } from "react-router-dom";
 
 export const NavbarCreator = () => {
   const [searchValue, setSearchValue] = useState("");
   const [activeMenu, setActiveMenu] = useState("홈");
+  const navigate = useNavigate();
+
 
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
@@ -26,6 +29,7 @@ export const NavbarCreator = () => {
   const handleCreateContent = () => {
     // 콘텐츠 작성 페이지로 이동
     console.log("콘텐츠 작성 버튼 클릭");
+    navigate("/content-form");
   };
 
   const handleProfileClick = () => {
