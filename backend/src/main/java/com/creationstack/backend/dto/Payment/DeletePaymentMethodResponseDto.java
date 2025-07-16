@@ -1,6 +1,5 @@
-package com.creationstack.backend.dto;
+package com.creationstack.backend.dto.Payment;
 
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

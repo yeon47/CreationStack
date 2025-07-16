@@ -1,10 +1,10 @@
 package com.creationstack.backend.controller;
 
-import com.creationstack.backend.dto.DeletePaymentMethodRequestDto;
-import com.creationstack.backend.dto.DeletePaymentMethodResponseDto;
-import com.creationstack.backend.dto.PaymentMethodResponseDto;
-import com.creationstack.backend.dto.SavePaymentMethodRequestDto;
-import com.creationstack.backend.dto.SavePaymentMethodResponseDto;
+import com.creationstack.backend.dto.Payment.DeletePaymentMethodRequestDto;
+import com.creationstack.backend.dto.Payment.DeletePaymentMethodResponseDto;
+import com.creationstack.backend.dto.Payment.PaymentMethodResponseDto;
+import com.creationstack.backend.dto.Payment.SavePaymentMethodRequestDto;
+import com.creationstack.backend.dto.Payment.SavePaymentMethodResponseDto;
 import com.creationstack.backend.service.PaymentMethodService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

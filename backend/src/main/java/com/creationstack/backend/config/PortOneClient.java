@@ -1,6 +1,6 @@
 package com.creationstack.backend.config;
 
-import com.creationstack.backend.dto.DeletePaymentMethodRequestDto;
+import com.creationstack.backend.dto.Payment.DeletePaymentMethodRequestDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

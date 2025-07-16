@@ -1,4 +1,4 @@
-package com.creationstack.backend.dto;
+package com.creationstack.backend.dto.Payment;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,7 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class DeletePaymentMethodRequestDto {
+public class SavePaymentMethodRequestDto {
   private String billingKey;
-  private String reason;
 }
