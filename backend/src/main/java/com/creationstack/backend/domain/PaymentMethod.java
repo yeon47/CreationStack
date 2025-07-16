@@ -24,8 +24,7 @@ import org.hibernate.annotations.CreationTimestamp;
 public class PaymentMethod {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO
-  )
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long paymentMethodId;
 
   private Long userId;
