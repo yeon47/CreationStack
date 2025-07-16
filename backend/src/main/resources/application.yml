@@ -75,3 +75,7 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+
+portone:
+  apisecret: ${PORTONE_API_SECRET}
+  hostname: ${PORTONE_HOSTNAME}
