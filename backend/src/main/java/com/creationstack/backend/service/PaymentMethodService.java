@@ -25,18 +25,19 @@ public class PaymentMethodService {
   private final PortOneClient portOneClient;
 
   // 1. 결제수단 저장
+  @Transactional
   public SavePaymentMethodResponseDto save(SavePaymentMethodRequestDto req) {
     try {
       String billingKey = req.getBillingKey();
-      JsonNode body = portOneClient.getBillingKeyInfo(billingKey);
-      JsonNode card = body.path("methods").path("card");
+      JsonNode card = portOneClient.getBillingKeyInfo(billingKey);
 
       PaymentMethod paymentMethod = PaymentMethod.builder()
           .userId(1L) // TODO: 실제 userId 할당
           .billingKey(billingKey)
-          .cardBrand(card.path("brand").asText())
-          .cardNumber(card.path("number").asText()) // 예시
-          .cardType(card.path("type").asText())     // 예시
+          .cardName(card.get("name").asText())
+          .cardBrand(card.get("brand").asText())
+          .cardNumber(card.get("number").asText())
+          .cardType(card.get("type").asText())
           .build();
 
       paymentMethodRepository.save(paymentMethod);

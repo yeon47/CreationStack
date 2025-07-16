@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,7 +21,7 @@ public class PaymentMethodController {
   private final PaymentMethodService paymentMethodService;
 
   // 1. 카드 등록(결제수단 추가 버튼 선택)
-  @GetMapping("/api/billings/card")
+  @PostMapping("/api/billings/card")
   public ResponseEntity<SavePaymentMethodResponseDto> savePaymentMethod(@RequestBody SavePaymentMethodRequestDto req){
     return ResponseEntity.ok(paymentMethodService.save(req));
   }
