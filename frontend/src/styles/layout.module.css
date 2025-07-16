@@ -221,6 +221,8 @@
   .createContentButton {
     padding: 6px 12px;
     font-size: 12px;
+  }
+}
 
 /* Layout container */
 .layout {
