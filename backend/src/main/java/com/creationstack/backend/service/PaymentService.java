@@ -14,7 +14,9 @@ import com.creationstack.backend.dto.Payment.PortOnePaymentRequestDto;
 import com.creationstack.backend.dto.Payment.PortOnePaymentRequestDto.Amount;
 import com.creationstack.backend.repository.PaymentRepository;
 import com.creationstack.backend.repository.SubscriptionRepository;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -58,17 +60,21 @@ public class PaymentService {
 
     Subscription subscription = subscriptionRepository.findById(1L).orElse(null);
     log.info("[processingBillingKeyPay] subscription: {}", subscription);
+    String rawDateTime = response.getResponse().get("payment").get("paidAt").asText();
 
+    Instant instant = Instant.parse(rawDateTime);
+    LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.of("Asia/Seoul"));
+    System.out.println("LocalTime: " + localDateTime);
     // 결제 내역 저장
     Payment payment = Payment.builder()
         .paymentMethod(paymentMethod)
         .subscription(subscription)
         .amount(req.getAmount())
         .paymentStatus(PaymentStatus.PENDING)
-        .transactionId(response.getResponse().get("pgTxId").asText())
+        .transactionId(response.getResponse().get("payment").get("pgTxId").asText())
         .failureReason(null)
         .tryAt(tryAt)
-        .successAt(LocalDateTime.parse(response.getResponse().get("paidAt").asText()))
+        .successAt(localDateTime)
         .build();
 
     // 결제내역 저장
