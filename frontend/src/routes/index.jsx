@@ -2,6 +2,12 @@ import { Routes, Route } from 'react-router-dom';
 import Home from '../pages/Home';
 import MainLayout from '../layouts/mainLayout';
 import PaymentMethodManagementPage from '../pages/Payment/PaymentMethodManagementPage';
+import ContentFormPage from '../pages/ContentForm/ContentFormPage';
+import { MyCreatorPage } from '../pages/MyCreatorPage/MyCreatorPage';
+import { SubscriptionManage } from '../pages/ManageSubscriptionPage/SubscriptionManage';
+import MainLayout from '../layouts/mainLayout';
+import ReplyTestPage from '../pages/ContentDetail/ReplyTestPage';
+import FavoriteContent from '../pages/MyPage/FavoriteContent';
 
 export default function AppRoutes() {
   return (
@@ -9,6 +15,11 @@ export default function AppRoutes() {
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/payments" element={<PaymentMethodManagementPage />} />
+        <Route path="/reply-test" element={<ReplyTestPage />} />
+        <Route path="/favorites" element={<FavoriteContent />} />
+        <Route path="/content-form" element={<ContentFormPage />} />
+        <Route path="/mypage-creator" element={<MyCreatorPage />} />
+        <Route path="/subscription-manage" element={<SubscriptionManage />} />
       </Route>
 
       {/* 로그인/회원가입 같이 레이아웃 제외할 페이지는 별도 Route로 */}

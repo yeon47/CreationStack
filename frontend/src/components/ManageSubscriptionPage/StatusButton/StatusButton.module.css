@@ -1,0 +1,45 @@
+.status-button {
+  align-items: center;
+  border-radius: 10px;
+  display: flex;
+  gap: 10.8px;
+  height: 20px;
+  justify-content: center;
+  padding: 21.6px 32.4px;
+  position: relative;
+  width: 60px;
+}
+
+.status-button .label {
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: normal;
+  margin: 10px;
+  position: relative;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* 상태별 기본색 + hover색 */
+.subscribed {
+  background-color: #4682a9;
+}
+.subscribed:hover {
+  background-color: #35678b;
+}
+
+.cancelled {
+  background-color: #b2d9de;
+}
+.cancelled:hover {
+  background-color: #7bbfc4;
+}
+
+.failed {
+  background-color: #6840c6c7;
+}
+.failed:hover {
+  background-color: #503491c7;
+}
