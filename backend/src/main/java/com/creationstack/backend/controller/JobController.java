@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.creationstack.backend.dto.JobResponse;
+import com.creationstack.backend.dto.member.JobResponse;
 import com.creationstack.backend.service.JobService;
 
 @RestController

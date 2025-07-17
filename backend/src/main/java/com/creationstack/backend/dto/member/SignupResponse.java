@@ -1,11 +1,11 @@
-package com.creationstack.backend.dto;
-
-import lombok.Builder;
-import lombok.Data;
+package com.creationstack.backend.dto.member;
 
 import java.time.LocalDateTime;
 
 import com.creationstack.backend.domain.user.User;
+
+import lombok.Builder;
+import lombok.Data;
 
 @Data
 @Builder

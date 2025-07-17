@@ -1,4 +1,4 @@
-package com.creationstack.backend.dto;
+package com.creationstack.backend.dto.member;
 
 import lombok.Builder;
 import lombok.Data;

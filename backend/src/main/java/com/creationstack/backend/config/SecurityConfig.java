@@ -1,4 +1,4 @@
-package com.creationstack.backend.auth;
+package com.creationstack.backend.config;
 
 import java.util.Arrays;
 
@@ -15,6 +15,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import com.creationstack.backend.auth.JwtAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,8 +40,20 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     log.info("URL 권한 설정 중...");
                     auth
-                            .requestMatchers("/api/users", "/api/jobs", "/api/auth/refresh").permitAll()
-                            .requestMatchers("/api/user/**").authenticated()
+                            // 인증 없이 접근 가능한 경로들
+                            .requestMatchers(
+                                    "/api/users", // 회원가입
+                                    "/api/jobs", // 직업 목록
+                                    "/api/auth/login", // 로그인
+                                    "/api/auth/refresh", // 토큰 갱신
+                                    "/api/auth/logout" // 로그아웃 (refresh token 방식)
+                    ).permitAll()
+                            // 인증이 필요한 경로들
+                            .requestMatchers(
+                                    "/api/user/**", // 프로필 관련
+                                    "/api/auth/logout-token" // 로그아웃 (access token 방식)
+                    ).authenticated()
+                            // 나머지 모든 요청은 허용
                             .anyRequest().permitAll();
                 })
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
