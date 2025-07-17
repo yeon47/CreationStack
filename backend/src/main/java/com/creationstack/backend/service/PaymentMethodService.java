@@ -1,21 +1,14 @@
 package com.creationstack.backend.service;
 
 import com.creationstack.backend.config.PortOneClient;
-<<<<<<< HEAD
-import com.creationstack.backend.domain.PaymentMethod;
+
+import com.creationstack.backend.domain.payment.PaymentMethod;
 import com.creationstack.backend.dto.Payment.DeletePaymentMethodRequestDto;
 import com.creationstack.backend.dto.Payment.DeletePaymentMethodResponseDto;
 import com.creationstack.backend.dto.Payment.PaymentMethodResponseDto;
 import com.creationstack.backend.dto.Payment.SavePaymentMethodRequestDto;
 import com.creationstack.backend.dto.Payment.SavePaymentMethodResponseDto;
-=======
-import com.creationstack.backend.domain.payment.PaymentMethod;
-import com.creationstack.backend.dto.DeletePaymentMethodRequestDto;
-import com.creationstack.backend.dto.DeletePaymentMethodResponseDto;
-import com.creationstack.backend.dto.PaymentMethodResponseDto;
-import com.creationstack.backend.dto.SavePaymentMethodRequestDto;
-import com.creationstack.backend.dto.SavePaymentMethodResponseDto;
->>>>>>> origin/dev
+
 import com.creationstack.backend.exception.CustomException;
 import com.creationstack.backend.repository.PaymentMethodRepository;
 import com.fasterxml.jackson.databind.JsonNode;
