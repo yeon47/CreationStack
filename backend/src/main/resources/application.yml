@@ -10,10 +10,10 @@ spring:
     name: jwt-auth-backend # 또는 CreationStack, 둘 중 하나 선택
 
   # 데이터베이스 설정
-    url: jdbc:mysql://localhost:3306/creationstack?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-    username: mydb
-    password: dhaha1102!
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: ${DB_DRIVER_CLASS_NAME}
     hikari:
       maximum-pool-size: 20
       minimum-idle: 5
@@ -75,5 +75,7 @@ management:
     health:
       show-details: when_authorized
 
+# 포트원 설정
+portone:
   apisecret: ${PORTONE_API_SECRET}
   hostname: ${PORTONE_HOSTNAME}
