@@ -1,5 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import Home from '../pages/Home';
+import MainLayout from '../layouts/mainLayout';
+import PaymentMethodManagementPage from '../pages/Payment/PaymentMethodManagementPage';
 import ContentFormPage from '../pages/ContentForm/ContentFormPage';
 import { MyCreatorPage } from '../pages/MyCreatorPage/MyCreatorPage';
 import { SubscriptionManage } from '../pages/ManageSubscriptionPage/SubscriptionManage';
@@ -12,6 +14,7 @@ export default function AppRoutes() {
     <Routes>
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
+        <Route path="/payments" element={<PaymentMethodManagementPage />} />
         <Route path="/reply-test" element={<ReplyTestPage />} />
         <Route path="/favorites" element={<FavoriteContent />} />
         <Route path="/content-form" element={<ContentFormPage />} />

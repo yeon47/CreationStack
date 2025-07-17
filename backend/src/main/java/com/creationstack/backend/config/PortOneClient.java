@@ -1,13 +1,13 @@
 package com.creationstack.backend.config;
 
-import com.creationstack.backend.dto.DeletePaymentMethodRequestDto;
+import com.creationstack.backend.dto.Payment.DeletePaymentMethodRequestDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -40,7 +40,9 @@ public class PortOneClient {
         restTemplate.exchange(requestUrl, HttpMethod.GET, entity, String.class);
 
     try{
-      return objectMapper.readTree(response.getBody());
+      JsonNode root = objectMapper.readTree(response.getBody());
+      JsonNode methods = root.get("methods");
+      return methods.get(0).get("card");
     }catch(Exception e){
       throw new RuntimeException("포트원 응답 파싱 실패"+e);
     }
