@@ -28,6 +28,9 @@ public @Entity class User { // 유저 테이블
     @JoinColumn(name = "job_id")
     private Job job; // 유저 직업
 
+    @Column(name = "subscriber_count", nullable = false)
+    private int subscriberCount = 0; // 구독자 수
+
     @Column(name = "is_active")
     private boolean isActive = true; // 활동 여부
 

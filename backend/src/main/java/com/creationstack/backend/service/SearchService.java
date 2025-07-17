@@ -103,14 +103,14 @@ public class SearchService { // 검색 서비스
                         keywordPredicates.add(cb.like(root.get("content"), keyword)); // 내용으로 검색
                     }
                     case CREATOR_ONLY -> { // 크리에이터 검색
-                        keywordPredicates.add(cb.like(root.get("creator").get("nickname"), keyword)); // 크리에이터 닉네임으로 검색
-                        keywordPredicates.add(cb.like(root.get("creator").get("job"), keyword)); // 크리에이터 직업으로 검색
+                        keywordPredicates.add(cb.like(root.get("creator").get("userDetail").get("nickname"), keyword)); // 크리에이터 닉네임으로 검색
+                        keywordPredicates.add(cb.like(root.get("creator").get("job").get("name"), keyword)); // 크리에이터 직업으로 검색
                     }
                     case ALL -> { // 통합 검색
                         keywordPredicates.add(cb.like(root.get("title"), keyword)); // 제목으로 검색
                         keywordPredicates.add(cb.like(root.get("content"), keyword)); // 내용으로 검색
-                        keywordPredicates.add(cb.like(root.get("creator").get("nickname"), keyword)); // 크리에이터 닉네임으로 검색
-                        keywordPredicates.add(cb.like(root.get("creator").get("job"), keyword)); // 크리에이터 직업으로 검색
+                        keywordPredicates.add(cb.like(root.get("creator").get("userDetail").get("nickname"), keyword)); // 크리에이터 닉네임으로 검색
+                        keywordPredicates.add(cb.like(root.get("creator").get("job").get("name"), keyword)); // 크리에이터 직업으로 검색
                     }
                 }
                 predicates.add(cb.or(keywordPredicates.toArray(new Predicate[0])));
@@ -157,6 +157,7 @@ public class SearchService { // 검색 서비스
                                         .profileImageUrl(content.getCreator().getUserDetail().getProfileImageUrl()) // 크리에이터 섬네일
                                         .job(content.getCreator().getJob().getName()) // 크리에이터 직업
                                         .bio(content.getCreator().getUserDetail().getBio()) // 크리에이터 간단 자기소개
+                                        .subscriberCount(content.getCreator().getSubscriberCount())
                                         .build())
 
                         .thumbnailUrl(content.getThumbnailUrl()) // 섬네일 Url
@@ -165,6 +166,7 @@ public class SearchService { // 검색 서비스
                         .likeCount(content.getLikeCount()) // 좋아요수
                         .commentCount(content.getCommentCount()) // 댓글수
                         .createdAt(content.getCreatedAt()) // 작성일
+
 
                         .categoryNames( // 카테고리 이름 목록
                                 content.getCategories().stream()

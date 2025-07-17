@@ -14,4 +14,5 @@ public class SearchCreatorDto { // 크리에이터 검색 결과 Dto
     private String profileImageUrl; // 크리에이터 섬네일
     private String job; // 크리에이터 직업
     private String bio; // 크리에이터 간단 자기소개
+    private int subscriberCount; // 구독자 수
 }
