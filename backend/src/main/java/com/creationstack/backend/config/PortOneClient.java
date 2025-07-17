@@ -48,6 +48,36 @@ public class PortOneClient {
     }
   }
 
+
+  //카드 이용한 결제 진행
+  public JsonNode processingBillingKeyPay(String billingKey){
+    String requestUrl="";
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Authorization", "PortOne " + API_SECRET);
+    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    //request Body 추가 필요
+
+    HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+    ResponseEntity<String> response =
+        restTemplate.exchange(requestUrl, HttpMethod.POST, entity, String.class);
+
+    try{
+//      JsonNode root = objectMapper.readTree(response.getBody());
+//      JsonNode methods = root.get("methods");
+      return null;
+    }catch(Exception e){
+      throw new RuntimeException("포트원 응답 파싱 실패"+e);
+    }
+  }
+
+  // 결제 예약 취소
+
+  // 결제 예약
+
+  //
+
   public JsonNode deleteBillingKey(DeletePaymentMethodRequestDto req) {
     String requestUrl = API_HOSTNAME + "/billing-keys/" + req.getBillingKey()+"?reason="+req.getReason();
 
