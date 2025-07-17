@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './UserInfo.module.css';
 
+// 사용자 메인페이지에서 사용자 정보
 export const UserInfo = ({ user }) => {
   const { profileImage, nickname, bio } = user;
 

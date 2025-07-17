@@ -3,6 +3,7 @@ import styles from './SubscribedCardsSection.module.css';
 
 import { CreatorInfo } from '../CreatorInfo/CreatorInfo';
 
+// 사용자 구독 목록 조회에서 크리에이터 정보 리스트 섹션
 // className, creatorName, subsCount, bio, userStatus, date
 export const SubscribedCardsSection = () => {
   return (

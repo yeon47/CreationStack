@@ -4,6 +4,7 @@ import styles from './CreatorInfo.module.css';
 import { StatusButton } from '../StatusButton/StatusButton';
 import { SubscriptionModal } from '../SubscriptionModal/SubscriptionModal';
 
+// 사용자 구독 목록에서 크리에이터 정보
 export const CreatorInfo = ({ className, profileImage, creatorName, subsCount, bio, userStatus, date }) => {
   // 상태별 메시지 + 버튼 정의
   const statusConfig = {
