@@ -44,11 +44,28 @@
   background: #ccc;
   border: none;
   border-radius: 6px;
+  transition: background-color 0.3s ease;
 }
 
 .confirmBtn {
   padding: 10px 16px;
   background: #4682a9;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.cancelBtn:hover {
+  padding: 10px 16px;
+  background: #adadad;
+  border: none;
+  border-radius: 6px;
+}
+
+.confirmBtn:hover {
+  padding: 10px 16px;
+  background: #35678b;
   border: none;
   border-radius: 6px;
   color: white;

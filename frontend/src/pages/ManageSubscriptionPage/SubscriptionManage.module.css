@@ -6,7 +6,7 @@
   gap: 71px;
   padding: 70px 0px;
   position: relative;
-  width: 70%;
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -21,7 +21,3 @@
   text-align: center;
   width: fit-content;
 }
-
-
-
-

@@ -25,6 +25,7 @@
 /* 상태별 기본색 + hover색 */
 .subscribed {
   background-color: #4682a9;
+  transition: background-color 0.3s ease;
 }
 .subscribed:hover {
   background-color: #35678b;
@@ -32,6 +33,7 @@
 
 .cancelled {
   background-color: #b2d9de;
+  transition: background-color 0.3s ease;
 }
 .cancelled:hover {
   background-color: #7bbfc4;
@@ -39,6 +41,7 @@
 
 .failed {
   background-color: #6840c6c7;
+  transition: background-color 0.3s ease;
 }
 .failed:hover {
   background-color: #503491c7;
