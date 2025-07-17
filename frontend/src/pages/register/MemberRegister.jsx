@@ -3,6 +3,7 @@ import { Button } from '../../components/Button';
 import { Label } from '../../components/Label';
 import { RadioGroup, RadioGroupItem } from '../../components/RadioGroup';
 import { LocalCommon } from './LocalCommon';
+import { LocalCreator } from './LocalCreator';
 import './MemberRegister.css';
 
 export const MemberRegister = () => {
