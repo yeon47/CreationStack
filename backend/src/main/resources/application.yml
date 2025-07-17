@@ -10,10 +10,9 @@ spring:
     name: jwt-auth-backend # 또는 CreationStack, 둘 중 하나 선택
 
   # 데이터베이스 설정
-  datasource:
     url: jdbc:mysql://localhost:3306/creationstack?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    username: mydb
+    password: dhaha1102!
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 20
@@ -55,11 +54,11 @@ jwt:
 # 로깅 설정
 logging:
   level:
-    com.example.auth: DEBUG
-    org.springframework.security: DEBUG
-    org.springframework.web: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    "org.springframework.web": DEBUG
+    "com.example.auth": DEBUG
+    "org.springframework.security": DEBUG
+    "org.hibernate.SQL": DEBUG
+    "org.hibernate.type.descriptor.sql.BasicBinder": TRACE
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

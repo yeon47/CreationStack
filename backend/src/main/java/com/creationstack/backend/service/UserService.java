@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.creationstack.backend.domain.entity.User;
+import com.creationstack.backend.domain.user.User;
 import com.creationstack.backend.dto.UserProfileResponse;
 import com.creationstack.backend.repository.UserRepository;
 

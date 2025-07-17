@@ -1,3 +1,4 @@
+/* layout.module.css */
 /* Layout container */
 .layout {
   display: flex;
@@ -49,7 +50,6 @@
   border-top: 1px solid #ddd;
 }
 
-
 /* NavbarCreator specific styles (Updated and merged) */
 .navbarCreator {
   display: flex;
@@ -89,7 +89,7 @@
 .menuItem {
   background: none; /* Retained */
   border: none; /* Retained */
-  font-family: "Poppins", Helvetica; /* Retained */
+  font-family: 'Poppins', Helvetica; /* Retained */
   font-size: 16px; /* Retained */
   font-weight: 500; /* Retained */
   color: #6b7280; /* Updated color */
@@ -110,7 +110,8 @@
   background-color: #dbeafe; /* New */
 }
 
-.menuItem.active::after { /* New active indicator */
+.menuItem.active::after {
+  /* New active indicator */
   content: '';
   position: absolute;
   bottom: -13px;
@@ -141,7 +142,8 @@
   position: relative; /* New */
 }
 
-.searchBar:focus-within { /* New focus style */
+.searchBar:focus-within {
+  /* New focus style */
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
@@ -161,7 +163,7 @@
   outline: none; /* Retained */
   font-size: 14px; /* Retained */
   color: #374151; /* Updated color */
-  font-family: "Poppins", Helvetica; /* Retained (was in previous version of this class) */
+  font-family: 'Poppins', Helvetica; /* Retained (was in previous version of this class) */
 }
 
 .searchInput::placeholder {
@@ -216,11 +218,13 @@
   transform: translateY(-1px); /* New */
 }
 
-.createContentButton:active { /* New active state */
+.createContentButton:active {
+  /* New active state */
   transform: translateY(0);
 }
 
-.profileButtonContainer { /* Retained */
+.profileButtonContainer {
+  /* Retained */
   position: relative; /* 드롭다운 메뉴의 위치 기준 */
 }
 
@@ -233,114 +237,164 @@
   transition: all 0.2s ease; /* New */
 }
 
-.profileButton:hover { /* New hover state */
+.profileButton:hover {
+  /* New hover state */
   transform: scale(1.05);
 }
 
-.profileButton .profileImage { /* Retained */
+.profileButton .profileImage {
+  /* Retained */
   width: 40px; /* Retained */
   height: 40px; /* Retained */
   border-radius: 50%; /* Retained */
   object-fit: cover; /* Retained */
 }
 
-/* 프로필 드롭다운 메뉴 스타일 (Retained from previous turn) */
-.profileDropdownMenu {
-  position: absolute;
-  top: 100%; /* 프로필 버튼 바로 아래에 위치 */
-  right: 0; /* 버튼의 오른쪽에 정렬 */
-  background-color: #ffffff;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  min-width: 150px;
-  z-index: 1001; /* Navbar보다 위에 표시 */
-  display: flex;
-  flex-direction: column;
-  padding: 8px 0;
-  margin-top: 5px; /* 버튼과의 간격 */
-}
-
-.profileDropdownMenuItem {
-  display: flex;
-  align-items: center;
-  padding: 10px 15px;
-  text-decoration: none; /* 링크 밑줄 제거 */
-  color: #333; /* 기본 텍스트 색상 */
-  font-family: "Poppins", Helvetica; /* Retained */
-  font-size: 15px; /* Retained */
-  font-weight: 500; /* Retained */
-  white-space: nowrap; /* 텍스트가 줄바꿈되지 않도록 */
-  transition: background-color 0.2s ease-in-out;
-}
-
-.profileDropdownMenuItem:hover {
-  background-color: #f0f0f0; /* 호버 시 배경색 변경 */
-}
-
-
-/* Responsive design (Updated and merged) */
-@media (max-width: 1024px) { /* Changed from 768px in new code to 1024px for consistency with main layout */
-  .main {
-    padding: 1.5rem 1rem;
-  }
-
-  .nav_container {
-    padding: 0 1rem;
-  }
-
-  .footer {
-    padding: 0 1rem;
-  }
-
+/* 반응형 디자인 */
+@media (max-width: 768px) {
   .navbarCreator {
-    padding: 8px 16px; /* Adjusted from 768px in new code */
+    padding: 8px 16px;
   }
 
   .linkSection {
-    gap: 16px; /* Adjusted from 768px in new code */
-    margin-left: 16px; /* Adjusted from 768px in new code */
+    gap: 16px;
+    margin-left: 16px;
   }
 
   .menuItem {
-    font-size: 14px; /* Adjusted from 768px in new code */
-    padding: 6px 12px; /* Adjusted from 768px in new code */
+    font-size: 14px;
+    padding: 6px 12px;
   }
 
   .searchSection {
-    max-width: 250px; /* Adjusted from 768px in new code */
-    margin: 0 16px; /* Adjusted from 768px in new code */
+    max-width: 250px;
+    margin: 0 16px;
   }
 
   .createContentButton {
-    padding: 8px 16px; /* Adjusted from 768px in new code */
-    font-size: 13px; /* Adjusted from 768px in new code */
+    padding: 8px 16px;
+    font-size: 13px;
   }
 }
 
-@media (max-width: 768px) { /* New breakpoint added for 640px styles */
+@media (max-width: 640px) {
   .linkSection {
-    display: none; /* Hidden on smaller screens */
+    display: none;
   }
 
   .searchSection {
-    max-width: 200px; /* Adjusted from 640px in new code */
-    margin: 0 8px; /* Adjusted from 640px in new code */
+    max-width: 200px;
+    margin: 0 8px;
   }
 
   .createContentButton {
-    padding: 6px 12px; /* Adjusted from 640px in new code */
-    font-size: 12px; /* Adjusted from 640px in new code */
+    padding: 6px 12px;
+    font-size: 12px;
   }
 }
 
-@media (max-width: 600px) { /* Retained from previous layout.module.css */
-  .main {
-    padding: 1rem 0.5rem;
+/* Layout container */
+.layout {
+  /* 프로필 드롭다운 메뉴 스타일 (Retained from previous turn) */
+  .profileDropdownMenu {
+    position: absolute;
+    top: 100%; /* 프로필 버튼 바로 아래에 위치 */
+    right: 0; /* 버튼의 오른쪽에 정렬 */
+    background-color: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 150px;
+    z-index: 1001; /* Navbar보다 위에 표시 */
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0;
+    margin-top: 5px; /* 버튼과의 간격 */
   }
 
-  .nav_container,
-  .footer {
-    padding: 0 0.5rem;
+  .profileDropdownMenuItem {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    text-decoration: none; /* 링크 밑줄 제거 */
+    color: #333; /* 기본 텍스트 색상 */
+    font-family: 'Poppins', Helvetica; /* Retained */
+    font-size: 15px; /* Retained */
+    font-weight: 500; /* Retained */
+    white-space: nowrap; /* 텍스트가 줄바꿈되지 않도록 */
+    transition: background-color 0.2s ease-in-out;
+  }
+
+  .profileDropdownMenuItem:hover {
+    background-color: #f0f0f0; /* 호버 시 배경색 변경 */
+  }
+
+  /* Responsive design (Updated and merged) */
+  @media (max-width: 1024px) {
+    /* Changed from 768px in new code to 1024px for consistency with main layout */
+    .main {
+      padding: 1.5rem 1rem;
+    }
+
+    .nav_container {
+      padding: 0 1rem;
+    }
+
+    .footer {
+      padding: 0 1rem;
+    }
+
+    .navbarCreator {
+      padding: 8px 16px; /* Adjusted from 768px in new code */
+    }
+
+    .linkSection {
+      gap: 16px; /* Adjusted from 768px in new code */
+      margin-left: 16px; /* Adjusted from 768px in new code */
+    }
+
+    .menuItem {
+      font-size: 14px; /* Adjusted from 768px in new code */
+      padding: 6px 12px; /* Adjusted from 768px in new code */
+    }
+
+    .searchSection {
+      max-width: 250px; /* Adjusted from 768px in new code */
+      margin: 0 16px; /* Adjusted from 768px in new code */
+    }
+
+    .createContentButton {
+      padding: 8px 16px; /* Adjusted from 768px in new code */
+      font-size: 13px; /* Adjusted from 768px in new code */
+    }
+  }
+
+  @media (max-width: 768px) {
+    /* New breakpoint added for 640px styles */
+    .linkSection {
+      display: none; /* Hidden on smaller screens */
+    }
+
+    .searchSection {
+      max-width: 200px; /* Adjusted from 640px in new code */
+      margin: 0 8px; /* Adjusted from 640px in new code */
+    }
+
+    .createContentButton {
+      padding: 6px 12px; /* Adjusted from 640px in new code */
+      font-size: 12px; /* Adjusted from 640px in new code */
+    }
+  }
+
+  @media (max-width: 600px) {
+    /* Retained from previous layout.module.css */
+    .main {
+      padding: 1rem 0.5rem;
+    }
+
+    .nav_container,
+    .footer {
+      padding: 0 0.5rem;
+    }
   }
 }

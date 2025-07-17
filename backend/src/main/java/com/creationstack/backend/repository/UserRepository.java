@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.creationstack.backend.domain.entity.User;
+import com.creationstack.backend.domain.user.User;
 
 import java.util.Optional;
 
@@ -21,3 +21,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUserDetail_Email(String email);
     boolean existsByUserDetail_Nickname(String nickname);
 }
+

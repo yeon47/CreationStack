@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.creationstack.backend.domain.entity.RefreshToken;
+import com.creationstack.backend.domain.user.RefreshToken;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
