@@ -1,0 +1,164 @@
+.pagination {
+  height: 38px;
+  position: relative;
+  width: 355px;
+}
+
+.prev {
+  height: 16px;
+  left: 0;
+  position: absolute;
+  top: 11px;
+  width: 52px;
+}
+
+.text-wrapper-2 {
+  color: #a0a7b4;
+  font-family: "Poppins", Helvetica;
+  font-size: 14px;
+  font-weight: 500;
+  height: 10px;
+  left: 19px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  text-align: center;
+  top: 3px;
+  white-space: nowrap;
+}
+
+.chevron-left {
+  height: 16px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 16px;
+}
+
+.vector {
+  height: 14px;
+  left: 4px;
+  position: absolute;
+  top: 1px;
+  width: 8px;
+}
+
+.nums {
+  align-items: flex-start;
+  display: inline-flex;
+  gap: 8px;
+  left: 66px;
+  position: absolute;
+  top: 0;
+}
+
+.element {
+  background-color: #f1f9ff;
+  border: 1px solid;
+  border-color: #0c8ce9;
+  border-radius: 5px;
+  height: 38px;
+  overflow: hidden;
+  position: relative;
+  width: 38px;
+}
+
+.num {
+  color: #0c8ce9;
+  font-family: "Poppins", Helvetica;
+  font-size: 14px;
+  font-weight: 700;
+  height: 10px;
+  left: 16px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  text-align: center;
+  top: 13px;
+  white-space: nowrap;
+}
+
+.num-wrapper {
+  background-color: #f0f1f5;
+  border-radius: 5px;
+  height: 38px;
+  overflow: hidden;
+  position: relative;
+  width: 38px;
+}
+
+.num-2 {
+  color: #60656e;
+  font-family: "Poppins", Helvetica;
+  font-size: 14px;
+  font-weight: 500;
+  height: 10px;
+  left: 15px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  text-align: center;
+  top: 13px;
+  white-space: nowrap;
+}
+
+.num-3 {
+  color: #60656e;
+  font-family: "Poppins", Helvetica;
+  font-size: 14px;
+  font-weight: 500;
+  height: 10px;
+  left: 14px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  text-align: center;
+  top: 13px;
+  white-space: nowrap;
+}
+
+.num-4 {
+  color: #60656e;
+  font-family: "Poppins", Helvetica;
+  font-size: 14px;
+  font-weight: 500;
+  height: 10px;
+  left: 12px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  text-align: center;
+  top: 13px;
+  white-space: nowrap;
+}
+
+.next {
+  height: 16px;
+  left: 305px;
+  position: absolute;
+  top: 11px;
+  width: 52px;
+}
+
+.prev-2 {
+  color: #23262a;
+  font-family: "Poppins", Helvetica;
+  font-size: 14px;
+  font-weight: 500;
+  height: 10px;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  text-align: center;
+  top: 3px;
+  white-space: nowrap;
+}
+
+.vector-wrapper {
+  height: 16px;
+  left: 34px;
+  position: absolute;
+  top: 0;
+  width: 16px;
+}

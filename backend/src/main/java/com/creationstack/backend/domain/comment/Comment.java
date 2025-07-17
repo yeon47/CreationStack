@@ -1,6 +1,9 @@
-package com.creationstack.backend.domain;
+package com.creationstack.backend.domain.comment;
 
 import java.time.LocalDateTime;
+
+import com.creationstack.backend.domain.user.User;
+import com.creationstack.backend.dto.CommentResponseDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,4 +1,4 @@
-package com.creationstack.backend.domain;
+package com.creationstack.backend.domain.comment;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -9,8 +9,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.creationstack.backend.domain.Comment;
-import com.creationstack.backend.domain.Content;
+import com.creationstack.backend.domain.comment.Comment;
+import com.creationstack.backend.domain.comment.Content;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {

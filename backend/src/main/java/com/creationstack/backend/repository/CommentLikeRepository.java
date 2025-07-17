@@ -4,9 +4,9 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.creationstack.backend.domain.Comment;
-import com.creationstack.backend.domain.CommentLike;
-import com.creationstack.backend.domain.User;
+import com.creationstack.backend.domain.comment.Comment;
+import com.creationstack.backend.domain.comment.CommentLike;
+import com.creationstack.backend.domain.user.User;
 
 public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> {
 

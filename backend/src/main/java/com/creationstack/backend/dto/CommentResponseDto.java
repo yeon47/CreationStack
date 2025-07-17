@@ -10,7 +10,8 @@ import lombok.Setter;
 public class CommentResponseDto {
 	private Long commentId;
 	private Long userId;
-	private String username;
+	private String nickname;
+	private String job;
 	private Long contentId;
 	private Long parentCommentId;
 	private String contentText;

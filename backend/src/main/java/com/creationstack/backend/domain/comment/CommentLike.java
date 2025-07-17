@@ -1,4 +1,6 @@
-package com.creationstack.backend.domain;
+package com.creationstack.backend.domain.comment;
+
+import com.creationstack.backend.domain.user.User;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

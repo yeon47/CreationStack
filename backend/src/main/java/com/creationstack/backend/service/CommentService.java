@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.creationstack.backend.domain.Comment;
-import com.creationstack.backend.domain.Content;
-import com.creationstack.backend.domain.User;
+import com.creationstack.backend.domain.comment.Comment;
+import com.creationstack.backend.domain.comment.Content;
+import com.creationstack.backend.domain.user.User;
 import com.creationstack.backend.dto.CommentCreateDto;
 import com.creationstack.backend.dto.CommentResponseDto;
 import com.creationstack.backend.dto.CommentUpdateDto;
@@ -28,9 +28,10 @@ public class CommentService {
 	private final UserRepository userRepository;
 	
 	// 댓글 등록
-	public CommentResponseDto createComment(CommentCreateDto dto) {
-		 User user = userRepository.findById(dto.getUserId())
-	                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+	public CommentResponseDto createComment(CommentCreateDto dto){
+		User user = userRepository.findByUserIdAndIsActiveTrue(dto.getUserId())
+		        .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+
 	        Content content = contentRepository.findById(dto.getContentId())
 	                .orElseThrow(() -> new IllegalArgumentException("콘텐츠 없음"));
 
@@ -92,7 +93,12 @@ public class CommentService {
 	        CommentResponseDto dto = new CommentResponseDto();
 	        dto.setCommentId(comment.getCommentId());
 	        dto.setUserId(comment.getUser().getUserId());
-	        dto.setUsername(comment.getUser().getNickname());
+	        if (comment.getUser().getUserDetail() != null) {
+	            dto.setNickname(comment.getUser().getUserDetail().getNickname());
+	        }
+	        if (comment.getUser().getJob() != null) {
+	            dto.setJob(comment.getUser().getJob().getName());
+	        }
 	        dto.setContentId(comment.getContent().getContentId());
 	        dto.setParentCommentId(
 	                comment.getParentComment() != null ? comment.getParentComment().getCommentId() : null);
