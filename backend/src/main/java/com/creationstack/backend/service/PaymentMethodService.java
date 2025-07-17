@@ -57,6 +57,7 @@ public class PaymentMethodService {
   public List<PaymentMethodResponseDto> getPaymentMethod(Long userId) {
     return paymentMethodRepository.findAllByUserId(userId).stream()
         .map(paymentMethod -> new PaymentMethodResponseDto(
+            paymentMethod.getPaymentMethodId(),
             paymentMethod.getCardBrand(),
             paymentMethod.getCardType(),
             paymentMethod.getCardNumber(),
