@@ -66,6 +66,7 @@ logging:
   file:
     name: logs/application.log
 
+<<<<<<< HEAD
 # 관리자 설정
 management:
   endpoints:
@@ -75,7 +76,13 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+=======
+>>>>>>> 64a1c44ff2ee6b0ffbb86358935d9576bf0b6246
 
 portone:
   apisecret: ${PORTONE_API_SECRET}
   hostname: ${PORTONE_HOSTNAME}
+<<<<<<< HEAD
+=======
+
+>>>>>>> 64a1c44ff2ee6b0ffbb86358935d9576bf0b6246
