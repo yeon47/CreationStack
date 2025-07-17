@@ -85,6 +85,11 @@ public class PaymentMethodService {
       throw new RuntimeException("결제수단 삭제 실패");
     }
   }
+
+  // 4. paymentMethodId 이용한 결제수단 조회
+  public PaymentMethod getPaymentMethodForBillingKey(Long paymentMethodId) {
+    return paymentMethodRepository.findById(paymentMethodId).orElse(null);
+  }
 }
 
 
