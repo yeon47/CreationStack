@@ -1,24 +1,80 @@
+# application.yml
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
 spring:
-  config:
-    import: optional:file:.env[.properties]
+  application:
+    name: jwt-auth-backend # 또는 CreationStack, 둘 중 하나 선택
+
+  # 데이터베이스 설정
   datasource:
-    url: ${DB_URL}
+    url: jdbc:mysql://localhost:3306/creationstack?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    driver-class-name: ${DB_DRIVER_CLASS_NAME}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # JPA 설정
   jpa:
     hibernate:
-      ddl-auto:update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+    open-in-view: false
+
+  # JSON 설정
+  jackson:
+    time-zone: Asia/Seoul
+    date-format: yyyy-MM-dd HH:mm:ss
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: NON_NULL
+
+# JWT 설정
+jwt:
+  secret: ${Secret_token}
+  refresh-secret: ${Refresh_token}
+  access-token-expiration: 900000 # 15분 (밀리초)
+  refresh-token-expiration: 604800000 # 7일 (밀리초)
+
+# 로깅 설정
 logging:
   level:
+    com.example.auth: DEBUG
+    org.springframework.security: DEBUG
     org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/application.log
 
+# 관리자 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
 
-portone:
   apisecret: ${PORTONE_API_SECRET}
   hostname: ${PORTONE_HOSTNAME}
-
