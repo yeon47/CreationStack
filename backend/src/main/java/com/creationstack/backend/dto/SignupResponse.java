@@ -5,7 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-import com.creationstack.backend.domain.entity.User;
+import com.creationstack.backend.domain.user.User;
 
 @Data
 @Builder

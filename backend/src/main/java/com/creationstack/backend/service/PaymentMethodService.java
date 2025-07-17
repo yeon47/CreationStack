@@ -1,7 +1,7 @@
 package com.creationstack.backend.service;
 
 import com.creationstack.backend.config.PortOneClient;
-import com.creationstack.backend.domain.PaymentMethod;
+import com.creationstack.backend.domain.payment.PaymentMethod;
 import com.creationstack.backend.dto.DeletePaymentMethodRequestDto;
 import com.creationstack.backend.dto.DeletePaymentMethodResponseDto;
 import com.creationstack.backend.dto.PaymentMethodResponseDto;

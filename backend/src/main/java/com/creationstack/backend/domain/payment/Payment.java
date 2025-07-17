@@ -1,4 +1,4 @@
-package com.creationstack.backend.domain;
+package com.creationstack.backend.domain.payment;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

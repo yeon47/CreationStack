@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.creationstack.backend.auth.JwtUtil;
-import com.creationstack.backend.domain.entity.Job;
-import com.creationstack.backend.domain.entity.RefreshToken;
-import com.creationstack.backend.domain.entity.User;
-import com.creationstack.backend.domain.entity.UserDetail;
-import com.creationstack.backend.domain.entity.User.UserRole;
+import com.creationstack.backend.domain.user.Job;
+import com.creationstack.backend.domain.user.RefreshToken;
+import com.creationstack.backend.domain.user.User;
+import com.creationstack.backend.domain.user.UserDetail;
+import com.creationstack.backend.domain.user.User.UserRole;
 import com.creationstack.backend.dto.SignupRequest;
 import com.creationstack.backend.dto.SignupResponse;
 import com.creationstack.backend.dto.TokenRefreshRequest;

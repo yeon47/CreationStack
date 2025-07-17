@@ -1,11 +1,11 @@
-import React from "react";
-import Main from "../components/main";
-import Footer from "../components/Footer";
-import styles from "../styles/layout.module.css";
-import { NavbarCreator } from "../components/NavbarCreator";
-import { Outlet } from "react-router-dom"; // Outlet 임포트
+import React from 'react';
+import Main from '../components/main';
+import Footer from '../components/Footer';
+import styles from '../styles/layout.module.css';
+import { Outlet } from 'react-router-dom';
+import { NavbarCreator } from '../components/NavbarCreator';
 
-const MainLayout = () => ( 
+const MainLayout = () => (
   <div className={styles.layout}>
     <NavbarCreator />
     <Main>

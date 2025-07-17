@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.creationstack.backend.domain.entity.Job;
+import com.creationstack.backend.domain.user.Job;
 import com.creationstack.backend.dto.JobResponse;
 import com.creationstack.backend.repository.JobRepository;
 

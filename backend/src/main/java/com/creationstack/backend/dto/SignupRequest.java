@@ -1,6 +1,6 @@
 package com.creationstack.backend.dto;
 
-import com.creationstack.backend.domain.entity.User;
+import com.creationstack.backend.domain.user.User;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;

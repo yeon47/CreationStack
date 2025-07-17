@@ -1,4 +1,4 @@
-package com.creationstack.backend.domain.entity;
+package com.creationstack.backend.domain.user;
 
 import java.time.LocalDateTime;
 
