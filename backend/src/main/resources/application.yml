@@ -12,8 +12,8 @@ spring:
   # 데이터베이스 설정
   datasource:
     url: jdbc:mysql://localhost:3306/creationstack?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-    username: bootcamp # 실제 사용자명으로 대체하거나 환경 변수 설정 필요
-    password: test1234 # 실제 비밀번호로 대체하거나 환경 변수 설정 필요
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 20
@@ -26,7 +26,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true # 개발 시 SQL 확인을 위해 true로 변경 고려
+    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
@@ -47,8 +47,8 @@ spring:
 
 # JWT 설정
 jwt:
-  secret: JWT_SECRET:your-super-secret-jwt-key-here-make-it-at-least-256-bits-long-for-security
-  refresh-secret: JWT_REFRESH_SECRET:your-super-secret-refresh-jwt-key-here-make-it-different-from-above
+  secret: ${Secret_token}
+  refresh-secret: ${Refresh_token}
   access-token-expiration: 900000 # 15분 (밀리초)
   refresh-token-expiration: 604800000 # 7일 (밀리초)
 
@@ -75,3 +75,7 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+
+portone:
+  apisecret: ${PORTONE_API_SECRET}
+  hostname: ${PORTONE_HOSTNAME}
