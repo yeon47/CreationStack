@@ -3,6 +3,8 @@ import Home from '../pages/Home';
 
 import { LoginSection } from '../pages/login/LoginSection';
 import { MemberRegister } from '../pages/register/MemberRegister';
+
+import PaymentMethodManagementPage from '../pages/Payment/PaymentMethodManagementPage';
 import ContentFormPage from '../pages/ContentForm/ContentFormPage';
 import { MyCreatorPage } from '../pages/MyCreatorPage/MyCreatorPage';
 import { SubscriptionManage } from '../pages/ManageSubscriptionPage/SubscriptionManage';
@@ -18,6 +20,7 @@ export default function AppRoutes() {
       <Route element={<MainLayout />}>
         {/* 홈 경로 */}
         <Route path="/" element={<Home />} />
+        <Route path="/payments" element={<PaymentMethodManagementPage />} />
         <Route path="/reply-test" element={<ReplyTestPage />} />
         <Route path="/favorites" element={<FavoriteContent />} />
         <Route path="/content-form" element={<ContentFormPage />} />
