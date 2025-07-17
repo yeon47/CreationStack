@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,14 +20,20 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Payment {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private String paymentId;
+  private Long paymentId;
 
   @OneToOne(fetch = FetchType.LAZY)
   private PaymentMethod paymentMethod;
+
+  @OneToOne(fetch = FetchType.LAZY)
+  private Subscription subscription;
+
+
 
 //  @OneToOne(fetch = FetchType.LAZY)
 //  private String subscriptionId;
@@ -36,6 +43,8 @@ public class Payment {
 
   @Enumerated(EnumType.STRING)
   private PaymentStatus paymentStatus;
+
+  private String transactionId;
 
   private String failureReason;
 
