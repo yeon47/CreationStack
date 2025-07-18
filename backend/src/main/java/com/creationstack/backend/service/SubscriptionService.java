@@ -11,39 +11,64 @@ import com.creationstack.backend.domain.payment.PaymentStatus;
 import com.creationstack.backend.domain.subscription.Subscription;
 import com.creationstack.backend.domain.subscription.SubscriptionStatus;
 import com.creationstack.backend.domain.subscription.SubscriptionStatusName;
+import com.creationstack.backend.domain.user.User;
 import com.creationstack.backend.dto.Subscription.SubscriptionRequestDto;
 import com.creationstack.backend.dto.Subscription.SubscriptionResponseDto;
+import com.creationstack.backend.etc.Role;
 import com.creationstack.backend.exception.CustomException;
 import com.creationstack.backend.repository.PaymentMethodRepository;
 import com.creationstack.backend.repository.PaymentRepository;
 import com.creationstack.backend.repository.SubscriptionRepository;
 import com.creationstack.backend.repository.SubscriptionStatusRepository;
+import com.creationstack.backend.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionStatusRepository statusRepository;
     private final PaymentMethodRepository paymentMethodRepository;
     private final PaymentRepository paymentRepository;
+    private final UserRepository userRepository;
 
     // 구독 생성 (PENDING 상태)
+    @Transactional
     public SubscriptionResponseDto createPendingSubscription(Long subscriberId, SubscriptionRequestDto request) {
         // 1. 구독 상태 PENDING 로딩
         SubscriptionStatus pendingStatus = statusRepository.findByName("PENDING")
                 .orElseThrow(() -> new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "PENDING 상태를 찾을 수 없습니다"));
 
         // 2. 결제 수단 존재 확인
+        log.info("요청 userId: {}", subscriberId);
+        log.info("결제 수단 ID: {}", request.getPaymentMethodId());
         PaymentMethod paymentMethod = paymentMethodRepository.findById(request.getPaymentMethodId())
                 .orElseThrow(() -> new CustomException(HttpStatus.BAD_REQUEST, "결제 수단 정보가 없습니다."));
 
         LocalDateTime now = LocalDateTime.now();
 
-        // 3. 기존 구독 확인 및 처리
+        // 3. 자기 자신에게 구독 불가
+        if (subscriberId.equals(request.getCreatorId())) {
+            throw new CustomException(HttpStatus.BAD_REQUEST, "자기 자신을 구독할 수 없습니다.");
+        }
+
+        // 4. 대상 크리에이터가 크리에이터인지 확인
+        User creator = userRepository.findById(request.getCreatorId())
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "대상 사용자가 존재하지 않습니다."));
+
+        log.info("대상 role: {}",creator.getRole());
+        log.info("Role.CREATOR: {}", Role.CREATOR);
+        log.info("creator.getRole() 클래스: {}", creator.getRole().getClass().getName());
+        if (!"CREATOR".equals(creator.getRole().name())) {
+            throw new CustomException(HttpStatus.BAD_REQUEST, "해당 사용자는 크리에이터가 아닙니다.");
+        }
+
+        // 5. 기존 구독 확인 및 처리
         Subscription existing = subscriptionRepository
                 .findBySubscriberIdAndCreatorId(subscriberId, request.getCreatorId())
                 .orElse(null);
@@ -79,13 +104,14 @@ public class SubscriptionService {
 
     // 결제 성공 후 구독 활성화
     @Transactional
-    public void activateSubscription(Long subscriptionId, Payment payment) {
+    public void activateSubscription(Long subscriptionId, Long paymentId) {
         Subscription subscription = subscriptionRepository.findById(subscriptionId)
                 .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "구독 정보를 찾을 수 없습니다."));
 
         SubscriptionStatus activeStatus = statusRepository.findByName("ACTIVE")
                 .orElseThrow(() -> new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "ACTIVE 상태 정보가 없습니다."));
 
+        Payment payment = paymentRepository.getReferenceById(paymentId);
         if (payment.getPaymentStatus() != PaymentStatus.SUCCESS) {
             throw new CustomException(HttpStatus.BAD_REQUEST, "결제가 실패하였습니다.");
         }

@@ -1,6 +1,6 @@
 import styles from './ContentCard.module.css';
 import { Link } from 'react-router-dom';
-import SubsIcon from '../../styles/img/subs_icon.svg'
+import SubsIcon from '../../assets/img/subs_icon.svg';
 
 export const ContentCard = ({ id, thumbnailUrl, creator, title, likes, isSubscriber }) => {
   return (

@@ -12,5 +12,4 @@ import lombok.Setter;
 public class SubscriptionRequestDto {
     private Long creatorId;
     private Long paymentMethodId;
-    private Long paymentId;
 }
