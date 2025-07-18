@@ -1,8 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
 import Home from '../pages/Home';
 
-import { LoginSection } from '../pages/login/LoginSection';
-import { MemberRegister } from '../pages/register/MemberRegister';
+import { LoginSection } from '../pages/Login/LoginSection';
+import { MemberRegister } from '../pages/Register/MemberRegister';
 
 import PaymentMethodManagementPage from '../pages/Payment/PaymentMethodManagementPage';
 import ContentFormPage from '../pages/ContentForm/ContentFormPage';
@@ -39,16 +39,11 @@ export default function AppRoutes() {
         <Route path="/search" element={<UnifiedSearchPage />} />
       </Route>
 
-      {/* 로그인 경로 */}
-      <Route path="/api/auth/login" element={<LoginSection />} />
-      {/* 회원가입 경로 */}
-      <Route path="/api/users" element={<MemberRegister />} />
+      <Route path="/login" element={<LoginSection />} />
+      <Route path="/register" element={<MemberRegister />} />
 
       {/* 404 처리 */}
       <Route path="*" element={<div>404 - Page Not Found</div>} />
-
-      {/* 로그인/회원가입 같이 레이아웃 제외할 페이지는 별도 Route로 */}
-      {/* <Route path="/login" element={<Login />} /> */}
     </Routes>
   );
 }

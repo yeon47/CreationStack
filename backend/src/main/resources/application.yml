@@ -7,7 +7,7 @@ server:
 
 spring:
   application:
-    name: jwt-auth-backend # 또는 CreationStack, 둘 중 하나 선택
+    name: CreationStack
   config:
     import: optional:file:.env[.properties]
 
@@ -49,7 +49,7 @@ spring:
     multipart:
       max-file-size: 50MB # 단일 파일의 최대 허용 크기 (50MB로 증가)
       max-request-size: 50MB # 전체 multipart 요청의 최대 허용 크기 (50MB로 증가)
-    
+
 # JWT 설정
 jwt:
   secret: ${Secret_token}
