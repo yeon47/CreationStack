@@ -6,6 +6,7 @@
   width: 70%;
   position: relative;
   padding: 24px 0; /* 위아래 여백 추가 */
+  flex-direction: column;
 }
 
 .subscribed-card .design-component-instance-node {
