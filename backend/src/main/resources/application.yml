@@ -81,6 +81,7 @@ management:
 portone:
   apisecret: ${PORTONE_API_SECRET}
   hostname: ${PORTONE_HOSTNAME}
+  storeid: ${PORTONE_STORE_ID}
 
 # S3 설정
 cloud:
