@@ -1,6 +1,7 @@
 // PaymentPage.jsx
 import React, { useEffect, useState } from 'react';
 import SubscriptionDetails from '../../components/Payment/SubscriptionDetails';
+import PaymentModal from '../../components/Payment/PaymentModal';
 import styles from './PaymentPage.module.css';
 // import SubscriptionSummary from "../../components/Payment/SubscriptionSummary";
 
@@ -30,6 +31,35 @@ function PaymentPage() {
   // ])
   // ])
   //     }, []);
+
+    // 모달 열기/닫기 핸들러
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+const cardData = [
+  {
+    brand: "Visa",
+    number: "**** **** **** 1234",
+    expired: "12/28",
+    bank: "신한은행",
+  },
+  {
+    brand: "MasterCard",
+    number: "**** **** **** 5678",
+    expired: "08/27",
+    bank: "국민은행",
+  },
+  {
+    brand: "Toss",
+    number: "**** **** **** 4321",
+    expired: "03/26",
+    bank: "토스뱅크",
+  },
+];
+
+
 
   // 예시용 데이터
   const creator = {
@@ -99,7 +129,7 @@ function PaymentPage() {
           </div>
 
           {/* Action Buttons */}
-          <button className={styles.payButton}>
+          <button className={styles.payButton} onClick={openModal}>
             <span className={styles.icon}>→</span>
             <span>결제 진행</span>
           </button>
@@ -110,6 +140,11 @@ function PaymentPage() {
           </button>
         </div>
       </div>
+
+
+ {/* ✅ 모달 렌더링 */}
+     
+      <PaymentModal isOpen={isModalOpen} onClose={closeModal} cardData={cardData} />
     </div>
   );
 }
