@@ -14,7 +14,44 @@ function PaymentMethodManagementPage() {
     const fetchCards = async () => {
       try {
         const res = await readAllPaymentMethod(); // API 호출
-        setCards(res); // 받아온 카드 정보를 상태에 저장
+        const testCards = [
+        {
+          cardName: '테스트카드 1',
+          cardNumberMasked: '1111-****-****-1111',
+          cardType: '신용카드',
+          customerKey: 'dummy-key-1',
+          billingKey: 'dummy-billing-key-1',
+        },
+        {
+          cardName: '테스트카드 2',
+          cardNumberMasked: '2222-****-****-2222',
+          cardType: '체크카드',
+          customerKey: 'dummy-key-2',
+          billingKey: 'dummy-billing-key-2',
+        },
+        {
+          cardName: '테스트카드 3',
+          cardNumberMasked: '3333-****-****-3333',
+          cardType: '신용카드',
+          customerKey: 'dummy-key-3',
+          billingKey: 'dummy-billing-key-3',
+        },
+        {
+          cardName: '테스트카드 4',
+          cardNumberMasked: '4444-****-****-4444',
+          cardType: '체크카드',
+          customerKey: 'dummy-key-4',
+          billingKey: 'dummy-billing-key-4',
+        },
+      ];
+
+      // 실제 카드 + 테스트 카드 결합
+      setCards([...res, ...testCards]);
+
+
+
+
+
       } catch (err) {
         console.error('카드 정보를 불러오는 데 실패했습니다.', err);
       }
@@ -46,7 +83,7 @@ function PaymentMethodManagementPage() {
       <PaymentMethodList cards={cards} />
       <div className={styles.register}>
         <button className={styles.register_button} onClick={handleCardRegister}>
-          <p>카드 등록</p>
+          <p>결제</p>
         </button>
       </div>
     </div>
