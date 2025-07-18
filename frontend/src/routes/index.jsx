@@ -29,7 +29,7 @@ export default function AppRoutes() {
         <Route path="/mypage-creator" element={<MyCreatorPage />} />
         <Route path="/subscription-manage" element={<SubscriptionManage />} />
         <Route path="/user-main" element={<UserMainPage />} />
-        <Route path="/creator-main" element={<CreatorMainPage />} />
+        <Route path="/creator-main/:creatorNickname" element={<CreatorMainPage />} />
       
       </Route>
 

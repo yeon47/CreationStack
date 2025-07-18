@@ -41,10 +41,15 @@
 
 .cancelBtn {
   padding: 10px 16px;
-  background: #ccc;
+  background: #a8a8a8;
+  color: white;
   border: none;
   border-radius: 6px;
   transition: background-color 0.3s ease;
+}
+
+.cancelBtn:focus, .confirmBtn:focus {
+  outline: none;
 }
 
 .confirmBtn {
@@ -58,7 +63,7 @@
 
 .cancelBtn:hover {
   padding: 10px 16px;
-  background: #adadad;
+  background: #5f5f5f;
   border: none;
   border-radius: 6px;
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './UserInfo.module.css';
-import CreatorIcon from '../../../../public/creator-icon.svg';
+import CreatorIcon from '../../../styles/img/creator-icon.svg';
 
 // 사용자 메인페이지에서 사용자 정보
 // 대상 페이지의 사용자가 크리에이터인지에따라 다르게 생성(로그인한 사용자 기준 아님)
