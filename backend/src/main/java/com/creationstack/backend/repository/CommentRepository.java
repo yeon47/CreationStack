@@ -15,8 +15,17 @@ import com.creationstack.backend.domain.comment.Comment;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-	List<Comment> findByContent(Content content);
-	
+	@Query("""
+		    SELECT c FROM Comment c
+		    JOIN FETCH c.user u
+		    LEFT JOIN FETCH u.userDetail
+		    LEFT JOIN FETCH u.job
+		    LEFT JOIN FETCH c.parentComment
+		    WHERE c.content = :content
+		""")
+		List<Comment> findByContentWithAll(@Param("content") Content content);
+
+
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Transactional
 	@Query("UPDATE Comment c SET c.isDeleted = true WHERE c.commentId = :commentId")

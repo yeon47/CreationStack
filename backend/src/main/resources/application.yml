@@ -43,13 +43,11 @@ spring:
   jackson:
     time-zone: Asia/Seoul
     date-format: yyyy-MM-dd HH:mm:ss
-#    property-naming-strategy: SNAKE_CASE
-    default-property-inclusion: NON_NULL
-
+    
 # JWT 설정
 jwt:
-  secret: ${Secret_token}
-  refresh-secret: ${Refresh_token}
+  secret: mytest1234567890mytest1234567890
+  refresh-secret: myrefresh1234567890myrefresh123456
   access-token-expiration: 900000 # 15분 (밀리초)
   refresh-token-expiration: 604800000 # 7일 (밀리초)
 

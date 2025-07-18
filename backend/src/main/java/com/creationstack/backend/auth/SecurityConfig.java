@@ -19,6 +19,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -45,12 +46,16 @@ public class SecurityConfig {
                                     "/api/jobs",
                                     "/api/auth/refresh",
                                     "/api/content/**", // 모든 /api/content 경로 허용
-                                    "/api/upload/image" // 이미지 업로드 경로 허용
+                                    "/api/upload/image", // 이미지 업로드 경로 허용
+                                    "/api/contents/**/comments",
+                                    "/api/contents/**/comments/**/like"
                             ).permitAll()
                             // /api/user/** 경로는 인증 필요 (기존 설정 유지)
                             .requestMatchers("/api/user/**").authenticated()
+
                             // 그 외 모든 요청은 인증 필요 (기존 anyRequest().authenticated() 유지)
                             .anyRequest().authenticated();
+
                 })
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
