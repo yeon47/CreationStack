@@ -27,11 +27,11 @@ export const UnifiedSearchPage = () => {
 
         // contents
         const contentMapped = (result.contents || []).map((item) => ({
-          content_id: item.contentId,
+          contentId: item.contentId,
           title: item.title,
-          thumbnail_url: item.thumbnailUrl,
-          like_count: item.likeCount,
-          category_names: item.categoryNames,
+          thumbnailUrl: item.thumbnailUrl,
+          likeCount: item.likeCount,
+          categoryNames: item.categoryNames,
           creator: {
             nickname: item.creator?.nickname,
             profileImageUrl: item.creator?.profileImageUrl,

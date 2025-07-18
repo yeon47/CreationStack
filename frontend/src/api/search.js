@@ -3,7 +3,7 @@ axios.defaults.withCredentials = true;
 
 export const searchCreator = async (page, keyword = "") => {
   try {
-    const response = await axios.get(`http://localhost:8080/api/creators`, {
+    const response = await axios.get(`/api/creators`, {
       params: {
         keyword, // ✅ SearchDto 필드
         page, // ✅ Pageable용
@@ -18,7 +18,7 @@ export const searchCreator = async (page, keyword = "") => {
 
 export const searchContent = async (page, keyword = "") => {
   try {
-    const response = await axios.get("http://localhost:8080/api/contents", {
+    const response = await axios.get("/api/contents", {
       params: {
         keyword,
         page,
@@ -57,12 +57,9 @@ export const searchUnified = async ({
     if (searchMode) params.searchMode = searchMode;
     if (creatorId) params.creatorId = creatorId;
 
-    const response = await axios.get(
-      "http://localhost:8080/api/contents/search",
-      {
-        params,
-      }
-    );
+    const response = await axios.get("/api/contents/search", {
+      params,
+    });
 
     return response.data;
   } catch (error) {
