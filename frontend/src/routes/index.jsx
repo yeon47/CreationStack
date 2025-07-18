@@ -5,6 +5,7 @@ import { LoginSection } from '../pages/Login/LoginSection';
 import { MemberRegister } from '../pages/Register/MemberRegister';
 
 import PaymentMethodManagementPage from '../pages/Payment/PaymentMethodManagementPage';
+import PaymentPage from "../pages/Payment/PaymentPage";
 import ContentFormPage from '../pages/ContentForm/ContentFormPage';
 import { MyCreatorPage } from '../pages/MyPage/MyCreatorPage';
 import { MyUserPage } from '../pages/MyPage/MyUserPage';
@@ -25,6 +26,7 @@ export default function AppRoutes() {
         <Route path="/" element={<Home />} />
 
         <Route path="/payments" element={<PaymentMethodManagementPage />} />
+        <Route path="/payments/summary" element={<PaymentPage />} />
         <Route path="/reply-test" element={<ReplyTestPage />} />
         <Route path="/favorites" element={<FavoriteContent />} />
         {/* <Route path="/creator-management" element={<CreatorManagementPage />} /> */}
