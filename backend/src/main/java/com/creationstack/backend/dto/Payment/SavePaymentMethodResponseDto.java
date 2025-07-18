@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+// 포트원 결제수단 응답 dto
 @Getter
 @Setter
 @AllArgsConstructor
