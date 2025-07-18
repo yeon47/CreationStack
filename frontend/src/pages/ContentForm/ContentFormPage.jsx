@@ -4,6 +4,10 @@ import styles from './contentForm.module.css'; // contentForm.module.css 임포�
 import { Editor } from '@toast-ui/react-editor';
 import '@toast-ui/editor/dist/toastui-editor.css'; // Editor's default style
 
+// API 함수 임포트
+import { createContent } from '../../api/contentAPI'; // 경로에 맞게 수정
+import { uploadEditorImage } from '../../api/imageAPI'; // 경로에 맞게 수정
+
 const ContentFormPage = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -13,6 +17,8 @@ const ContentFormPage = () => {
   const [attachedFiles, setAttachedFiles] = useState([]); // 첨부파일
   const [thumbnailFile, setThumbnailFile] = useState(null); // 썸네일 이미지 파일
   const [isDragging, setIsDragging] = useState(false); // 드래그 중인지 여부
+  const [isImageUploading, setIsImageUploading] = useState(false); // 이미지 업로드 중 상태 추가
+  
 
   // 드롭다운 외부 클릭 감지를 위한 ref
   const dropdownRef = useRef(null);
@@ -69,6 +75,7 @@ const ContentFormPage = () => {
         {
           id: Date.now() + Math.random(), // 고유 ID 생성
           name: file.name,
+          file: file // 실제 파일 객체도 저장
         },
       ]);
     });
@@ -115,24 +122,77 @@ const ContentFormPage = () => {
     }
   };
 
+
+  // Toast UI Editor 이미지 업로드 훅
+  const onUploadImage = async (blob, callback) => {
+    setIsImageUploading(true); // 이미지 업로드 시작
+    try {
+      // 분리된 API 함수 호출
+      const result = await uploadEditorImage(blob);
+      // 백엔드에서 반환된 이미지 URL을 에디터에 전달
+      callback(result.imageUrl, '이미지'); // 두 번째 인자는 alt text
+    } catch (error) {
+      console.error('이미지 업로드 실패:', error);
+      alert('이미지 업로드에 실패했습니다: ' + error.message); // 사용자에게 알림
+    } finally {
+      setIsImageUploading(false); // 이미지 업로드 완료 (성공 또는 실패)
+    }
+  };
+
   // --------------- 컨텐츠 저장/작성취소
-  // 저장 버튼 핸들러
-  const handleSave = () => {
+
+ // 저장 버튼 핸들러
+  const handleSave = async () => {
     let markdownContent = '';
     if (editorRef.current) {
       const editorInstance = editorRef.current.getInstance();
       markdownContent = editorInstance.getMarkdown();
     }
 
-    console.log('저장:', {
-      title,
-      content: markdownContent,
-      isSubscriberOnly,
-      selectedCategories,
-      thumbnailFile, // 썸네일 파일 포함
-      attachedFiles, // 일반 첨부파일 포함
+    // AccessType 매핑
+    const accessType = isSubscriberOnly ? 'SUBSCRIBER' : 'FREE';
+
+    // FormData 생성
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('content', markdownContent);
+    formData.append('accessType', accessType);
+
+    // 카테고리 추가 (여러 개일 경우 동일한 키로 여러 번 append)
+    selectedCategories.forEach(category => {
+      formData.append('categoryNames', category);
     });
-    // 여기에 실제 저장 로직 (예: API 호출)을 구현합니다.
+
+    // 썸네일 파일 추가
+    if (thumbnailFile) {
+      formData.append('thumbnailFile', thumbnailFile);
+    } else {
+      // 썸네일이 필수인 경우 (백엔드 DTO에 @NotNull)
+      alert('썸네일 이미지는 필수입니다.');
+      return;
+    }
+
+    // 첨부 파일 추가 (수정된 부분)
+    if (attachedFiles.length > 0) { // 첨부 파일이 있을 때만 FormData에 추가
+      attachedFiles.forEach(file => {
+        formData.append('attachmentFiles', file.file); // 실제 파일 객체 append
+      });
+    }
+
+    // creatorId (임시로 하드코딩, 실제로는 로그인 사용자 정보에서 가져와야 함)
+    const creatorId = 2; // 예시: 로그인된 사용자의 ID
+
+    try {
+      // 분리된 API 함수 호출
+      const result = await createContent(formData, creatorId);
+      console.log('콘텐츠 저장 성공:', result);
+      alert('콘텐츠가 성공적으로 저장되었습니다!');
+      // 저장 성공 후 폼 초기화 또는 다른 페이지로 이동
+      handleCancel();
+    } catch (error) {
+      console.error('콘텐츠 저장 실패:', error);
+      alert('콘텐츠 저장에 실패했습니다: ' + error.message);
+    }
   };
 
   // 작성 취소 버튼 핸들러
@@ -249,7 +309,7 @@ const ContentFormPage = () => {
           previewStyle="vertical" // 'vertical' 또는 'tab'
           height="300px" // 에디터 높이 설정
           initialEditType="wysiwyg" // 'wysiwyg' 또는 'markdown'
-          // 에디터 툴바 아이템 설정 (원하는 아이템만 포함)
+          // 에디터 툴바 아이템 설정
           toolbarItems={[
             ['heading', 'bold', 'italic', 'strike'],
             ['hr', 'quote'],
@@ -258,11 +318,18 @@ const ContentFormPage = () => {
             ['code', 'codeblock'],
             ['scrollSync'],
           ]}
-          onChange={() => {
-            // 에디터 내용 변경 시마다 content 상태를 업데이트할 필요는 없습니다.
-            // 저장 버튼 클릭 시 editorRef를 통해 최신 내용을 가져올 수 있습니다.
+          hooks={{
+            addImageBlobHook: onUploadImage,
           }}
+          onChange={() => {}}
         />
+        {/* 이미지 업로드 중 로딩 인디케이터 */}
+        {isImageUploading && (
+          <div className={styles.imageUploadLoadingOverlay}>
+            <div className={styles.spinner}></div>
+            <p>이미지 업로드 중...</p>
+          </div>
+        )}
       </div>
       {/* 썸네일 이미지 드래그앤드랍 영역 */}
       <div
@@ -347,7 +414,6 @@ const ContentFormPage = () => {
       </div>
       {/* 하단 버튼 섹션 */}
       <div className={styles.footerSection}>
-        {/* Anima CSS의 라인 이미지는 footerSection 내부에 절대 위치로 지정되어 있습니다. */}
         <img className={styles.img} alt="Line" src="https://c.animaapp.com/md45uvjzPxvxqT/img/line-5.svg" />
         <button onClick={handleCancel} className={styles.cancelButton}>
           <span className={styles.textWrapper2}>작성취소</span>
