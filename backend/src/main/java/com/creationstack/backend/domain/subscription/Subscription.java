@@ -30,7 +30,7 @@ public class Subscription {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long susbscriptionId;   // 구독 ID
+    private Long subscriptionId;   // 구독 ID
 
     @Column(nullable = false)
     private Long subscriberId;  // 구독 요청한 사용자 ID
