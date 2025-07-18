@@ -1,4 +1,4 @@
-package com.creationstack.backend.domain;
+package com.creationstack.backend.domain.search;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -7,7 +7,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -56,7 +55,7 @@ public @Entity class Content { // 콘텐츠 테이블
 
     @Enumerated(EnumType.STRING)
     @Column(name = "access_type", nullable = false)
-    private AccessType accessType = AccessType.FREE; // 유/무료 여부, 기본값 무료
+    private com.creationstack.backend.domain.search.AccessType accessType = AccessType.FREE; // 유/무료 여부, 기본값 무료
 
     @ManyToMany
     @JoinTable(

@@ -1,11 +1,10 @@
-package com.creationstack.backend.domain;
+package com.creationstack.backend.domain.search;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter

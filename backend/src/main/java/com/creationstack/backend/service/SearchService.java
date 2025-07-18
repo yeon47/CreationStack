@@ -1,9 +1,9 @@
 package com.creationstack.backend.service;
 
-import com.creationstack.backend.domain.Category;
-import com.creationstack.backend.domain.Content;
+import com.creationstack.backend.domain.search.Category;
+import com.creationstack.backend.domain.search.Content;
 import com.creationstack.backend.dto.search.*;
-import com.creationstack.backend.repository.ContentRepository;
+import com.creationstack.backend.repository.search.ContentRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;

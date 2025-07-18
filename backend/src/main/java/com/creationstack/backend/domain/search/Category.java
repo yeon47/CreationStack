@@ -1,9 +1,7 @@
-package com.creationstack.backend.domain;
+package com.creationstack.backend.domain.search;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.Set;
 
 
 @Getter
