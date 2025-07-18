@@ -371,7 +371,11 @@ public class AuthService {
                 }
         }
 
-        public boolean isEmailAvailable(String email) {
+        public boolean isEmailAvailable(String email) { // 이메일 실시간 중복 체크
                 return !userDetailRepository.existsByEmail(email);
+        }
+
+        public boolean isNicknameAvailable(String nickname) { // 닉네임 실시간 중복 체크
+                return !userDetailRepository.existsByNickname(nickname);
         }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '../../components/Member/Card';
 import { Input } from '../../components/Member/Input';
 import { Button } from '../../components/Member/Button';
@@ -16,27 +16,6 @@ export const LocalCreator = ({ onBack }) => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [jobs, setJobs] = useState([]);
-
-  // 컴포넌트 마운트 시 직업 목록 로드
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const response = await fetch('/api/jobs');
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-          setJobs(result.data);
-        } else {
-          console.error('직업 목록 로드 실패:', result.message);
-        }
-      } catch (error) {
-        console.error('직업 목록 로드 중 오류:', error);
-      }
-    };
-
-    fetchJobs();
-  }, []);
 
   const handleInputChange = e => {
     const { id, value } = e.target;
@@ -62,44 +41,31 @@ export const LocalCreator = ({ onBack }) => {
       return;
     }
 
-    if (!formData.job) {
-      alert('직업을 선택해주세요.');
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/users', {
+      const response = await fetch('/api/users/creator', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: formData.name,
-          nickname: formData.nickname,
           email: formData.email,
+          name: formData.name,
+          nickname: formData.nickname,
+          job: formData.job,
           password: formData.password,
-          role: 'CREATOR',
-          jobId: parseInt(formData.job),
-          bio: null,
+          userType: 'creator',
         }),
       });
 
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        const { accessToken, refreshToken } = result.data.tokens;
-
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
-
-        localStorage.setItem('userInfo', JSON.stringify(result.data.user));
-
+      if (response.ok) {
+        const result = await response.json();
         alert('크리에이터 회원가입이 완료되었습니다!');
         window.location.href = '/login';
       } else {
-        alert(`회원가입 실패: ${result.message}`);
+        const error = await response.json();
+        alert(`회원가입 실패: ${error.message}`);
       }
     } catch (error) {
       alert('서버 오류가 발생했습니다.');
@@ -116,21 +82,16 @@ export const LocalCreator = ({ onBack }) => {
     }
 
     try {
-      const response = await fetch(`/api/users/check-email?email=${encodeURIComponent(formData.email)}`);
+      const response = await fetch(`/api/users/check-email?email=${formData.email}`);
       const result = await response.json();
 
-      if (response.ok && result.success) {
-        if (result.available) {
-          alert('사용 가능한 이메일입니다.');
-        } else {
-          alert('이미 사용 중인 이메일입니다.');
-        }
+      if (result.available) {
+        alert('사용 가능한 이메일입니다.');
       } else {
-        alert(`오류: ${result.message}`);
+        alert('이미 사용 중인 이메일입니다.');
       }
     } catch (error) {
       alert('이메일 중복 확인 중 오류가 발생했습니다.');
-      console.error('Email check error:', error);
     }
   };
 
@@ -160,6 +121,7 @@ export const LocalCreator = ({ onBack }) => {
 
           <form onSubmit={handleSubmit}>
             <div className={styles.formContainer}>
+              {/* Email field with duplicate check button */}
               <div className={styles.fieldContainer}>
                 <div className={styles.fieldLabel}>
                   <span>이메일 주소 </span>
@@ -180,6 +142,7 @@ export const LocalCreator = ({ onBack }) => {
                 </div>
               </div>
 
+              {/* Name field */}
               <div className={styles.fieldContainer}>
                 <div className={styles.fieldLabel}>
                   <span>이름 </span>
@@ -195,6 +158,7 @@ export const LocalCreator = ({ onBack }) => {
                 />
               </div>
 
+              {/* Nickname field */}
               <div className={styles.fieldContainer}>
                 <div className={styles.fieldLabel}>
                   <span>닉네임 </span>
@@ -210,6 +174,7 @@ export const LocalCreator = ({ onBack }) => {
                 />
               </div>
 
+              {/* Job/Occupation dropdown */}
               <div className={styles.fieldContainer}>
                 <div className={styles.fieldLabel}>
                   <span>직업 </span>
@@ -220,15 +185,15 @@ export const LocalCreator = ({ onBack }) => {
                     <SelectValue placeholder="직업을 선택해주세요" />
                   </SelectTrigger>
                   <SelectContent>
-                    {jobs.map(job => (
-                      <SelectItem key={job.jobId} value={job.jobId.toString()}>
-                        {job.name}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="developer">개발자</SelectItem>
+                    <SelectItem value="designer">디자이너</SelectItem>
+                    <SelectItem value="manager">매니저</SelectItem>
+                    <SelectItem value="other">기타</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
+              {/* Password field */}
               <div className={styles.fieldContainer}>
                 <div className={styles.fieldLabel}>
                   <span>비밀번호 </span>
@@ -245,6 +210,7 @@ export const LocalCreator = ({ onBack }) => {
                 />
               </div>
 
+              {/* Password confirmation field */}
               <div className={styles.fieldContainer}>
                 <div className={styles.fieldLabel}>
                   <span>비밀번호 확인 </span>
@@ -262,6 +228,7 @@ export const LocalCreator = ({ onBack }) => {
               </div>
             </div>
 
+            {/* Sign up button */}
             <div className={styles.submitContainer}>
               <div className={styles.submitButtonWrapper}>
                 <div className={styles.buttonContainer}>

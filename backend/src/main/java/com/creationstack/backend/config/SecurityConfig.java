@@ -45,6 +45,7 @@ public class SecurityConfig {
                                     "/api/users", // 회원가입
                                     "/api/jobs", // 직업 목록
                                     "/api/users/check-email", // 이메일 중복 확인
+                                    "/api/users/check-nickname", // 닉네임 중복 확인
                                     "/api/auth/login", // 로그인
                                     "/api/auth/refresh", // 토큰 갱신
                                     "/api/auth/logout", // 로그아웃 (refresh token 방식)
