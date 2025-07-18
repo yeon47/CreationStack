@@ -1,4 +1,4 @@
-package com.creationstack.backend.dto;
+package com.creationstack.backend.dto.member;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

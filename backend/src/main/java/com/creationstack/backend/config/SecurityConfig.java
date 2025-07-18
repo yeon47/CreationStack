@@ -1,10 +1,9 @@
-package com.creationstack.backend.auth;
+package com.creationstack.backend.config;
 
 import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -17,9 +16,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.creationstack.backend.auth.JwtAuthenticationFilter;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -40,11 +40,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     log.info("URL 권한 설정 중...");
                     auth
-                            // 인증 없이 접근 가능한 경로 (테스트를 위해 모든 콘텐츠 API를 permitAll로 임시 변경)
+                            // 인증 없이 접근 가능한 경로들
                             .requestMatchers(
-                                    "/api/users",
-                                    "/api/jobs",
-                                    "/api/auth/refresh",
+                                    "/api/users", // 회원가입
+                                    "/api/jobs", // 직업 목록
+                                    "/api/auth/login", // 로그인
+                                    "/api/auth/refresh", // 토큰 갱신
+                                    "/api/auth/logout", // 로그아웃 (refresh token 방식)
                                     "/api/content/**", // 모든 /api/content 경로 허용
                                     "/api/upload/image", // 이미지 업로드 경로 허용
                                     "/api/contents/**/comments",
