@@ -5,9 +5,9 @@
   gap: 10.8px;
   height: 20px;
   justify-content: center;
-  padding: 21.6px 32.4px;
+  padding: 25px 50px;
   position: relative;
-  width: 60px;
+  width: 2rem;
 }
 
 .status-button .label {
@@ -25,7 +25,7 @@
 /* 상태별 기본색 + hover색 */
 .subscribed {
   background-color: #4682a9;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease;
 }
 .subscribed:hover {
   background-color: #35678b;
@@ -33,7 +33,7 @@
 
 .cancelled {
   background-color: #b2d9de;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease;
 }
 .cancelled:hover {
   background-color: #7bbfc4;
@@ -41,7 +41,7 @@
 
 .failed {
   background-color: #6840c6c7;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease;
 }
 .failed:hover {
   background-color: #503491c7;

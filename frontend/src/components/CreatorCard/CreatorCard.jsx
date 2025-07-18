@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './CreatorCard.module.css';
 
+// 사용자 메인페이지에서 사용자가 구독한 크리에이터 정보
 const CreatorCard = ({ creator }) => (
   <div className={styles.creatorCard}>
     <div className={styles.profileImage} style={{ backgroundImage: `url(${creator.profileImageUrl})` }} />

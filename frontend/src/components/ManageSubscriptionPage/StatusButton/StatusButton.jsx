@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './StatusButton.module.css';
 
+// 사용자 구독 목록 조회에서 구독 상태 버튼
 export const StatusButton = ({ status = 'SUBSCRIBED', className, onClick }) => {
   const config = {
     SUBSCRIBED: {
