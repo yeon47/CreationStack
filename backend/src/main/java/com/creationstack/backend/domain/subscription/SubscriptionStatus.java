@@ -20,8 +20,9 @@ public class SubscriptionStatus {
     @Id
     private Integer statusId;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length=20)
     private String name;    // 'PENDING', 'ACTIVE', ...
 
+    @Column(length=100)
     private String description;
 }

@@ -25,37 +25,37 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="subscription")
+@Table(name = "subscription")
 public class Subscription {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long subscriptionId;   // 구독 ID
+    private Long subscriptionId; // 구독 ID
 
     @Column(nullable = false)
-    private Long subscriberId;  // 구독 요청한 사용자 ID
-    
+    private Long subscriberId; // 구독 요청한 사용자 ID
+
     @Column(nullable = false)
     private Long creatorId; // 구독할 대상 크리에이터 ID
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id", nullable = false)
-    private SubscriptionStatus status;  // ACTIVE, CANCELLED, EXPIRED
+    private SubscriptionStatus status; // ACTIVE, CANCELLED, EXPIRED
 
     @ManyToOne
     @JoinColumn(name = "payment_method_id", nullable = false)
     private PaymentMethod paymentMethod;
 
     @Column(nullable = false)
-    private LocalDateTime startedAt;    // 구독 시작일  
-    
+    private LocalDateTime startedAt; // 구독 시작일
+
     @Column(nullable = false)
-    private LocalDateTime nextPaymentAt;    // 다음 결제 시각
-    
+    private LocalDateTime nextPaymentAt; // 다음 결제 시각
+
     @Column(nullable = false)
-    private LocalDateTime lastPaymentAt;    // 마지막 결제 시각
+    private LocalDateTime lastPaymentAt; // 마지막 결제 시각
 
     @Column(length = 255)
-    private String scheduleId;  // 매달 정기결제용 (포트원에서 넘어오는 값)
-    
+    private String scheduleId; // 매달 정기결제용 (포트원에서 넘어오는 값)
+
 }
