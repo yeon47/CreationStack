@@ -15,14 +15,14 @@ export const ContentCardList = ({
         <div
           className="div-2"
           key={index}
-          onClick={() => navigate(`/contents/${content?.content_id}`)}
+          onClick={() => navigate(`/contents/${content?.contentId}`)}
           style={{ cursor: "pointer" }}
         >
           <div className="image">
-            {content?.thumbnail_url && (
+            {content?.thumbnailUrl && (
               <img
                 className="thumbnail"
-                src={content?.thumbnail_url}
+                src={content?.thumbnailUrl}
                 alt="썸네일"
               />
             )}
@@ -35,7 +35,7 @@ export const ContentCardList = ({
                 <p className="p">{content?.title}</p>
               </div>
             </div>
-            {content?.like_count != null && (
+            {content?.likeCount != null && (
               <div className="categories">
                 <div className="group-2">
                   <img
@@ -43,13 +43,13 @@ export const ContentCardList = ({
                     alt="Free icon like"
                     src="https://c.animaapp.com/md5omgh5oM1d1X/img/free-icon-like-6924834-1-11.png"
                   />
-                  <div className="text-wrapper-5">({content?.like_count})</div>
+                  <div className="text-wrapper-5">({content?.likeCount})</div>
                 </div>
               </div>
             )}
-            {content?.category_names?.length > 0 && (
+            {content?.categoryNames?.length > 0 && (
               <div className="categories-2">
-                {(content?.category_names || []).map((name, i) => (
+                {(content?.categoryNames || []).map((name, i) => (
                   <div key={i} className="badge-base">
                     <div className={`text ${textClassName}`}>{name}</div>
                   </div>

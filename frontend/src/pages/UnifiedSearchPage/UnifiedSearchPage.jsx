@@ -19,22 +19,22 @@ export const UnifiedSearchPage = () => {
         // creators
         const creatorMapped = (result.creators || []).map((item) => ({
           nickname: item.creator?.nickname,
-          profileImageUrl: item.creator?.profile_image_url,
+          profileImageUrl: item.creator?.profileImageUrl,
           bio: item.creator?.bio,
           job: item.creator?.job,
-          subscriberCount: item.creator?.subscriber_count,
+          subscriberCount: item.creator?.subscriberCount,
         }));
 
         // contents
         const contentMapped = (result.contents || []).map((item) => ({
-          content_id: item.content_id,
+          content_id: item.contentId,
           title: item.title,
-          thumbnail_url: item.thumbnail_url,
-          like_count: item.like_count,
-          category_names: item.category_names,
+          thumbnail_url: item.thumbnailUrl,
+          like_count: item.likeCount,
+          category_names: item.categoryNames,
           creator: {
             nickname: item.creator?.nickname,
-            profileImageUrl: item.creator?.profile_image_url,
+            profileImageUrl: item.creator?.profileImageUrl,
           },
         }));
 

@@ -26,11 +26,11 @@ export const CreatorSearchPage = () => {
           nickname: item.creator.nickname,
           job: item.creator.job,
           bio: item.creator.bio,
-          profileImageUrl: item.creator.profile_image_url,
-          subscriberCount: item.creator.subscriber_count,
+          profileImageUrl: item.creator.profileImageUrl,
+          subscriberCount: item.creator.subscriberCount,
         }));
         setCreators(mapped);
-        setTotalPages(result.total_pages);
+        setTotalPages(result.totalPages);
       } catch (error) {
         console.error("Failed to fetch creators:", error);
       }

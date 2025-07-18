@@ -25,15 +25,15 @@ export const ContentSearchPage = () => {
         }
 
         const mapped = result.contents.map((item) => ({
-          content_id: item.content_id,
+          contentId: item.contentId,
           nickname: item.creator.nickname,
-          thumbnail_url: item.thumbnail_url,
+          thumbnailUrl: item.thumbnailUrl,
           title: item.title,
-          like_count: item.like_count,
-          category_names: item.category_names,
+          likeCount: item.likeCount,
+          categoryNames: item.categoryNames,
         }));
         setCreators(mapped);
-        setTotalPages(result.total_pages);
+        setTotalPages(result.totalPages);
       } catch (error) {
         console.error("Failed to fetch creators:", error);
       }
