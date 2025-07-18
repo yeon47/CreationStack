@@ -1,18 +1,26 @@
 package com.creationstack.backend.controller;
 
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.stream.Collectors;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.creationstack.backend.dto.member.EmailCheckResponse;
+import com.creationstack.backend.dto.member.NicknameCheckResponse;
 import com.creationstack.backend.dto.member.SignupRequest;
 import com.creationstack.backend.dto.member.SignupResponse;
 import com.creationstack.backend.service.AuthService;
 
-import java.util.stream.Collectors;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/users")
@@ -62,6 +70,54 @@ public class UserController {
             SignupResponse response = SignupResponse.builder()
                     .success(false)
                     .message("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
+                    .build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<EmailCheckResponse> checkEmailDuplicate(@RequestParam String email) {
+        try {
+            boolean isAvailable = authService.isEmailAvailable(email);
+
+            EmailCheckResponse response = EmailCheckResponse.builder()
+                    .success(true)
+                    .available(isAvailable)
+                    .message(isAvailable ? "사용 가능한 이메일입니다." : "이미 사용 중인 이메일입니다.")
+                    .build();
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("이메일 중복 확인 중 오류 발생", e);
+            EmailCheckResponse response = EmailCheckResponse.builder()
+                    .success(false)
+                    .available(false)
+                    .message("이메일 중복 확인 중 오류가 발생했습니다.")
+                    .build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @GetMapping("/check-nickname")
+    public ResponseEntity<NicknameCheckResponse> checkNicknameDuplicate(@RequestParam String nickname) {
+        try {
+            boolean isAvailable = authService.isNicknameAvailable(nickname);
+
+            NicknameCheckResponse response = NicknameCheckResponse.builder()
+                    .success(true)
+                    .available(isAvailable)
+                    .message(isAvailable ? "사용 가능한 닉네임입니다." : "이미 존재하는 닉네임입니다.")
+                    .build();
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("닉네임 중복 확인 중 오류 발생", e);
+            NicknameCheckResponse response = NicknameCheckResponse.builder()
+                    .success(false)
+                    .available(false)
+                    .message("닉네임 중복 확인 중 오류가 발생했습니다.")
                     .build();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }

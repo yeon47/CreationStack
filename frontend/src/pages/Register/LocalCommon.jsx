@@ -5,6 +5,9 @@ import { Input } from '../../components/Member/Input';
 import { SimpleLabel } from '../../components/Member/SimpleLabel';
 import styles from './LocalCommon.module.css';
 
+import Eye from '../../components/Member/Eye';
+import EyeOff from '../../components/Member/EyeOff';
+
 export const LocalCommon = ({ onBack }) => {
   const [formData, setFormData] = useState({
     email: '',
@@ -16,7 +19,12 @@ export const LocalCommon = ({ onBack }) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Form field data with labels and placeholders
+  // --- 추가된 부분: 비밀번호 보이기/숨기기 상태 ---
+  const [passwordVisibility, setPasswordVisibility] = useState({
+    password: false,
+    confirmPassword: false,
+  });
+
   const formFields = [
     {
       id: 'email',
@@ -62,10 +70,17 @@ export const LocalCommon = ({ onBack }) => {
     }));
   };
 
+  // --- 추가된 부분: 비밀번호 보이기/숨기기 토글 핸들러 ---
+  const togglePasswordVisibility = fieldId => {
+    setPasswordVisibility(prev => ({
+      ...prev,
+      [fieldId]: !prev[fieldId],
+    }));
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
 
-    // 비밀번호 확인 검증
     if (formData.password !== formData.confirmPassword) {
       alert('비밀번호가 일치하지 않습니다.');
       return;
@@ -79,11 +94,13 @@ export const LocalCommon = ({ onBack }) => {
         headers: {
           'Content-Type': 'application/json',
         },
+        // --- 👇 여기를 수정해주세요 ---
         body: JSON.stringify({
           email: formData.email,
-          name: formData.name,
+          username: formData.name, // 👈 1. 'name'을 'username'으로 변경
           nickname: formData.nickname,
           password: formData.password,
+          role: 'USER', // 👈 2. 'role' 정보 추가 (기본값)
         }),
       });
 
@@ -93,6 +110,7 @@ export const LocalCommon = ({ onBack }) => {
         window.location.href = '/login';
       } else {
         const error = await response.json();
+        // 백엔드에서 오는 에러 메시지를 그대로 사용하도록 수정
         alert(`회원가입 실패: ${error.message}`);
       }
     } catch (error) {
@@ -108,11 +126,9 @@ export const LocalCommon = ({ onBack }) => {
       alert('이메일을 입력해주세요.');
       return;
     }
-
     try {
       const response = await fetch(`/api/users/check-email?email=${formData.email}`);
       const result = await response.json();
-
       if (result.available) {
         alert('사용 가능한 이메일입니다.');
       } else {
@@ -131,7 +147,6 @@ export const LocalCommon = ({ onBack }) => {
     <div className={styles.container}>
       <Card className={styles.card}>
         <CardContent className={styles.cardContent}>
-          {/* Header Section */}
           <div className={styles.header}>
             <div className={styles.headerLeft}>
               <div className={styles.welcomeText}>
@@ -140,7 +155,6 @@ export const LocalCommon = ({ onBack }) => {
               </div>
               <div className={styles.title}>회원가입</div>
             </div>
-
             <div className={styles.headerRight}>
               <div className={styles.loginPrompt}>계정이 있으신가요?</div>
               <button className={styles.loginLink} onClick={handleLoginClick}>
@@ -149,7 +163,6 @@ export const LocalCommon = ({ onBack }) => {
             </div>
           </div>
 
-          {/* Form Fields */}
           <form onSubmit={handleSubmit}>
             <div className={styles.formFields}>
               {formFields.map(field => (
@@ -158,6 +171,7 @@ export const LocalCommon = ({ onBack }) => {
                     {field.label} {field.required && <span className={styles.required}>*</span>}
                   </SimpleLabel>
 
+                  {/* --- 수정된 렌더링 로직 --- */}
                   {field.hasButton ? (
                     <div className={styles.inputWithButton}>
                       <div className={styles.inputWrapper}>
@@ -178,20 +192,39 @@ export const LocalCommon = ({ onBack }) => {
                     <div className={styles.inputWrapperRegular}>
                       <Input
                         id={field.id}
-                        type={field.type || 'text'}
+                        // 상태에 따라 type을 동적으로 변경
+                        type={
+                          field.type === 'password'
+                            ? passwordVisibility[field.id]
+                              ? 'text'
+                              : 'password'
+                            : field.type || 'text'
+                        }
                         placeholder={field.placeholder}
                         className={styles.input}
                         value={formData[field.id]}
                         onChange={handleInputChange}
                         required={field.required}
                       />
+                      {/* 비밀번호 필드일 경우 아이콘 버튼 추가 */}
+                      {field.type === 'password' && (
+                        <button
+                          type="button"
+                          onClick={() => togglePasswordVisibility(field.id)}
+                          className={styles.passwordIcon}>
+                          {passwordVisibility[field.id] ? (
+                            <EyeOff size={20} color="#8D8D8D" />
+                          ) : (
+                            <Eye size={20} color="#8D8D8D" />
+                          )}
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
               ))}
             </div>
 
-            {/* Submit Button */}
             <div className={styles.submitSection}>
               <div className={styles.buttonContainer}>
                 {onBack && (

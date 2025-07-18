@@ -42,7 +42,6 @@ public class AuthService {
         private final PasswordEncoder passwordEncoder;
         private final JwtUtil jwtUtil;
 
-        // 기존 signup 메서드는 그대로 유지
         public SignupResponse signup(SignupRequest request) {
                 if (userDetailRepository.existsByEmail(request.getEmail())) {
                         return SignupResponse.builder()
@@ -370,5 +369,13 @@ public class AuthService {
                         log.error("로그아웃 처리 중 오류 발생: {}", e.getMessage(), e);
                         return LogoutResponse.error("로그아웃 처리 중 오류가 발생했습니다.");
                 }
+        }
+
+        public boolean isEmailAvailable(String email) { // 이메일 실시간 중복 체크
+                return !userDetailRepository.existsByEmail(email);
+        }
+
+        public boolean isNicknameAvailable(String nickname) { // 닉네임 실시간 중복 체크
+                return !userDetailRepository.existsByNickname(nickname);
         }
 }

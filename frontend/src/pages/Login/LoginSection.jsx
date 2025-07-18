@@ -34,6 +34,7 @@ export const LoginSection = () => {
     setIsSubmitting(true);
 
     try {
+      // 실제 API 호출 (백엔드로 프록시됨)
       const response = await fetch('/api/auth/signin', {
         method: 'POST',
         headers: {
@@ -110,36 +111,34 @@ export const LoginSection = () => {
               </button>
 
               {/* Email and password inputs */}
-              <form onSubmit={handleSubmit}>
-                <div className={styles.inputSection}>
-                  <div className={styles.inputContainer}>
-                    <Label htmlFor="email" className={styles.inputLabel}>
-                      이메일 주소
-                    </Label>
-                    <Input
-                      id="email"
-                      placeholder="이메일 주소를 입력해주세요"
-                      className={styles.emailInput}
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
+              <form onSubmit={handleSubmit} className={styles.inputSection}>
+                <div className={styles.inputContainer}>
+                  <Label htmlFor="email" className={styles.inputLabel}>
+                    이메일 주소
+                  </Label>
+                  <Input
+                    id="email"
+                    placeholder="이메일 주소를 입력해주세요"
+                    className={styles.emailInput}
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
 
-                  <div className={styles.inputContainer}>
-                    <Label htmlFor="password" className={styles.inputLabel}>
-                      비밀번호
-                    </Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="비밀번호를 입력해주세요"
-                      className={styles.passwordInput}
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
+                <div className={styles.inputContainer}>
+                  <Label htmlFor="password" className={styles.inputLabel}>
+                    비밀번호
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="비밀번호를 입력해주세요"
+                    className={styles.passwordInput}
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    required
+                  />
                 </div>
 
                 {/* Login button */}
@@ -156,13 +155,7 @@ export const LoginSection = () => {
               {/* Logo */}
               <div className={styles.logoSection}>
                 <div className={styles.logoContainer}>
-                  <div className={styles.logoInner}>
-                    <img
-                      className={styles.logoImage}
-                      alt="Mask group"
-                      src="https://c.animaapp.com/md45lq6rQTeTYg/img/mask-group-1.svg"
-                    />
-                  </div>
+                  <div className={styles.logoInner}>{/* 로고 아이콘 또는 이미지 */}</div>
                 </div>
               </div>
 
@@ -180,15 +173,15 @@ export const LoginSection = () => {
                   <div className={styles.descriptionText}>{leftSideContent.description}</div>
                 </div>
               </div>
-            </div>
 
-            {/* Illustration */}
-            <div className={styles.illustration}>
-              <img
-                className={styles.illustrationImage}
-                alt="Saly"
-                src="https://c.animaapp.com/md45lq6rQTeTYg/img/saly-1.png"
-              />
+              {/* Illustration */}
+              <div className={styles.illustration}>
+                <img
+                  className={styles.illustrationImage}
+                  alt="Saly"
+                  src="https://c.animaapp.com/md45lq6rQTeTYg/img/saly-1.png"
+                />
+              </div>
             </div>
           </div>
         </div>
