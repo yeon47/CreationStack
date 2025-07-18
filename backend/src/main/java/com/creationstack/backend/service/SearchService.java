@@ -1,9 +1,9 @@
 package com.creationstack.backend.service;
 
-import com.creationstack.backend.domain.search.Category;
-import com.creationstack.backend.domain.search.Content;
+import com.creationstack.backend.domain.content.ContentCategory;
+import com.creationstack.backend.domain.content.Content;
 import com.creationstack.backend.dto.search.*;
-import com.creationstack.backend.repository.search.ContentRepository;
+import com.creationstack.backend.repository.content.ContentRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,19 +65,8 @@ public class SearchService { // 검색 서비스
         return searchFilter(dto, pageable, sortType);
     }
 
-    /*
-    // 전체 검색
-    public SearchResponse<SearchResultDto> searchAll(
-            SearchDto dto, // 검색 조건 Dto
-            Pageable pageable, // 페이징 정보
-            String sortType) { // 정렬 기준
-
-        dto.setSearchMode(SearchMode.ALL);
-        return searchFilter(dto, pageable, sortType);
-    }
-    */
-
     // 검색조건으로 필터링 메소드, ContentSearchResponse<ContentListDto>로 반환
+    @Transactional(readOnly = true)
     public SearchResponse<SearchResultDto> searchFilter(
             SearchDto dto, // 검색 조건 Dto
             Pageable pageable, // 페이징 정보
@@ -85,10 +75,6 @@ public class SearchService { // 검색 서비스
         // 동적 쿼리를 위한 Specification
         Specification<Content> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>(); // 조건 담는 리스트
-
-            if (dto.getCreatorId() != null) { // 크리에이터의 콘텐츠 검색 조건
-                predicates.add(cb.equal(root.get("creator").get("userId"), dto.getCreatorId()));
-            }
 
             // 크리에이터 닉네임, 제목, 내용 통합 키워드 검색
             if (dto.getKeyword() != null && !dto.getKeyword().trim().isEmpty()) {
@@ -125,7 +111,7 @@ public class SearchService { // 검색 서비스
 
             // 카테고리 조건
             if (dto.getCategories() != null && !dto.getCategories().isEmpty()) {
-                Join<Content, Category> join = root.join("categories", JoinType.INNER);
+                Join<Content, ContentCategory> join = root.join("categories", JoinType.INNER);
                 predicates.add(join.get("categoryId").in(dto.getCategories()));
             }
 
@@ -169,8 +155,8 @@ public class SearchService { // 검색 서비스
 
 
                         .categoryNames( // 카테고리 이름 목록
-                                content.getCategories().stream()
-                                        .map(Category::getName)
+                                content.getCategoryMappings().stream()
+                                        .map(mapping -> mapping.getCategory().getName())
                                         .toList())
                         .build()
                 );

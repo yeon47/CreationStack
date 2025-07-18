@@ -31,6 +31,9 @@ public class User {
     @JoinColumn(name = "job_id")
     private Job job;
 
+    @Column(name = "subscriber_count", nullable = false)
+    private int subscriberCount = 0; // 구독자 수
+
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;

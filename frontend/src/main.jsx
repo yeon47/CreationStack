@@ -1,17 +1,9 @@
 import { createRoot } from 'react-dom/client';
 import './index.css';
-<<<<<<< HEAD
-import { BrowserRouter } from 'react-router-dom';
 import AppRoutes from './routes/index.jsx'; 
-
-createRoot(document.getElementById('root')).render(
-  <BrowserRouter>
-    <AppRoutes />
-=======
 import { LoginSection } from './pages/login/LoginSection';
 import { MemberRegister } from './pages/register/MemberRegister';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import App from './App';
 
 // 홈 페이지 컴포넌트 (필요에 따라 생성)
 function HomePage() {
@@ -25,7 +17,6 @@ function HomePage() {
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
-    <App />
->>>>>>> feat/comment
+    <AppRoutes />
   </BrowserRouter>
 );

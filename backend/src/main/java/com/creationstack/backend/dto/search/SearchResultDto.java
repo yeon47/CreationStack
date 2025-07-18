@@ -1,6 +1,6 @@
 package com.creationstack.backend.dto.search;
 
-import com.creationstack.backend.domain.search.AccessType;
+import com.creationstack.backend.domain.content.AccessType;
 import lombok.*;
 
 import java.time.LocalDateTime;

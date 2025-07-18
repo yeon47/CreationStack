@@ -45,10 +45,14 @@ public class SecurityConfig {
                                     "/api/users",
                                     "/api/jobs",
                                     "/api/auth/refresh",
+                                    "/api/contents/**",
+                                    "/api/search/**",
+                                    "/api/creators/**",
                                     "/api/content/**", // 모든 /api/content 경로 허용
                                     "/api/upload/image", // 이미지 업로드 경로 허용
                                     "/api/contents/**/comments",
                                     "/api/contents/**/comments/**/like"
+
                             ).permitAll()
                             // /api/user/** 경로는 인증 필요 (기존 설정 유지)
                             .requestMatchers("/api/user/**").authenticated()
