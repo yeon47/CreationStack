@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+// 고객 정보 dto
 @Getter
 @Setter
 @AllArgsConstructor
