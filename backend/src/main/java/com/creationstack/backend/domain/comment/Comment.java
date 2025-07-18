@@ -2,6 +2,7 @@ package com.creationstack.backend.domain.comment;
 
 import java.time.LocalDateTime;
 
+import com.creationstack.backend.domain.content.Content;
 import com.creationstack.backend.domain.user.User;
 import com.creationstack.backend.dto.CommentResponseDto;
 

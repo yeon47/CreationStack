@@ -1,0 +1,23 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 32px;
+}
+
+/* 페이징 애니메이션 */
+.fadeIn {
+  opacity: 1;
+  transition: opacity 0.2s ease-in;
+}
+
+.fadeOut {
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+}

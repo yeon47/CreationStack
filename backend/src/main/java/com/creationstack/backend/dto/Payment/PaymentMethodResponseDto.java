@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class PaymentMethodResponseDto {
+  private Long paymentMethodId;
   private String cardBrand;
   private String cardType;
   private String cardNumber;

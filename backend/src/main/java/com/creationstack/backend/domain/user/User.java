@@ -62,4 +62,5 @@ public class User {
     public enum UserRole {
         USER, CREATOR
     }
+
 }

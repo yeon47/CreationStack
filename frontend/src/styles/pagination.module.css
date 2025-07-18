@@ -1,164 +1,107 @@
 .pagination {
-  height: 38px;
-  position: relative;
-  width: 355px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  padding: 16px 0;
+  flex-wrap: wrap;
+  width: 100%;
+  margin: 0 auto;
 }
 
-.prev {
-  height: 16px;
-  left: 0;
-  position: absolute;
-  top: 11px;
-  width: 52px;
-}
-
-.text-wrapper-2 {
-  color: #a0a7b4;
-  font-family: "Poppins", Helvetica;
+/* Prev, Next 공통 */
+.prev,
+.next {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
   font-size: 14px;
+  font-family: 'Poppins', Helvetica;
   font-weight: 500;
-  height: 10px;
-  left: 19px;
-  letter-spacing: 0;
-  line-height: normal;
-  position: absolute;
-  text-align: center;
-  top: 3px;
-  white-space: nowrap;
+  color: #202022;
+  transition: opacity 0.2s ease;
 }
 
-.chevron-left {
-  height: 16px;
-  left: 0;
-  position: absolute;
-  top: 0;
-  width: 16px;
+.prev:hover,
+.next:hover {
+  opacity: 0.7;
+}
+
+.prev.disabled,
+.next.disabled {
+  cursor: default;
+  opacity: 0.3;
 }
 
 .vector {
-  height: 14px;
-  left: 4px;
-  position: absolute;
-  top: 1px;
   width: 8px;
+  height: 14px;
 }
 
+/* 페이지 번호 영역 */
 .nums {
-  align-items: flex-start;
-  display: inline-flex;
+  display: flex;
   gap: 8px;
-  left: 66px;
-  position: absolute;
-  top: 0;
+  align-items: center;
 }
 
-.element {
-  background-color: #f1f9ff;
-  border: 1px solid;
-  border-color: #0c8ce9;
-  border-radius: 5px;
-  height: 38px;
-  overflow: hidden;
-  position: relative;
-  width: 38px;
-}
-
-.num {
-  color: #0c8ce9;
-  font-family: "Poppins", Helvetica;
-  font-size: 14px;
-  font-weight: 700;
-  height: 10px;
-  left: 16px;
-  letter-spacing: 0;
-  line-height: normal;
-  position: absolute;
-  text-align: center;
-  top: 13px;
-  white-space: nowrap;
-}
-
+/* 일반 페이지 번호 */
 .num-wrapper {
   background-color: #f0f1f5;
   border-radius: 5px;
-  height: 38px;
-  overflow: hidden;
-  position: relative;
   width: 38px;
-}
-
-.num-2 {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', Helvetica;
+  font-size: 14px;
+  font-weight: 500;
   color: #60656e;
-  font-family: "Poppins", Helvetica;
-  font-size: 14px;
-  font-weight: 500;
-  height: 10px;
-  left: 15px;
-  letter-spacing: 0;
-  line-height: normal;
-  position: absolute;
-  text-align: center;
-  top: 13px;
-  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-.num-3 {
+.num-wrapper:hover {
+  background-color: #91C8E4;
+  color: white;
+  border: none;
+}
+
+.num {
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* 현재 선택된 페이지 */
+.element {
+  background-color: #F1F9FF;
+  border: 1px solid #0c8ce9;
+  border-radius: 5px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', Helvetica;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0C8CE9;
+}
+
+
+/* 점(...) 표시 */
+.ellipsis {
+  pointer-events: none;
+  background: transparent;
   color: #60656e;
-  font-family: "Poppins", Helvetica;
   font-size: 14px;
+  font-family: 'Poppins', Helvetica;
   font-weight: 500;
-  height: 10px;
-  left: 14px;
-  letter-spacing: 0;
-  line-height: normal;
-  position: absolute;
-  text-align: center;
-  top: 13px;
-  white-space: nowrap;
-}
-
-.num-4 {
-  color: #60656e;
-  font-family: "Poppins", Helvetica;
-  font-size: 14px;
-  font-weight: 500;
-  height: 10px;
-  left: 12px;
-  letter-spacing: 0;
-  line-height: normal;
-  position: absolute;
-  text-align: center;
-  top: 13px;
-  white-space: nowrap;
-}
-
-.next {
-  height: 16px;
-  left: 305px;
-  position: absolute;
-  top: 11px;
-  width: 52px;
-}
-
-.prev-2 {
-  color: #23262a;
-  font-family: "Poppins", Helvetica;
-  font-size: 14px;
-  font-weight: 500;
-  height: 10px;
-  left: 0;
-  letter-spacing: 0;
-  line-height: normal;
-  position: absolute;
-  text-align: center;
-  top: 3px;
-  white-space: nowrap;
-}
-
-.vector-wrapper {
-  height: 16px;
-  left: 34px;
-  position: absolute;
-  top: 0;
-  width: 16px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

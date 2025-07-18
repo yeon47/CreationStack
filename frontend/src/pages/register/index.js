@@ -1,2 +1,1 @@
-export { MemberRegister } from './MemberRegister';
-export { LocalCommon } from './LocalCommon';
+export { Register } from './Register';

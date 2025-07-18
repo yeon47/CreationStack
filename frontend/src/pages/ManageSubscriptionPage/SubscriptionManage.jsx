@@ -10,7 +10,6 @@ export const SubscriptionManage = () => {
       <div className={styles['subscribe-list-title']}>구독 관리</div>
 
       <SubscribedCardsSection />
-      <Pagination />
     </div>
   );
 };

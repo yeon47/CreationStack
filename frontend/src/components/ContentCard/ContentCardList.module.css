@@ -1,0 +1,8 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 24px;
+  max-width: 1000px;     /* 카드가 한 줄에 몇 개 나올지에 따라 조절 */
+  margin: 0 auto;        /* 중앙 정렬 */
+  padding: 20px 0;       /* 위아래 여백 */
+}
