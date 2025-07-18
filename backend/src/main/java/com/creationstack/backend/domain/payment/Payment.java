@@ -23,7 +23,7 @@ public class Payment {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private String paymentId;
+  private Long paymentId;
 
   @OneToOne(fetch = FetchType.LAZY)
   private PaymentMethod paymentMethod;

@@ -18,6 +18,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -40,6 +41,9 @@ public class SecurityConfig {
                     auth
                             .requestMatchers("/api/users", "/api/jobs", "/api/auth/refresh").permitAll()
                             .requestMatchers("/api/user/**").authenticated()
+                            .requestMatchers("/api/contents/*/comments").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/contents/*/comments/*/like").authenticated()
+                            .requestMatchers(HttpMethod.POST, "/api/contents/*/comments").authenticated()
                             .anyRequest().permitAll();
                 })
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

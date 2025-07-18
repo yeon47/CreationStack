@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import CommentItem from '../../components/CommentItem';
-import styles from '../../styles/ReplyList.module.css';
+import CommentItem from '../../components/Comments/CommentItem';
+import styles from '../../styles/replyList.module.css';
 import btnstyles from '../../styles/commentBtn.module.css';
 
 const ReplyList = ({ contentId }) => {
   const [comments, setComments] = useState([]);
-  const [showReplyForm, setShowReplyForm] = useState(null);
-  const [editingComment, setEditingComment] = useState(null);
+  const [editingTargetId, setEditingTargetId] = useState(null);
   const [editContent, setEditContent] = useState('');
   const [newComment, setNewComment] = useState('');
+  const [replyTargetId, setReplyTargetId] = useState(null);
   const [replyContents, setReplyContents] = useState({});
   const [loading, setLoading] = useState(false);
+
   const userId = Number(localStorage.getItem('userId'));
+  console.log(userId);
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('accessToken');
-    const headers = { 'Content-Type': 'application/json' };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+    console.log(localStorage.getItem('accessToken'));
     return {
       headers: {
         'Content-Type': 'application/json',
@@ -25,6 +26,7 @@ const ReplyList = ({ contentId }) => {
       },
     };
   };
+  console.log(getAuthHeaders());
 
   const fetchComments = async () => {
     try {
@@ -42,22 +44,22 @@ const ReplyList = ({ contentId }) => {
     if (contentId) fetchComments();
   }, [contentId]);
 
+  // 댓글 등록
   const handleNewComment = async () => {
-    if (!newComment.trim() || !userId) return alert('로그인이 필요합니다.');
+    if (!newComment.trim() || !userId) return alert('댓글 내용을 입력해주세요');
     try {
       await axios.post(
         `/api/contents/${contentId}/comments`,
         {
           contentText: newComment,
-          contentId,
           parentCommentId: null,
-          userId,
         },
         getAuthHeaders()
       );
       setNewComment('');
       fetchComments();
-    } catch {
+    } catch (err) {
+      console.error('댓글 등록 오류:', err);
       alert('댓글 등록 실패');
     }
   };
@@ -69,15 +71,13 @@ const ReplyList = ({ contentId }) => {
   // 답글 등록
   const handleReplySubmit = async parentId => {
     const content = replyContents[parentId];
-    if (!content?.trim()) return alert('답글 입력');
+    if (!content?.trim()) return alert('답글을 입력해주세요');
     try {
       await axios.post(
         `/api/contents/${contentId}/comments`,
         {
           contentText: content,
-          contentId,
           parentCommentId: parentId,
-          userId,
         },
         getAuthHeaders()
       );
@@ -86,19 +86,17 @@ const ReplyList = ({ contentId }) => {
         delete copy[parentId];
         return copy;
       });
-      setShowReplyForm(null);
+      setReplyTargetId(null);
       fetchComments();
-    } catch {
-      alert('답글 실패');
+    } catch (err) {
+      console.error('답글 등록 오류:', err);
+      alert('답글 등록 실패');
     }
   };
 
   const handleEditSubmit = async commentId => {
     if (!editContent.trim()) return;
-
-    const confirmEdit = window.confirm('댓글을 수정하시겠습니까?');
-    if (!confirmEdit) return;
-
+    if (!window.confirm('댓글을 수정하시겠습니까?')) return;
     try {
       await axios.put(
         `/api/contents/${contentId}/comments/${commentId}`,
@@ -107,7 +105,7 @@ const ReplyList = ({ contentId }) => {
         },
         getAuthHeaders()
       );
-      setEditingComment(null);
+      setEditingTargetId(null);
       setEditContent('');
       fetchComments();
     } catch {
@@ -117,19 +115,12 @@ const ReplyList = ({ contentId }) => {
 
   const handleLike = async commentId => {
     try {
-      const { headers } = getAuthHeaders();
-      const params = { userId };
-
-      // 서버에 좋아요/좋아요 취소 요청
-      await axios.post(
-        `/api/contents/${contentId}/comments/${commentId}/like`,
-        {},
-        {
-          headers,
-          params,
-        }
-      );
-
+      const token = localStorage.getItem('accessToken');
+      await axios.post(`/api/contents/${contentId}/comments/${commentId}/like`, null, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       // 로컬 상태 업데이트 (서버 응답을 기다리지 않고 즉시 UI 업데이트)
       setComments(prevComments =>
         prevComments.map(comment => {
@@ -144,13 +135,9 @@ const ReplyList = ({ contentId }) => {
           return comment;
         })
       );
-
-      // 서버 데이터와 동기화 (선택적)
-      // fetchComments();
     } catch (error) {
       alert('좋아요 처리 실패');
       console.error(error);
-      // 오류 발생 시 서버에서 최신 데이터 다시 가져오기
       fetchComments();
     }
   };
@@ -196,33 +183,35 @@ const ReplyList = ({ contentId }) => {
       <div className={styles.commentList}>
         {/*댓글목록*/}
         {comments
-          .filter(c => !c.parentCommentId)
+          .filter(c => !c.parentCommentId && c.commentId !== undefined)
           .map(comment => (
             <div key={`comment-${comment.commentId}`} className={styles.commentItem}>
               <CommentItem
                 comment={comment}
                 isReply={false}
-                editingComment={editingComment}
+                editingTargetId={editingTargetId}
+                replyTargetId={replyTargetId}
                 editContent={editContent}
                 onEditChange={e => setEditContent(e.target.value)}
                 onEditSubmit={handleEditSubmit}
                 onEditStart={comment => {
-                  setEditingComment(comment.commentId);
+                  setEditingTargetId(`comment-${comment.commentId}`);
                   setEditContent(comment.contentText);
                 }}
                 onEditCancel={() => {
-                  setEditingComment(null);
+                  setEditingTargetId(null);
                   setEditContent('');
                 }}
                 onLike={handleLike}
                 onDelete={handleDelete}
-                showReplyForm={showReplyForm}
-                onReplyToggle={setShowReplyForm}
+                onReplyToggle={id => {
+                  setReplyTargetId(prev => (prev === `reply-${id}` ? null : `reply-${id}`));
+                }}
                 replyContent={replyContents[comment.commentId]}
                 onReplyChange={handleReplyChange}
                 onReplySubmit={handleReplySubmit}
                 onReplyCancel={id => {
-                  setShowReplyForm(null);
+                  setReplyTargetId(null); // 답글 폼 닫기
                   setReplyContents(prev => {
                     const copy = { ...prev };
                     delete copy[id];
@@ -233,33 +222,33 @@ const ReplyList = ({ contentId }) => {
               />
               {/*답글목록*/}
               {comments
-                .filter(reply => reply.parentCommentId === comment.commentId)
+                .filter(reply => reply.parentCommentId === comment.commentId && reply.commentId !== undefined)
                 .map(reply => (
                   <div key={`reply-${reply.commentId}`} className={styles.replies}>
                     <CommentItem
                       comment={reply}
                       isReply={true}
-                      editingComment={editingComment}
+                      editingTargetId={editingTargetId}
                       editContent={editContent}
                       onEditChange={e => setEditContent(e.target.value)}
                       onEditSubmit={handleEditSubmit}
                       onEditStart={comment => {
-                        setEditingComment(comment.commentId);
+                        setEditingTargetId(`comment-${comment.commentId}`);
                         setEditContent(comment.contentText);
                       }}
                       onEditCancel={() => {
-                        setEditingComment(null);
+                        setEditingTargetId(null);
                         setEditContent('');
                       }}
                       onLike={handleLike}
                       onDelete={handleDelete}
-                      showReplyForm={showReplyForm}
-                      onReplyToggle={setShowReplyForm}
+                      replyTargetId={replyTargetId}
+                      onReplyToggle={id => setReplyTargetId(prev => (prev === `reply-${id}` ? null : `reply-${id}`))}
                       replyContent={replyContents[reply.commentId]}
                       onReplyChange={handleReplyChange}
                       onReplySubmit={handleReplySubmit}
                       onReplyCancel={id => {
-                        setShowReplyForm(null);
+                        setReplyTargetId(null); // 답글 폼 닫기
                         setReplyContents(prev => {
                           const copy = { ...prev };
                           delete copy[id];

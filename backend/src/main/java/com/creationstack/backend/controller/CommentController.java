@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,10 +34,15 @@ public class CommentController {
 
 	// 댓글 작성
 	@PostMapping
-	public ResponseEntity<CommentResponseDto> createComment(@PathVariable("contentId") Long contentId,
-			@RequestBody CommentCreateDto dto) {
+	public ResponseEntity<CommentResponseDto> createComment(
+	        @PathVariable("contentId") Long contentId,
+	        @RequestBody CommentCreateDto dto,
+	        Authentication authentication) {
+	   
+		Long userId = (Long) authentication.getPrincipal();
 	    dto.setContentId(contentId);
-		return ResponseEntity.ok(commentService.createComment(dto));
+	    dto.setUserId(userId); 
+	    return ResponseEntity.ok(commentService.createComment(dto));
 	}
 
 	// 댓글 목록 조회
@@ -55,9 +61,27 @@ public class CommentController {
 
 	// 댓글 삭제
 	@DeleteMapping("/{commentId}")
-	public ResponseEntity<Void> deleteComment(@PathVariable Long contentId, @PathVariable Long commentId,
-			@RequestParam Long userId) throws AccessDeniedException {
-		   commentService.deleteComment(commentId, userId);
-		    return ResponseEntity.ok().build(); 
+	public ResponseEntity<Void> deleteComment(
+	        @PathVariable Long contentId,
+	        @PathVariable Long commentId,
+	        Authentication authentication) throws AccessDeniedException {
+
+	    Long userId = (Long) authentication.getPrincipal();
+	    commentService.deleteComment(commentId, userId);
+	    return ResponseEntity.ok().build();
 	}
+	
+	// 댓글 좋아요 
+	@PostMapping("/{commentId}/like")
+	public ResponseEntity<String> toggleLike(
+	        @PathVariable Long contentId,
+	        @PathVariable Long commentId,
+	        Authentication authentication) {
+
+	    Long userId = (Long) authentication.getPrincipal();
+	    boolean isLiked = commentService.toggleLike(commentId, userId);
+	    String result = isLiked ? "liked" : "unliked";
+	    return ResponseEntity.ok(result);
+	}
+
 }

@@ -3,6 +3,7 @@ import './index.css';
 import { LoginSection } from './pages/login/LoginSection';
 import { MemberRegister } from './pages/register/MemberRegister';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import App from './App';
 
 // 홈 페이지 컴포넌트 (필요에 따라 생성)
 function HomePage() {
@@ -16,18 +17,6 @@ function HomePage() {
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
-    <Routes>
-      {/* 홈 경로 */}
-      <Route path="/" element={<HomePage />} />
-
-      {/* 로그인 경로 */}
-      <Route path="/api/auth/login" element={<LoginSection />} />
-
-      {/* 회원가입 경로 */}
-      <Route path="/api/users" element={<MemberRegister />} />
-
-      {/* 404 처리 */}
-      <Route path="*" element={<div>404 - Page Not Found</div>} />
-    </Routes>
+    <App />
   </BrowserRouter>
 );
