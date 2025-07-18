@@ -49,11 +49,11 @@ spring:
     multipart:
       max-file-size: 50MB # 단일 파일의 최대 허용 크기 (50MB로 증가)
       max-request-size: 50MB # 전체 multipart 요청의 최대 허용 크기 (50MB로 증가)
-    
+
 # JWT 설정
 jwt:
-  secret: mytest1234567890mytest1234567890
-  refresh-secret: myrefresh1234567890myrefresh123456
+  secret: ${Secret_token}
+  refresh-secret: ${Refresh_token}
   access-token-expiration: 900000 # 15분 (밀리초)
   refresh-token-expiration: 604800000 # 7일 (밀리초)
 

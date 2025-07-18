@@ -1,7 +1,7 @@
 package com.creationstack.backend.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,16 +11,8 @@ import com.creationstack.backend.auth.JwtUtil;
 import com.creationstack.backend.domain.user.Job;
 import com.creationstack.backend.domain.user.RefreshToken;
 import com.creationstack.backend.domain.user.User;
-import com.creationstack.backend.domain.user.UserDetail;
 import com.creationstack.backend.domain.user.User.UserRole;
-import com.creationstack.backend.repository.JobRepository;
-import com.creationstack.backend.repository.RefreshTokenRepository;
-import com.creationstack.backend.repository.UserDetailRepository;
-import com.creationstack.backend.repository.UserRepository;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
-
+import com.creationstack.backend.domain.user.UserDetail;
 import com.creationstack.backend.dto.member.LoginRequest;
 import com.creationstack.backend.dto.member.LoginResponse;
 import com.creationstack.backend.dto.member.LogoutRequest;
@@ -29,6 +21,13 @@ import com.creationstack.backend.dto.member.SignupRequest;
 import com.creationstack.backend.dto.member.SignupResponse;
 import com.creationstack.backend.dto.member.TokenRefreshRequest;
 import com.creationstack.backend.dto.member.TokenRefreshResponse;
+import com.creationstack.backend.repository.JobRepository;
+import com.creationstack.backend.repository.RefreshTokenRepository;
+import com.creationstack.backend.repository.UserDetailRepository;
+import com.creationstack.backend.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +44,6 @@ public class AuthService {
 
         // 기존 signup 메서드는 그대로 유지
         public SignupResponse signup(SignupRequest request) {
-                // 이메일 중복 체크
                 if (userDetailRepository.existsByEmail(request.getEmail())) {
                         return SignupResponse.builder()
                                         .success(false)
@@ -127,7 +125,8 @@ public class AuthService {
                                                                 .accessToken(accessToken)
                                                                 .refreshToken(refreshToken)
                                                                 .tokenType("Bearer")
-                                                                .expiresIn(jwtUtil.getAccessTokenExpirationInSeconds())
+                                                                .expiresIn(jwtUtil
+                                                                                .getAccessTokenExpirationInSeconds())
                                                                 .build())
                                                 .build())
                                 .redirect("/")
