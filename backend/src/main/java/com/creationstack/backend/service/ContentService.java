@@ -6,7 +6,9 @@ import com.creationstack.backend.domain.content.Content;
 import com.creationstack.backend.domain.content.ContentCategory;
 import com.creationstack.backend.domain.content.ContentCategoryMapping;
 import com.creationstack.backend.domain.user.User;
+import com.creationstack.backend.domain.user.UserDetail;
 import com.creationstack.backend.dto.content.ContentCreateRequest;
+import com.creationstack.backend.dto.content.ContentDetailResponse;
 import com.creationstack.backend.dto.content.ContentResponse;
 import com.creationstack.backend.dto.content.ContentUpdateRequest;
 import com.creationstack.backend.exception.CustomException; // CustomException 임포트
@@ -14,6 +16,7 @@ import com.creationstack.backend.repository.content.AttachmentRepository;
 import com.creationstack.backend.repository.content.ContentCategoryRepository;
 import com.creationstack.backend.repository.content.ContentRepository;
 import com.creationstack.backend.repository.UserRepository;
+import com.creationstack.backend.repository.UserDetailRepository; // UserDetailRepository 임포트
 import com.creationstack.backend.service.FileStorageService; // FileStorageService 임포트
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +44,7 @@ public class ContentService {
     private final ContentCategoryRepository contentCategoryRepository;
     private final AttachmentRepository attachmentRepository;
     private final FileStorageService fileStorageService; // S3 연동을 위한 FileStorageService 주입
+    private final UserDetailRepository userDetailRepository; // UserDetailRepository 주입 (사용자 상세 정보 조회용)
 
     // 콘텐츠 생성
     @Transactional // 쓰기 작업이므로 트랜잭션 적용
@@ -81,12 +85,10 @@ public class ContentService {
                         }))
                 .collect(Collectors.toSet());
 
-        categories.forEach(category ->
-            content.getCategoryMappings().add(ContentCategoryMapping.builder()
+        categories.forEach(category -> content.getCategoryMappings().add(ContentCategoryMapping.builder()
                 .content(content)
                 .category(category)
-                .build())
-        );
+                .build()));
 
         // 5. Content 저장
         Content savedContent = contentRepository.save(content);
@@ -103,7 +105,7 @@ public class ContentService {
                             // 여기서는 S3에 저장된 파일의 고유한 이름 (UUID-originalFileName)을 storedFileName으로 사용.
                             storedFileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
                         } catch (IOException e) {
-                            log.error("첨부파일 업로드 실패: {}",((MultipartFile) file).getOriginalFilename(), e);
+                            log.error("첨부파일 업로드 실패: {}", ((MultipartFile) file).getOriginalFilename(), e);
                             throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "첨부파일 업로드에 실패했습니다.", e);
                         }
 
@@ -135,7 +137,8 @@ public class ContentService {
                 .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "콘텐츠를 찾을 수 없습니다. ID: " + contentId));
 
         content.incrementViewCount(); // 조회수 증가
-        // contentRepository.save(content); // @Transactional 어노테이션이 있으면 변경 감지(Dirty Checking)로 자동 저장됨
+        // contentRepository.save(content); // @Transactional 어노테이션이 있으면 변경 감지(Dirty
+        // Checking)로 자동 저장됨
 
         log.info("콘텐츠 조회 및 조회수 증가: Content ID = {}", contentId);
         return ContentResponse.from(content);
@@ -198,22 +201,22 @@ public class ContentService {
             }
         }
 
-
-
         // 3. 콘텐츠 핵심 정보 및 카테고리 매핑 업데이트
         Set<ContentCategory> categoriesToUpdate = new HashSet<>();
         if (request.getCategoryNames() != null && !request.getCategoryNames().isEmpty()) {
             for (String categoryName : request.getCategoryNames()) {
                 ContentCategory category = contentCategoryRepository.findByName(categoryName)
-                        .orElseGet(() -> contentCategoryRepository.save(ContentCategory.builder().name(categoryName).build()));
+                        .orElseGet(() -> contentCategoryRepository
+                                .save(ContentCategory.builder().name(categoryName).build()));
                 categoriesToUpdate.add(category);
             }
         }
 
         // 4. 첨부파일 처리 (수정된 부분)
         // 기존 첨부파일 중 유지할 파일 ID 목록
-        Set<Long> existingAttachmentIdsToKeep = request.getExistingAttachmentIds() != null ?
-                new HashSet<>(request.getExistingAttachmentIds()) : new HashSet<>();
+        Set<Long> existingAttachmentIdsToKeep = request.getExistingAttachmentIds() != null
+                ? new HashSet<>(request.getExistingAttachmentIds())
+                : new HashSet<>();
 
         // 삭제할 첨부파일을 임시로 담을 리스트
         List<Attachment> attachmentsToDeleteFromCollection = new ArrayList<>();
@@ -231,7 +234,6 @@ public class ContentService {
         // 식별된 첨부파일들을 Content 엔티티의 컬렉션에서 제거
         // Content 엔티티의 @OneToMany(orphanRemoval=true) 설정으로 인해 이 제거가 DB 삭제로 이어집니다.
         content.getAttachments().removeAll(attachmentsToDeleteFromCollection);
-
 
         // 새로 추가될 첨부파일 처리
         if (request.getNewAttachmentFiles() != null && !request.getNewAttachmentFiles().isEmpty()) {
@@ -266,15 +268,14 @@ public class ContentService {
                 request.getContent(),
                 newThumbnailUrl,
                 request.getAccessType(),
-                categoriesToUpdate
-        );
-        //6. 저장
+                categoriesToUpdate);
+        // 6. 저장
         log.info("콘텐츠 수정 완료: {}", contentId);
         Content updatedContent = contentRepository.save(content);
         return ContentResponse.from(updatedContent);
     }
 
-   // 콘텐츠 삭제
+    // 콘텐츠 삭제
     @Transactional // 쓰기 작업이므로 트랜잭션 적용
     public void deleteContent(Long contentId, Long creatorId) {
         Content content = contentRepository.findById(contentId)
@@ -295,7 +296,6 @@ public class ContentService {
         log.info("콘텐츠 삭제 완료: {}", contentId);
     }
 
-
     @Transactional
     public void initializeCategories(Set<String> categoryNames) {
         categoryNames.forEach(name -> {
@@ -305,4 +305,37 @@ public class ContentService {
             }
         });
     }
+
+    @Transactional
+    public ContentDetailResponse getContentDetail(Long contentId) {
+        Content content = contentRepository.findById(contentId)
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "콘텐츠를 찾을 수 없습니다. ID: " + contentId));
+
+        content.incrementViewCount(); // 조회수 증가
+
+        User creator = content.getCreator();
+        UserDetail detail = userDetailRepository.findById(creator.getUserId())
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "크리에이터 상세 정보를 찾을 수 없습니다."));
+
+        List<String> attachmentUrls = content.getAttachments().stream()
+                .map(Attachment::getFileUrl)
+                .collect(Collectors.toList());
+
+        return ContentDetailResponse.builder()
+                .contentId(content.getContentId())
+                .title(content.getTitle())
+                .content(content.getContent())
+                .thumbnailUrl(content.getThumbnailUrl())
+                .creatorId(creator.getUserId())
+                .creatorNickname(detail.getNickname())
+                .creatorProfileImageUrl(detail.getProfileImageUrl())
+                .viewCount(content.getViewCount())
+                .likeCount(content.getLikeCount())
+                .commentCount(content.getCommentCount())
+                .attachmentUrls(attachmentUrls)
+                .createdAt(content.getCreatedAt())
+                .updatedAt(content.getUpdatedAt())
+                .build();
+    }
+
 }
