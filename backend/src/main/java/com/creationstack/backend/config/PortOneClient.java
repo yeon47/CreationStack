@@ -112,7 +112,25 @@ public class PortOneClient {
     }
   }
 
-  //
+  // 결제 예약 다건 조회
+  public String getScheduleStatus() {
+    String requestUrl = API_HOSTNAME + "/payment-schedules";
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Authorization", "PortOne " + API_SECRET);
+    HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+    ResponseEntity<String> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, String.class);
+
+    try {
+      return objectMapper.readTree(response.getBody()).get("status").asText(); // SUCCEEDED, FAILED 등
+    } catch (Exception e) {
+      throw new CustomException(HttpStatus.BAD_REQUEST, "조회 실패: " + e.getMessage());
+    }
+  }
+
+
+
 
   public JsonNode deleteBillingKey(DeletePaymentMethodRequestDto req) {
     String requestUrl =
