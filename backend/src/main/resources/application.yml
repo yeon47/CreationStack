@@ -7,7 +7,7 @@ server:
 
 spring:
   application:
-    name: jwt-auth-backend # 또는 CreationStack, 둘 중 하나 선택
+    name: CreationStack
   config:
     import: optional:file:.env[.properties]
 
