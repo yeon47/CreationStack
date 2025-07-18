@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.creationstack.backend.dto.member.SignupRequest;
 import com.creationstack.backend.dto.member.SignupResponse;
+import com.creationstack.backend.dto.member.EmailCheckResponse;
 import com.creationstack.backend.service.AuthService;
 
 import java.util.stream.Collectors;
@@ -62,6 +63,30 @@ public class UserController {
             SignupResponse response = SignupResponse.builder()
                     .success(false)
                     .message("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
+                    .build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<EmailCheckResponse> checkEmailDuplicate(@RequestParam String email) {
+        try {
+            boolean isAvailable = authService.isEmailAvailable(email);
+
+            EmailCheckResponse response = EmailCheckResponse.builder()
+                    .success(true)
+                    .available(isAvailable)
+                    .message(isAvailable ? "사용 가능한 이메일입니다." : "이미 사용 중인 이메일입니다.")
+                    .build();
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("이메일 중복 확인 중 오류 발생", e);
+            EmailCheckResponse response = EmailCheckResponse.builder()
+                    .success(false)
+                    .available(false)
+                    .message("이메일 중복 확인 중 오류가 발생했습니다.")
                     .build();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }

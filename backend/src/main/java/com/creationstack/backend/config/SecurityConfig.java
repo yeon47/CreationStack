@@ -44,14 +44,15 @@ public class SecurityConfig {
                             .requestMatchers(
                                     "/api/users", // 회원가입
                                     "/api/jobs", // 직업 목록
+                                    "/api/users/check-email", // 이메일 중복 확인
                                     "/api/auth/login", // 로그인
                                     "/api/auth/refresh", // 토큰 갱신
                                     "/api/auth/logout", // 로그아웃 (refresh token 방식)
                                     "/api/content/**", // 모든 /api/content 경로 허용
                                     "/api/upload/image", // 이미지 업로드 경로 허용
                                     "/api/contents/**/comments",
-                                    "/api/contents/**/comments/**/like"
-                            ).permitAll()
+                                    "/api/contents/**/comments/**/like")
+                            .permitAll()
                             // /api/user/** 경로는 인증 필요 (기존 설정 유지)
                             .requestMatchers("/api/user/**").authenticated()
 

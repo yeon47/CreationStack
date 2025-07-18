@@ -80,20 +80,33 @@ export const LocalCommon = ({ onBack }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: formData.email,
-          name: formData.name,
+          username: formData.name,
           nickname: formData.nickname,
+          email: formData.email,
           password: formData.password,
+          role: 'USER', // 일반 사용자
+          jobId: null, // 일반 사용자는 직업 선택 안함
+          bio: null,
         }),
       });
 
-      if (response.ok) {
-        const result = await response.json();
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        // 회원가입 성공 처리
+        const { accessToken, refreshToken } = result.data.tokens;
+
+        // 토큰 저장
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+
+        // 사용자 정보 저장
+        localStorage.setItem('userInfo', JSON.stringify(result.data.user));
+
         alert('회원가입이 완료되었습니다!');
         window.location.href = '/login';
       } else {
-        const error = await response.json();
-        alert(`회원가입 실패: ${error.message}`);
+        alert(`회원가입 실패: ${result.message}`);
       }
     } catch (error) {
       alert('서버 오류가 발생했습니다.');
@@ -110,16 +123,25 @@ export const LocalCommon = ({ onBack }) => {
     }
 
     try {
-      const response = await fetch(`/api/users/check-email?email=${formData.email}`);
-      const result = await response.json();
+      console.log('이메일 중복 확인 요청:', formData.email);
+      const response = await fetch(`/api/users/check-email?email=${encodeURIComponent(formData.email)}`);
+      console.log('응답 상태:', response.status);
 
-      if (result.available) {
-        alert('사용 가능한 이메일입니다.');
+      const result = await response.json();
+      console.log('응답 데이터:', result);
+
+      if (response.ok && result.success) {
+        if (result.available) {
+          alert('사용 가능한 이메일입니다.');
+        } else {
+          alert('이미 사용 중인 이메일입니다.');
+        }
       } else {
-        alert('이미 사용 중인 이메일입니다.');
+        alert(`오류: ${result.message || '알 수 없는 오류가 발생했습니다.'}`);
       }
     } catch (error) {
-      alert('이메일 중복 확인 중 오류가 발생했습니다.');
+      console.error('이메일 중복 확인 중 오류:', error);
+      alert(`이메일 중복 확인 중 오류가 발생했습니다. 상세: ${error.message}`);
     }
   };
 
