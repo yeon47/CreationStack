@@ -29,8 +29,8 @@ export default function AppRoutes() {
         <Route path="/favorites" element={<FavoriteContent />} />
         {/* <Route path="/creator-management" element={<CreatorManagementPage />} /> */}
         <Route path="/content-form" element={<ContentFormPage />} />
-        <Route path="/mypage-creator" element={<MyCreatorPage />} />
-        <Route path="/mypage-user" element={<MyUserPage />} />
+        <Route path="/mypage-creator" element={<MyCreatorPage />} /> {/* 크리에이터 마이페이지 */}
+        <Route path="/mypage-user" element={<MyUserPage />} /> {/* 사용자 마이페이지 */}
         <Route path="/subscription-manage" element={<SubscriptionManage />} />
         <Route path="/user-main" element={<UserMainPage />} />
         <Route path="/creator-main/:creatorNickname" element={<CreatorMainPage />} />
