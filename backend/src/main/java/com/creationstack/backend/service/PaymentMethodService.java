@@ -57,6 +57,7 @@ public class PaymentMethodService {
   public List<PaymentMethodResponseDto> getPaymentMethod(Long userId) {
     return paymentMethodRepository.findAllByUserId(userId).stream()
         .map(paymentMethod -> new PaymentMethodResponseDto(
+            paymentMethod.getPaymentMethodId(),
             paymentMethod.getCardBrand(),
             paymentMethod.getCardType(),
             paymentMethod.getCardNumber(),
@@ -83,6 +84,11 @@ public class PaymentMethodService {
     } catch (RuntimeException e) {
       throw new RuntimeException("결제수단 삭제 실패");
     }
+  }
+
+  // 4. paymentMethodId 이용한 결제수단 조회
+  public PaymentMethod getPaymentMethodForBillingKey(Long paymentMethodId) {
+    return paymentMethodRepository.findById(paymentMethodId).orElse(null);
   }
 }
 
