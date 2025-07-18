@@ -89,8 +89,6 @@
   text-decoration: none;
 }
 
-/* 이전에 있던 .backButton 스타일 제거 - 위에서 새로 정의했으므로 */
-
 .formFields {
   display: flex;
   flex-direction: column;
@@ -129,10 +127,13 @@
 }
 
 .inputWrapperRegular {
+  position: relative; /* --- 추가된 부분: 아이콘 위치 기준점 --- */
   height: 58px;
   border-radius: 9px;
   border: 1px solid #adadad;
   overflow: hidden;
+  display: flex; /* 아이콘과 input 정렬을 위해 추가 */
+  align-items: center; /* 아이콘과 input 정렬을 위해 추가 */
 }
 
 .input {
@@ -144,6 +145,11 @@
   padding: 0 1rem;
   background: transparent;
   color: black;
+}
+
+/* 비밀번호 아이콘이 있을 때 input의 오른쪽 패딩을 추가하여 아이콘과 텍스트가 겹치지 않도록 함 */
+.inputWrapperRegular .input {
+  padding-right: 2.5rem; /* 40px */
 }
 
 .input::placeholder {
@@ -172,6 +178,22 @@
 
 .duplicateCheckButton:hover {
   opacity: 0.7;
+}
+
+/* --- 추가된 부분: 비밀번호 보이기/숨기기 아이콘 버튼 스타일 --- */
+.passwordIcon {
+  position: absolute;
+  top: 50%;
+  right: 1rem; /* 16px */
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8d8d8d;
 }
 
 .submitSection {
