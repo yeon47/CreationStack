@@ -296,4 +296,6 @@ $RECYCLE.BIN/
 *.njsproj
 *.sln
 *.sw?
-/.metadata/
+**/.metadata/
+**/.factorypath
+
