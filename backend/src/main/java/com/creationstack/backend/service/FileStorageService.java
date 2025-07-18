@@ -13,10 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
-/**
- * 파일 저장 및 관리를 위한 서비스 클래스입니다.
- * AWS S3에 파일을 업로드하고 URL을 반환하는 기능을 제공합니다.
- */
 @Slf4j // Lombok: 로깅을 위한 Logger 자동 생성
 @RequiredArgsConstructor // Lombok: final 필드에 대한 생성자 자동 생성 (의존성 주입)
 @Service
@@ -29,11 +25,6 @@ public class FileStorageService {
 
     /**
      * 파일을 S3에 업로드하고 해당 파일의 URL을 반환합니다.
-     *
-     * @param multipartFile 업로드할 MultipartFile 객체
-     * @param dirName S3 버킷 내의 디렉토리 이름 (예: "images", "attachments")
-     * @return 업로드된 파일의 공개 URL
-     * @throws IOException 파일 처리 중 발생할 수 있는 예외
      */
     public String uploadFile(MultipartFile multipartFile, String dirName) throws IOException {
         if (multipartFile.isEmpty()) {
@@ -50,8 +41,7 @@ public class FileStorageService {
 
         try (InputStream inputStream = multipartFile.getInputStream()) {
             // S3에 파일 업로드
-            amazonS3Client.putObject(new PutObjectRequest(bucketName, fileName, inputStream, objectMetadata)
-                    .withCannedAcl(CannedAccessControlList.PublicRead)); // 공개 읽기 권한 설정
+            amazonS3Client.putObject(new PutObjectRequest(bucketName, fileName, inputStream, objectMetadata));
             log.info("File uploaded to S3: {}", fileName);
         } catch (IOException e) {
             log.error("Failed to upload file to S3: {}", fileName, e);

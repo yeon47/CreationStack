@@ -93,8 +93,7 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.github.iamport</groupId> <!--포트원
-			관련 의존성-->
+			<groupId>com.github.iamport</groupId> <!--포트원 관련 의존성-->
 			<artifactId>iamport-rest-client-java</artifactId>
 			<version>0.2.23</version>
 		</dependency>
@@ -116,11 +115,15 @@
 			<version>0.11.5</version>
 			<scope>runtime</scope>
 		</dependency>
-		<!-- S3 -->
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
 			<version>1.12.788</version>
+			</dependency>
+		<dependency>
+			<groupId>io.github.cdimascio</groupId>
+			<artifactId>dotenv-java</artifactId>
+			<version>3.0.0</version>
 		</dependency>
 	</dependencies>
 
@@ -129,13 +132,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-					</execution>
-				</executions>
 				<configuration>
 					<annotationProcessorPaths>
 						<path>
@@ -156,6 +152,13 @@
 						</exclude>
 					</excludes>
 				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

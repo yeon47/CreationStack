@@ -7,7 +7,7 @@ server:
 
 spring:
   application:
-    name: jwt-auth-backend # 또는 CreationStack, 둘 중 하나 선택
+    name: CreationStack
   config:
     import: optional:file:.env[.properties]
 
@@ -43,8 +43,12 @@ spring:
   jackson:
     time-zone: Asia/Seoul
     date-format: yyyy-MM-dd HH:mm:ss
-#    property-naming-strategy: SNAKE_CASE
-    default-property-inclusion: NON_NULL
+
+  # 파일 업로드 설정 추가 (50MB로 증대)
+  servlet:
+    multipart:
+      max-file-size: 50MB # 단일 파일의 최대 허용 크기 (50MB로 증가)
+      max-request-size: 50MB # 전체 multipart 요청의 최대 허용 크기 (50MB로 증가)
 
 # JWT 설정
 jwt:

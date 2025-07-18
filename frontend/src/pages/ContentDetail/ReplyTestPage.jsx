@@ -7,7 +7,6 @@ const ReplyTestPage = () => {
 
   return (
     <div style={{ padding: '2rem' }}>
-      <h2>🧪 댓글 테스트 페이지</h2>
       <ReplyList contentId={testContentId} />
     </div>
   );
