@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styles from './paymentMethodManagementPage.module.css';
 import PaymentMethodList from '../../components/Payment/PaymentMethodList';
-import { requestIssueBillingKey, savePaymentMethod, readAllPaymentMethod } from '../../api/portone';
+import { requestIssueBillingKey, savePaymentMethod, readAllPaymentMethod, deleteCardMethod } from '../../api/payment';
 
 // paymentMethodManagement page
 function PaymentMethodManagementPage() {
@@ -16,42 +16,33 @@ function PaymentMethodManagementPage() {
         const res = await readAllPaymentMethod(); // API 호출
         const testCards = [
         {
-          cardName: '테스트카드 1',
-          cardNumberMasked: '1111-****-****-1111',
+          cardName: '국민카드',
+          cardNumber: '11111111****111*',
           cardType: '신용카드',
-          customerKey: 'dummy-key-1',
-          billingKey: 'dummy-billing-key-1',
+          cardBrand:'VISA'
         },
         {
-          cardName: '테스트카드 2',
-          cardNumberMasked: '2222-****-****-2222',
-          cardType: '체크카드',
-          customerKey: 'dummy-key-2',
-          billingKey: 'dummy-billing-key-2',
-        },
-        {
-          cardName: '테스트카드 3',
-          cardNumberMasked: '3333-****-****-3333',
+          cardName: '토스뱅크',
+          cardNumber: '11111111****111*',
           cardType: '신용카드',
-          customerKey: 'dummy-key-3',
-          billingKey: 'dummy-billing-key-3',
+          cardBrand:'VISA'
         },
         {
-          cardName: '테스트카드 4',
-          cardNumberMasked: '4444-****-****-4444',
-          cardType: '체크카드',
-          customerKey: 'dummy-key-4',
-          billingKey: 'dummy-billing-key-4',
+          cardName: '농협카드',
+          cardNumber: '11111111****111*',
+          cardType: '신용카드',
+          cardBrand:'MASTER'
+        },
+        {
+          cardName: '비씨카드',
+          cardNumber: '11111111****111*',
+          cardType: '신용카드',
+          cardBrand:'MASTER'
         },
       ];
 
       // 실제 카드 + 테스트 카드 결합
       setCards([...res, ...testCards]);
-
-
-
-
-
       } catch (err) {
         console.error('카드 정보를 불러오는 데 실패했습니다.', err);
       }
@@ -61,15 +52,27 @@ function PaymentMethodManagementPage() {
 
   //빌링키 발급 후 결제수단 조회해 보여주는 메소드
   const handleCardRegister = async () => {
-    // 빌링키 발급
+    // 빌링키 발급 (로그인한 사용자로 test, test@gmail.com 부분 바꿀 예정)
     const issueResponse = await requestIssueBillingKey(storeId, channelKey, 'test', 'test@gmail.com');
-    // 발급된 빌링키 이용한 결제수단 조회
+    // 발급된 빌링키 이용한 결제수단 조회 (빌링키 발급단계에서 이루어진 결제수단 조회)
     const saveResponse = await savePaymentMethod(issueResponse.billingKey);
 
+    // 회원이 추가한 결제수단을 cards에 저장
     const { username, ...cardWithoutUsername } = saveResponse;
 
     setCards(prev => [...prev, cardWithoutUsername]);
   };
+
+  // 결제수단 삭제
+  const handleCardDelete = async (paymentMethodId) => {
+    alert("정말로 이 카드를 삭제하시겠어요?"); // 임시 모달창
+
+    // const deleteResponse = await deleteCardMethod(paymentId);
+    
+    // setCards((prevCards) =>
+    //     prevCards.filter((card) => card.paymentMethodId !== paymentMethodId)
+    //   );
+  }
 
   return (
     <div className={styles.payment_container}>
@@ -80,10 +83,12 @@ function PaymentMethodManagementPage() {
       </div>
 
       {/* 등록된 카드 리스트 */}
-      <PaymentMethodList cards={cards} />
+      <PaymentMethodList cards={cards} onDeleteCard={handleCardDelete} />
+
+      {/* 카드 등록 버튼 */}
       <div className={styles.register}>
         <button className={styles.register_button} onClick={handleCardRegister}>
-          <p>결제</p>
+          <p>카드 등록</p>
         </button>
       </div>
     </div>
