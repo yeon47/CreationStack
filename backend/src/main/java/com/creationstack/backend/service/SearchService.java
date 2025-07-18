@@ -1,12 +1,14 @@
 package com.creationstack.backend.service;
 
-import com.creationstack.backend.domain.content.ContentCategory;
 import com.creationstack.backend.domain.content.Content;
+import com.creationstack.backend.domain.content.ContentCategory;
+import com.creationstack.backend.domain.content.ContentCategoryMapping;
+import com.creationstack.backend.domain.user.Job;
+import com.creationstack.backend.domain.user.User;
+import com.creationstack.backend.domain.user.UserDetail;
 import com.creationstack.backend.dto.search.*;
 import com.creationstack.backend.repository.content.ContentRepository;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,9 +17,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -75,6 +77,9 @@ public class SearchService { // 검색 서비스
         // 동적 쿼리를 위한 Specification
         Specification<Content> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>(); // 조건 담는 리스트
+            Join<Content, User> creatorJoin = root.join("creator", JoinType.LEFT);
+            Join<User, UserDetail> userDetailJoin = creatorJoin.join("userDetail", JoinType.LEFT);
+            Join<User, Job> jobJoin = creatorJoin.join("job", JoinType.LEFT);
 
             // 크리에이터 닉네임, 제목, 내용 통합 키워드 검색
             if (dto.getKeyword() != null && !dto.getKeyword().trim().isEmpty()) {
@@ -89,14 +94,14 @@ public class SearchService { // 검색 서비스
                         keywordPredicates.add(cb.like(root.get("content"), keyword)); // 내용으로 검색
                     }
                     case CREATOR_ONLY -> { // 크리에이터 검색
-                        keywordPredicates.add(cb.like(root.get("creator").get("userDetail").get("nickname"), keyword)); // 크리에이터 닉네임으로 검색
-                        keywordPredicates.add(cb.like(root.get("creator").get("job").get("name"), keyword)); // 크리에이터 직업으로 검색
+                        keywordPredicates.add(cb.like(userDetailJoin.get("nickname"), keyword)); // 크리에이터 닉네임으로 검색
+                        keywordPredicates.add(cb.like(jobJoin.get("name"), keyword)); // 크리에이터 직업으로 검색
                     }
                     case ALL -> { // 통합 검색
                         keywordPredicates.add(cb.like(root.get("title"), keyword)); // 제목으로 검색
                         keywordPredicates.add(cb.like(root.get("content"), keyword)); // 내용으로 검색
-                        keywordPredicates.add(cb.like(root.get("creator").get("userDetail").get("nickname"), keyword)); // 크리에이터 닉네임으로 검색
-                        keywordPredicates.add(cb.like(root.get("creator").get("job").get("name"), keyword)); // 크리에이터 직업으로 검색
+                        keywordPredicates.add(cb.like(userDetailJoin.get("nickname"), keyword)); // 크리에이터 닉네임으로 검색
+                        keywordPredicates.add(cb.like(jobJoin.get("name"), keyword)); // 크리에이터 직업으로 검색
                     }
                 }
                 predicates.add(cb.or(keywordPredicates.toArray(new Predicate[0])));
@@ -111,8 +116,9 @@ public class SearchService { // 검색 서비스
 
             // 카테고리 조건
             if (dto.getCategories() != null && !dto.getCategories().isEmpty()) {
-                Join<Content, ContentCategory> join = root.join("categories", JoinType.INNER);
-                predicates.add(join.get("categoryId").in(dto.getCategories()));
+                Join<Content, ContentCategoryMapping> mappingJoin = root.join("categoryMappings", JoinType.INNER);
+                Join<ContentCategoryMapping, ContentCategory> categoryJoin = mappingJoin.join("category", JoinType.INNER);
+                predicates.add(categoryJoin.get("categoryId").in(dto.getCategories()));
             }
 
             // 모든 조건을 AND로 묶어서 반환
@@ -131,35 +137,34 @@ public class SearchService { // 검색 서비스
 
         // 조건에 맞는 콘텐츠 리스트를 페이징해서 가져오고 map을 이용해서 Dto로 변환
         Page<SearchResultDto> page = contentRepository.findAll(spec, sortedPageable)
-                .map(content -> SearchResultDto.builder()
+                .map(content -> {
+                    SearchCreatorDto creatorDto = Optional.ofNullable(content.getCreator())
+                            .map(creator -> SearchCreatorDto.builder()
+                                    .userId(creator.getUserId())
+                                    .nickname(Optional.ofNullable(creator.getUserDetail()).map(UserDetail::getNickname).orElse(null))
+                                    .profileImageUrl(Optional.ofNullable(creator.getUserDetail()).map(UserDetail::getProfileImageUrl).orElse(null))
+                                    .job(Optional.ofNullable(creator.getJob()).map(Job::getName).orElse(null))
+                                    .bio(Optional.ofNullable(creator.getUserDetail()).map(UserDetail::getBio).orElse(null))
+                                    .subscriberCount(creator.getSubscriberCount())
+                                    .build())
+                            .orElse(null);
 
-                        .contentId(content.getContentId()) // 콘텐츠 ID
-                        .title(content.getTitle()) // 제목
-
-                        .creator( // 크리에이터 정보
-                                SearchCreatorDto.builder()
-                                        .userId(content.getCreator().getUserId()) // 크리에이터 ID
-                                        .nickname(content.getCreator().getUserDetail().getNickname()) // 크리에이터 닉네임
-                                        .profileImageUrl(content.getCreator().getUserDetail().getProfileImageUrl()) // 크리에이터 섬네일
-                                        .job(content.getCreator().getJob().getName()) // 크리에이터 직업
-                                        .bio(content.getCreator().getUserDetail().getBio()) // 크리에이터 간단 자기소개
-                                        .subscriberCount(content.getCreator().getSubscriberCount())
-                                        .build())
-
-                        .thumbnailUrl(content.getThumbnailUrl()) // 섬네일 Url
-                        .accessType(content.getAccessType()) // 유/무료 여부
-                        .viewCount(content.getViewCount()) // 조회수
-                        .likeCount(content.getLikeCount()) // 좋아요수
-                        .commentCount(content.getCommentCount()) // 댓글수
-                        .createdAt(content.getCreatedAt()) // 작성일
-
-
-                        .categoryNames( // 카테고리 이름 목록
-                                content.getCategoryMappings().stream()
-                                        .map(mapping -> mapping.getCategory().getName())
-                                        .toList())
-                        .build()
-                );
+                    return SearchResultDto.builder()
+                            .contentId(content.getContentId()) // 콘텐츠 ID
+                            .title(content.getTitle()) // 제목
+                            .creator(creatorDto) // 크리에이터 정보
+                            .thumbnailUrl(content.getThumbnailUrl()) // 섬네일 Url
+                            .accessType(content.getAccessType()) // 유/무료 여부
+                            .viewCount(content.getViewCount()) // 조회수
+                            .likeCount(content.getLikeCount()) // 좋아요수
+                            .commentCount(content.getCommentCount()) // 댓글수
+                            .createdAt(content.getCreatedAt()) // 작성일
+                            .categoryNames( // 카테고리 이름 목록
+                                    content.getCategoryMappings().stream()
+                                            .map(mapping -> mapping.getCategory().getName())
+                                            .toList())
+                            .build();
+                });
 
         // Page 객체에서 페이지 정보와 콘텐츠 리스트를 추출하여 SearchResponse로 변환
         return new SearchResponse<>(

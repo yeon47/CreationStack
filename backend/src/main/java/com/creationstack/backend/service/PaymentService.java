@@ -15,16 +15,8 @@ import com.creationstack.backend.dto.Payment.CustomerDto.Name;
 import com.creationstack.backend.dto.Payment.PortOneBillingResponseDto;
 import com.creationstack.backend.dto.Payment.PortOnePaymentRequestDto;
 
-import com.creationstack.backend.dto.Payment.PortOneReservationRequestDto;
-import com.creationstack.backend.dto.Payment.PortOneReservationResponseDto;
 import com.creationstack.backend.repository.PaymentRepository;
-import com.creationstack.backend.repository.SubscriptionRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,7 +30,6 @@ public class PaymentService {
   private final PaymentRepository paymentRepository;
   private final PaymentMethodService paymentMethodService;
   private final PortOneClient portOneClient;
-  private final SubscriptionRepository subscriptionRepository;
 
   //결제
   public BillingKeyPaymentResponseDto processingBillingKeyPay(BillingKeyPaymentRequestDto req) {

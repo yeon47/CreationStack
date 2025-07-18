@@ -57,7 +57,7 @@ export const searchUnified = async ({
     if (searchMode) params.searchMode = searchMode;
     if (creatorId) params.creatorId = creatorId;
 
-    const response = await axios.get("/api/contents/search", {
+    const response = await axios.get("/api/search", {
       params,
     });
 
