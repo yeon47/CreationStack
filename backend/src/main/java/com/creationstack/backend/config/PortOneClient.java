@@ -3,6 +3,9 @@ package com.creationstack.backend.config;
 import com.creationstack.backend.dto.Payment.PortOneBillingResponseDto;
 import com.creationstack.backend.dto.Payment.PortOnePaymentRequestDto;
 import com.creationstack.backend.dto.Payment.DeletePaymentMethodRequestDto;
+import com.creationstack.backend.dto.Payment.PortOneReservationRequestDto;
+import com.creationstack.backend.dto.Payment.PortOneReservationResponseDto;
+import com.creationstack.backend.dto.Payment.PortOneReservationResponseDto.ScheduleDto;
 import com.creationstack.backend.exception.CustomException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,7 +66,7 @@ public class PortOneClient {
 
   //카드 이용한 결제 진행
   public PortOneBillingResponseDto processingBillingKeyPay(PortOnePaymentRequestDto requestBody) {
-    String portOnePaymentId = generateWithTimestamp();
+    String portOnePaymentId = "order-"+generateWithTimestamp();
     String requestUrl = API_HOSTNAME + "/payments/" + portOnePaymentId + "/billing-key";
     HttpHeaders headers = new HttpHeaders();
     headers.set("Authorization", "PortOne " + API_SECRET);
@@ -87,9 +90,47 @@ public class PortOneClient {
 
   // 결제 예약 취소
 
-  // 결제 예약
 
-  //
+  // 결제 예약
+  public PortOneReservationResponseDto reservationPayment(PortOneReservationRequestDto requestBody){
+    String portOnePaymentId = "pay-"+generateWithTimestamp();
+    String requestUrl = API_HOSTNAME + "/payments/" + portOnePaymentId + "/schedule";
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Authorization", "PortOne " + API_SECRET);
+    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    HttpEntity<PortOneReservationRequestDto> entity = new HttpEntity<>(requestBody, headers);
+
+    ResponseEntity<String> response =
+        restTemplate.exchange(requestUrl, HttpMethod.POST, entity, String.class);
+
+    try {
+      String scheduleId = objectMapper.readTree(response.getBody()).get("schedule").get("id").asText();
+      return PortOneReservationResponseDto.builder().schedule(new ScheduleDto(scheduleId)).build();
+    } catch (Exception e) {
+      throw new CustomException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+  }
+
+  // 결제 예약 다건 조회
+  public String getScheduleStatus() {
+    String requestUrl = API_HOSTNAME + "/payment-schedules";
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Authorization", "PortOne " + API_SECRET);
+    HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+    ResponseEntity<String> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, String.class);
+
+    try {
+      return objectMapper.readTree(response.getBody()).get("status").asText(); // SUCCEEDED, FAILED 등
+    } catch (Exception e) {
+      throw new CustomException(HttpStatus.BAD_REQUEST, "조회 실패: " + e.getMessage());
+    }
+  }
+
+
+
 
   public JsonNode deleteBillingKey(DeletePaymentMethodRequestDto req) {
     String requestUrl =
@@ -114,6 +155,6 @@ public class PortOneClient {
   private String generateWithTimestamp() {
     String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
     String random = UUID.randomUUID().toString().substring(0, 6);
-    return "order" + time + "_" + random;
+    return time + "_" + random;
   }
 }

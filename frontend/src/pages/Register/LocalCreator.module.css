@@ -1,0 +1,386 @@
+/* LocalCreator.module.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 1200px;
+  align-items: center;
+  gap: 2.5rem;
+  padding: 5rem 0;
+  position: relative;
+  background-color: white;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 25px;
+  padding: 2.5rem;
+  border-radius: 2.5rem;
+  border: 1px solid white;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25), 0px 4px 4px rgba(0, 0, 0, 0.25), 0px 4px 4px rgba(0, 0, 0, 0.25),
+    0px 4px 35px rgba(0, 0, 0, 0.25), 0px 4px 4px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+.cardContent {
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  width: 459px;
+  height: 114px;
+  align-items: flex-start;
+  position: relative;
+  overflow: hidden;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  width: 353px;
+  align-items: flex-start;
+  gap: 1.25rem;
+  position: relative;
+}
+
+.welcomeText {
+  position: relative;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: 'Poppins', Helvetica, sans-serif;
+  font-weight: normal;
+  font-size: 21px;
+  letter-spacing: 0;
+  line-height: 31.5px;
+  white-space: nowrap;
+  color: black;
+}
+
+.brandName {
+  font-weight: bold;
+  color: #4682a9;
+}
+
+.title {
+  position: relative;
+  width: fit-content;
+  font-family: 'Poppins', Helvetica, sans-serif;
+  font-weight: 500;
+  color: black;
+  font-size: 55px;
+  letter-spacing: 0;
+  line-height: 55px;
+  white-space: nowrap;
+}
+
+.headerRight {
+  position: relative;
+  width: 110px;
+  height: 44px;
+}
+
+.loginPrompt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-family: 'Poppins', Helvetica, sans-serif;
+  font-weight: normal;
+  color: #8d8d8d;
+  font-size: 13px;
+  text-align: right;
+  letter-spacing: 0;
+  line-height: 19.5px;
+  white-space: nowrap;
+}
+
+.loginLink {
+  position: absolute;
+  top: 24px;
+  left: 70px;
+  font-family: 'Poppins', Helvetica, sans-serif;
+  font-weight: normal;
+  color: #4682a9;
+  font-size: 13px;
+  text-align: right;
+  letter-spacing: 0;
+  line-height: 19.5px;
+  white-space: nowrap;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.loginLink:hover {
+  text-decoration: none;
+}
+
+/* 이전에 있던 .backButton 스타일 제거 - 위에서 새로 정의했으므로 */
+
+.formContainer {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 25px;
+  padding: 1px 0;
+  position: relative;
+}
+
+.fieldContainer {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  position: relative;
+}
+
+.fieldLabel {
+  position: relative;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: 'Poppins', Helvetica, sans-serif;
+  font-weight: normal;
+  font-size: 1rem;
+  letter-spacing: 0;
+  line-height: 24px;
+  white-space: nowrap;
+  color: black;
+}
+
+.required {
+  color: #ff0000;
+}
+
+.emailContainer {
+  display: flex;
+  width: 459px;
+  height: 58px;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+
+.emailInput {
+  height: 58px;
+  flex: 1;
+  border-radius: 9px;
+  border: 1px solid #749bc2;
+  padding: 0 1rem;
+  font-family: 'Poppins', Helvetica, sans-serif;
+  font-size: 0.875rem;
+  background: transparent;
+  color: black;
+}
+
+.emailInput::placeholder {
+  color: #999999;
+  font-size: 0.875rem;
+}
+
+.emailInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(116, 155, 194, 0.2);
+}
+
+.duplicateCheckButton {
+  width: 176px;
+  height: 58px;
+  background-color: #4682a9;
+  opacity: 0.5;
+  border-radius: 9px;
+  font-family: 'Poppins', Helvetica, sans-serif;
+  font-weight: 500;
+  color: white;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.duplicateCheckButton:hover {
+  opacity: 0.7;
+}
+
+.regularInput {
+  width: 459px;
+  height: 58px;
+  padding: 0 1.25rem;
+  border-radius: 9px;
+  border: 1px solid #adadad;
+  font-family: 'Poppins', Helvetica, sans-serif;
+  font-size: 0.875rem;
+  background: transparent;
+  color: black;
+}
+
+.regularInput::placeholder {
+  color: #999999;
+  font-size: 0.875rem;
+}
+
+.regularInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(173, 173, 173, 0.2);
+}
+
+.selectTrigger {
+  width: 459px;
+  height: 58px;
+  padding: 0 1.25rem;
+  background-color: #d9d9d9;
+  border-radius: 9px;
+  border: 1px solid #d9d9d9;
+  font-family: 'Poppins', Helvetica, sans-serif;
+  font-weight: normal;
+  color: black;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.selectTrigger:focus {
+  outline: none;
+  border-color: #4682a9;
+  box-shadow: 0 0 0 2px rgba(70, 130, 169, 0.1);
+}
+
+.selectTrigger:hover {
+  border-color: #bfbfbf;
+}
+
+.selectContent {
+  position: relative;
+  z-index: 50;
+  max-height: 24rem;
+  min-width: 8rem;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background-color: white;
+  color: black;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.selectViewport {
+  padding: 0.25rem;
+}
+
+.selectItem {
+  position: relative;
+  display: flex;
+  width: 100%;
+  cursor: pointer;
+  user-select: none;
+  align-items: center;
+  border-radius: 2px;
+  padding: 0.375rem 0.5rem 0.375rem 2rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition: background-color 0.15s ease;
+}
+
+.selectItem:hover,
+.selectItem:focus {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.selectItem[data-disabled] {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.selectItemIndicator {
+  position: absolute;
+  right: 0.5rem;
+  display: flex;
+  height: 0.875rem;
+  width: 0.875rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.selectIcon {
+  height: 1rem;
+  width: 1rem;
+  opacity: 0.5;
+}
+
+.submitContainer {
+  display: flex;
+  flex-direction: column;
+  width: 461px;
+  align-items: center;
+  gap: 10px;
+  padding: 30px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.submitButtonWrapper {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 1px 0;
+  position: relative;
+  margin-left: -1px;
+  margin-right: -1px;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  width: 461px;
+}
+
+.backButton {
+  width: 100px;
+  height: 55px;
+  background-color: white;
+  border-radius: 10px;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  cursor: pointer;
+  font-family: 'Poppins', Helvetica, sans-serif;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.backButton:hover {
+  background-color: #f9fafb;
+  color: #4b5563;
+  border-color: #9ca3af;
+}
+
+.submitButton {
+  flex: 1;
+  height: 55px;
+  background-color: #4682a9;
+  border-radius: 10px;
+  font-family: 'Poppins', Helvetica, sans-serif;
+  font-weight: 500;
+  color: white;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.submitButton:hover {
+  background-color: rgba(70, 130, 169, 0.9);
+}
+
+.submitButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
