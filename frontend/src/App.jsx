@@ -1,5 +1,5 @@
-import Home from "./pages/Home";
-import AppRoutes from "./routes";
+import Home from './pages/Home';
+import AppRoutes from './routes';
 
 function App() {
   return <AppRoutes />;

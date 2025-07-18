@@ -13,10 +13,7 @@ export const NavbarCreator = () => {
   // 프로필 드롭다운 외부 클릭 감지
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        profileDropdownRef.current &&
-        !profileDropdownRef.current.contains(event.target)
-      ) {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
         setIsProfileDropdownOpen(false);
       }
     };
@@ -60,7 +57,7 @@ export const NavbarCreator = () => {
 
   const handleProfileClick = () => {
     // 프로필 드롭다운 토글
-    setIsProfileDropdownOpen((prev) => !prev);
+    setIsProfileDropdownOpen(prev => !prev);
   };
 
   const handleProfileMenuItemClick = (path) => {
@@ -132,16 +129,18 @@ export const NavbarCreator = () => {
           콘텐츠 작성
         </button>
 
-        <div className={styles.profileButtonContainer} ref={profileDropdownRef}>
-          {" "}
-          {/* 드롭다운 컨테이너 */}
-          <button className={styles.profileButton} onClick={handleProfileClick}>
+        <div className={styles.profileButtonContainer} ref={profileDropdownRef}> {/* 드롭다운 컨테이너 */}
+          <button
+            className={styles.profileButton}
+            onClick={handleProfileClick}
+          >
             <img
               className={styles.profileImage}
               alt="Profile"
               src="https://c.animaapp.com/md45uvjzPxvxqT/img/profilebutton-1.png"
             />
           </button>
+
           {isProfileDropdownOpen && (
             <div className={styles.profileDropdownMenu}>
               {/* 마이페이지 링크 */}

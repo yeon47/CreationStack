@@ -38,9 +38,7 @@
 
 /* Footer (from previous context, kept for completeness) */
 .footer {
-  height: var(
-    --footer-height
-  ); /* Assuming --footer-height is defined elsewhere or will be given */
+  height: var(--footer-height); /* Assuming --footer-height is defined elsewhere or will be given */
   background-color: #f1f1f1;
   color: #666;
   text-align: center;
@@ -91,7 +89,7 @@
 .menuItem {
   background: none; /* Retained */
   border: none; /* Retained */
-  font-family: "Poppins", Helvetica; /* Retained */
+  font-family: 'Poppins', Helvetica; /* Retained */
   font-size: 16px; /* Retained */
   font-weight: 500; /* Retained */
   color: #6b7280; /* Updated color */
@@ -114,7 +112,7 @@
 
 .menuItem.active::after {
   /* New active indicator */
-  content: "";
+  content: '';
   position: absolute;
   bottom: -13px;
   left: 50%;
@@ -165,8 +163,7 @@
   outline: none; /* Retained */
   font-size: 14px; /* Retained */
   color: #374151; /* Updated color */
-  font-family:
-    "Poppins", Helvetica; /* Retained (was in previous version of this class) */
+  font-family: 'Poppins', Helvetica; /* Retained (was in previous version of this class) */
 }
 
 .searchInput::placeholder {
@@ -321,7 +318,7 @@
     padding: 10px 15px;
     text-decoration: none; /* 링크 밑줄 제거 */
     color: #333; /* 기본 텍스트 색상 */
-    font-family: "Poppins", Helvetica; /* Retained */
+    font-family: 'Poppins', Helvetica; /* Retained */
     font-size: 15px; /* Retained */
     font-weight: 500; /* Retained */
     white-space: nowrap; /* 텍스트가 줄바꿈되지 않도록 */
