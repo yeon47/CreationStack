@@ -93,7 +93,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.github.iamport</groupId> <!--포트원 관련 의존성-->
+			<groupId>com.github.iamport</groupId> <!--포트원
+			관련 의존성-->
 			<artifactId>iamport-rest-client-java</artifactId>
 			<version>0.2.23</version>
 		</dependency>
@@ -119,7 +120,7 @@
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
 			<version>1.12.788</version>
-			</dependency>
+		</dependency>
 		<dependency>
 			<groupId>io.github.cdimascio</groupId>
 			<artifactId>dotenv-java</artifactId>
@@ -132,13 +133,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-					</execution>
-				</executions>
 				<configuration>
 					<annotationProcessorPaths>
 						<path>
@@ -151,6 +145,13 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 				<configuration>
 					<excludes>
 						<exclude>
