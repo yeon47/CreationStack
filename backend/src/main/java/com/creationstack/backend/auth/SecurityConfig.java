@@ -45,7 +45,10 @@ public class SecurityConfig {
                                     "/api/jobs",
                                     "/api/auth/refresh",
                                     "/api/content/**", // 모든 /api/content 경로 허용
-                                    "/api/upload/image" // 이미지 업로드 경로 허용
+                                    "/api/upload/image", // 이미지 업로드 경로 허용
+                                    "/api/billings/**",
+                                    "/api/payments/**"
+
                             ).permitAll()
                             // /api/user/** 경로는 인증 필요 (기존 설정 유지)
                             .requestMatchers("/api/user/**").authenticated()
