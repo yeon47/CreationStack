@@ -81,3 +81,16 @@ management:
 portone:
   apisecret: ${PORTONE_API_SECRET}
   hostname: ${PORTONE_HOSTNAME}
+
+# S3 설정
+cloud:
+  aws:
+    s3:
+      bucket-name: ${AWS_S3_BUCKET_NAME} # S3 버킷 이름
+    credentials:
+      access-key: ${AWS_ACCESS_KEY_ID} # AWS Access Key ID
+      secret-key: ${AWS_SECRET_ACCESS_KEY} # AWS Secret Access Key
+    region:
+      static: ap-northeast-2 # ← 한국(서울) 리전으로 고정
+    stack:
+      auto: false # CloudFormation 스택 자동 생성 비활성화

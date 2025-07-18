@@ -2,6 +2,7 @@ package com.creationstack.backend.repository;
 
 import java.util.List;
 
+import com.creationstack.backend.domain.content.Content;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.creationstack.backend.domain.comment.Comment;
-import com.creationstack.backend.domain.comment.Content;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {

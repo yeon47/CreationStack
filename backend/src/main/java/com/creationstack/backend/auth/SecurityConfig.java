@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -38,9 +39,18 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     log.info("URL 권한 설정 중...");
                     auth
-                            .requestMatchers("/api/users", "/api/jobs", "/api/auth/refresh").permitAll()
+                            // 인증 없이 접근 가능한 경로 (테스트를 위해 모든 콘텐츠 API를 permitAll로 임시 변경)
+                            .requestMatchers(
+                                    "/api/users",
+                                    "/api/jobs",
+                                    "/api/auth/refresh",
+                                    "/api/content/**", // 모든 /api/content 경로 허용
+                                    "/api/upload/image" // 이미지 업로드 경로 허용
+                            ).permitAll()
+                            // /api/user/** 경로는 인증 필요 (기존 설정 유지)
                             .requestMatchers("/api/user/**").authenticated()
-                            .anyRequest().permitAll();
+                            // 그 외 모든 요청은 인증 필요 (기존 anyRequest().authenticated() 유지)
+                            .anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

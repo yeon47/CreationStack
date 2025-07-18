@@ -7,13 +7,13 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.creationstack.backend.domain.comment.Comment;
-import com.creationstack.backend.domain.comment.Content;
+import com.creationstack.backend.domain.content.Content; // 올바른 Content 엔티티 임포트
 import com.creationstack.backend.domain.user.User;
 import com.creationstack.backend.dto.CommentCreateDto;
 import com.creationstack.backend.dto.CommentResponseDto;
 import com.creationstack.backend.dto.CommentUpdateDto;
 import com.creationstack.backend.repository.CommentRepository;
-import com.creationstack.backend.repository.ContentRepository;
+import com.creationstack.backend.repository.content.ContentRepository;
 import com.creationstack.backend.repository.UserRepository;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -22,89 +22,91 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class CommentService {
-	
+
 	private final CommentRepository commentRepository;
 	private final ContentRepository contentRepository;
 	private final UserRepository userRepository;
-	
+
 	// 댓글 등록
+	@Transactional
 	public CommentResponseDto createComment(CommentCreateDto dto){
 		User user = userRepository.findByUserIdAndIsActiveTrue(dto.getUserId())
-		        .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+				.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-	        Content content = contentRepository.findById(dto.getContentId())
-	                .orElseThrow(() -> new IllegalArgumentException("콘텐츠 없음"));
+		Content content = contentRepository.findById(dto.getContentId())
+				.orElseThrow(() -> new IllegalArgumentException("콘텐츠를 찾을 수 없습니다."));
 
-	        Comment comment = new Comment();
-	        comment.setUser(user);
-	        comment.setContent(content);
-	        comment.setContentText(dto.getContentText());
+		Comment comment = new Comment();
+		comment.setUser(user);
+		comment.setContent(content);
+		comment.setContentText(dto.getContentText());
 
-	        if (dto.getParentCommentId() != null) {
-	            Comment parent = commentRepository.findById(dto.getParentCommentId())
-	                    .orElseThrow(() -> new IllegalArgumentException("부모 댓글 없음"));
-	            comment.setParentComment(parent);
-	        }
+		if (dto.getParentCommentId() != null) {
+			Comment parent = commentRepository.findById(dto.getParentCommentId())
+					.orElseThrow(() -> new IllegalArgumentException("부모 댓글을 찾을 수 없습니다."));
+			comment.setParentComment(parent);
+		}
 
-	        Comment saved = commentRepository.save(comment);
-	        return toDto(saved);
+		Comment saved = commentRepository.save(comment);
+		return toDto(saved);
 	}
-	
-	// 댓글 등록
-	 public List<CommentResponseDto> getCommentsByContentId(Long contentId) {
-	        Content content = contentRepository.findById(contentId)
-	                .orElseThrow(() -> new IllegalArgumentException("콘텐츠 없음"));
 
-	        List<Comment> comments = commentRepository.findByContent(content);
+	// 댓글 조회
+	public List<CommentResponseDto> getCommentsByContentId(Long contentId) {
+		Content content = contentRepository.findById(contentId) // 올바른 Content 타입 사용
+				.orElseThrow(() -> new IllegalArgumentException("콘텐츠를 찾을 수 없습니다."));
 
-	        return comments.stream()
-	                .map(this::toDto)
-	                .collect(Collectors.toList());
-	    }
-	 
-	 // 댓글 수정
-	  public CommentResponseDto updateComment(Long commentId, CommentUpdateDto dto) {
-	        Comment comment = commentRepository.findById(commentId)
-	                .orElseThrow(() -> new IllegalArgumentException("댓글 없음"));
+		List<Comment> comments = commentRepository.findByContent(content);
 
-	        comment.setContentText(dto.getContentText());
-	        return toDto(commentRepository.save(comment));
-	    }
+		return comments.stream()
+				.map(this::toDto)
+				.collect(Collectors.toList());
+	}
 
-	  // 댓글 삭제
-	  @Transactional
-	  public void deleteComment(Long commentId, Long userId) throws AccessDeniedException {
+	// 댓글 수정
+	@Transactional
+	public CommentResponseDto updateComment(Long commentId, CommentUpdateDto dto) {
+		Comment comment = commentRepository.findById(commentId)
+				.orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
 
-		    commentRepository.markAsDeleted(commentId);
+		comment.setContentText(dto.getContentText());
+		return toDto(commentRepository.save(comment));
+	}
 
-		  /*  Comment comment = commentRepository.findById(commentId)
-	                .orElseThrow(() -> new IllegalArgumentException("댓글 없음"));
+	// 댓글 삭제
+	@Transactional
+	public void deleteComment(Long commentId, Long userId) throws AccessDeniedException {
 
-	        if (!comment.getUser().getUserId().equals(userId)) {
-	            throw new AccessDeniedException("삭제 권한 없음");
-	        }
+		commentRepository.markAsDeleted(commentId);
 
-	        comment.setDeleted(true);
-	        commentRepository.save(comment);*/
-	    }
-	  
-	  // 응답용 dto 반환
-	  private CommentResponseDto toDto(Comment comment) {
-	        CommentResponseDto dto = new CommentResponseDto();
-	        dto.setCommentId(comment.getCommentId());
-	        dto.setUserId(comment.getUser().getUserId());
-	        if (comment.getUser().getUserDetail() != null) {
-	            dto.setNickname(comment.getUser().getUserDetail().getNickname());
-	        }
-	        if (comment.getUser().getJob() != null) {
-	            dto.setJob(comment.getUser().getJob().getName());
-	        }
-	        dto.setContentId(comment.getContent().getContentId());
-	        dto.setParentCommentId(
-	                comment.getParentComment() != null ? comment.getParentComment().getCommentId() : null);
-	        dto.setContentText(comment.isDeleted() ? "삭제된 댓글입니다" : comment.getContentText());
-	        dto.setCreatedAt(comment.getCreatedAt());
-	        return dto;
-	    }
+         /* Comment comment = commentRepository.findById(commentId)
+                    .orElseThrow(() -> new IllegalArgumentException("댓글 없음"));
+
+            if (!comment.getUser().getUserId().equals(userId)) {
+                throw new AccessDeniedException("삭제 권한 없음");
+            }
+
+            comment.setDeleted(true);
+            commentRepository.save(comment);*/
+	}
+
+	// 응답용 dto 반환
+	private CommentResponseDto toDto(Comment comment) {
+		CommentResponseDto dto = new CommentResponseDto();
+		dto.setCommentId(comment.getCommentId());
+		dto.setUserId(comment.getUser().getUserId());
+		if (comment.getUser().getUserDetail() != null) {
+			dto.setNickname(comment.getUser().getUserDetail().getNickname());
+		}
+		if (comment.getUser().getJob() != null) {
+			dto.setJob(comment.getUser().getJob().getName());
+		}
+		dto.setContentId(comment.getContent().getContentId());
+		dto.setParentCommentId(
+				comment.getParentComment() != null ? comment.getParentComment().getCommentId() : null);
+		dto.setContentText(comment.isDeleted() ? "삭제된 댓글입니다" : comment.getContentText());
+		dto.setCreatedAt(comment.getCreatedAt());
+		return dto;
+	}
 
 }
