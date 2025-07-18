@@ -48,15 +48,16 @@ public class SecurityConfig {
                                     "/api/auth/refresh", // 토큰 갱신
                                     "/api/auth/logout", // 로그아웃 (refresh token 방식)
                                     "/api/content/**", // 모든 /api/content 경로 허용
-                                    "/api/upload/image" // 이미지 업로드 경로 허용
-                    ).permitAll()
-                            // 인증이 필요한 경로들
-                            .requestMatchers(
-                                    "/api/user/**", // 프로필 관련
-                                    "/api/auth/logout-token" // 로그아웃 (access token 방식)
-                    ).authenticated()
-                            // 나머지 모든 요청은 허용
-                            .anyRequest().permitAll();
+                                    "/api/upload/image", // 이미지 업로드 경로 허용
+                                    "/api/contents/**/comments",
+                                    "/api/contents/**/comments/**/like"
+                            ).permitAll()
+                            // /api/user/** 경로는 인증 필요 (기존 설정 유지)
+                            .requestMatchers("/api/user/**").authenticated()
+
+                            // 그 외 모든 요청은 인증 필요 (기존 anyRequest().authenticated() 유지)
+                            .anyRequest().authenticated();
+
                 })
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
