@@ -5,11 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// 포트원 결제수단 요청 dto
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SavePaymentMethodRequestDto {
-  private String billingKey;
+public class AmountDto {
+  private int total;
+
+  public int getTotal() { return total; }
+  public void setTotal(int total) { this.total = total; }
 }
