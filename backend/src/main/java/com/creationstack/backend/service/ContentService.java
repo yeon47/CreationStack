@@ -23,11 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -46,14 +42,7 @@ public class ContentService {
     private final AttachmentRepository attachmentRepository;
     private final FileStorageService fileStorageService; // S3 연동을 위한 FileStorageService 주입
 
-    /**
-     * 새로운 콘텐츠를 생성합니다.
-     * 썸네일 및 첨부파일을 S3에 업로드합니다.
-     *
-     * @param request ContentCreateRequest DTO
-     * @param creatorId 콘텐츠를 생성하는 사용자의 ID
-     * @return 생성된 콘텐츠의 응답 DTO
-     */
+    // 콘텐츠 생성
     @Transactional // 쓰기 작업이므로 트랜잭션 적용
     public ContentResponse createContent(ContentCreateRequest request, Long creatorId) {
         // 1. 크리에이터(User) 조회
@@ -139,12 +128,7 @@ public class ContentService {
         return ContentResponse.from(savedContent);
     }
 
-    /**
-     * 특정 ID의 콘텐츠를 조회하고 조회수를 1 증가시킵니다.
-     *
-     * @param contentId 조회할 콘텐츠의 ID
-     * @return 조회된 콘텐츠의 응답 DTO
-     */
+    // 특정 콘텐츠 조회
     @Transactional // 조회수 증가로 인해 쓰기 트랜잭션 필요
     public ContentResponse getContentById(Long contentId) {
         Content content = contentRepository.findById(contentId)
@@ -157,12 +141,7 @@ public class ContentService {
         return ContentResponse.from(content);
     }
 
-    /**
-     * 특정 크리에이터가 작성한 모든 콘텐츠 목록을 조회합니다.
-     *
-     * @param creatorId 크리에이터의 ID
-     * @return 해당 크리에이터의 콘텐츠 목록 응답 DTO
-     */
+    // 콘텐츠 목록 조회
     public List<ContentResponse> getContentsByCreator(Long creatorId) {
         // 크리에이터 존재 여부 확인 (선택 사항: 콘텐츠가 없으면 빈 리스트 반환)
         if (!userRepository.existsById(creatorId)) { // existsById 사용
@@ -176,15 +155,7 @@ public class ContentService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 콘텐츠를 수정합니다.
-     * 썸네일 및 첨부파일 변경 로직을 S3와 연동합니다.
-     *
-     * @param contentId 수정할 콘텐츠의 ID
-     * @param request ContentUpdateRequest DTO
-     * @param creatorId 수정 요청을 하는 사용자의 ID (권한 확인용)
-     * @return 수정된 콘텐츠의 응답 DTO
-     */
+    // 콘텐츠 수정
     @Transactional // 쓰기 작업이므로 트랜잭션 적용
     public ContentResponse updateContent(Long contentId, ContentUpdateRequest request, Long creatorId) {
         Content content = contentRepository.findById(contentId)
@@ -196,96 +167,114 @@ public class ContentService {
         }
 
         // 2. 썸네일 이미지 처리
-        String newThumbnailUrl = content.getThumbnailUrl(); // 기본적으로 기존 URL 유지
+        String newThumbnailUrl = content.getThumbnailUrl(); // 현재 콘텐츠의 썸네일 URL로 초기화
+
         if (request.getNewThumbnailFile() != null && !request.getNewThumbnailFile().isEmpty()) {
-            // 기존 썸네일 삭제 (새 파일이 업로드될 경우)
-            if (newThumbnailUrl != null) {
+            // 새 썸네일 파일이 있으면 기존 썸네일 삭제 후 업로드
+            if (newThumbnailUrl != null) { // 기존 썸네일이 존재하면 S3에서 삭제
                 fileStorageService.deleteFile(newThumbnailUrl);
             }
-            // 새로운 썸네일 업로드
             try {
                 newThumbnailUrl = fileStorageService.uploadFile(request.getNewThumbnailFile(), "thumbnails");
             } catch (IOException e) {
                 log.error("새 썸네일 업로드 실패", e);
                 throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "새 썸네일 업로드에 실패했습니다.", e);
             }
-        } else if (request.getExistingThumbnailUrl() != null && !request.getExistingThumbnailUrl().isEmpty()) {
-            newThumbnailUrl = request.getExistingThumbnailUrl(); // 기존 썸네일 유지
         } else {
-            // 썸네일 제거 요청 (기존 썸네일이 있었고 새로운 파일이 없으며 기존 URL도 제공되지 않았을 때)
-            if (newThumbnailUrl != null) {
-                fileStorageService.deleteFile(newThumbnailUrl);
+            // 새 썸네일 파일이 없는 경우
+            if (request.getExistingThumbnailUrl() != null) {
+                // request.getExistingThumbnailUrl()이 명시적으로 제공된 경우
+                if (request.getExistingThumbnailUrl().isEmpty()) {
+                    // 클라이언트가 썸네일 제거를 명시적으로 요청 (빈 문자열)
+                    if (content.getThumbnailUrl() != null) { // 기존 썸네일이 있었다면 S3에서 삭제
+                        fileStorageService.deleteFile(content.getThumbnailUrl());
+                    }
+                    throw new CustomException(HttpStatus.BAD_REQUEST, "썸네일 URL은 필수입니다. 빈 값으로 설정할 수 없습니다.");
+                } else {
+                    // 클라이언트가 기존 썸네일 URL을 유지하거나 변경 요청 (파일 업로드 없이 URL만 변경)
+                    // 이 경우, S3에 이미 존재하는 URL이라고 가정하고 그대로 사용합니다.
+                    newThumbnailUrl = request.getExistingThumbnailUrl();
+                }
             }
-            newThumbnailUrl = null;
         }
 
 
-        // 3. 카테고리 매핑 처리
-        Set<ContentCategory> updatedCategories = request.getCategoryNames().stream()
-                .map(categoryName -> contentCategoryRepository.findByName(categoryName)
-                        .orElseGet(() -> {
-                            log.warn("존재하지 않는 카테고리입니다. 새로 생성: {}", categoryName);
-                            return contentCategoryRepository.save(ContentCategory.builder().name(categoryName).build());
-                        }))
-                .collect(Collectors.toSet());
 
-        // 4. Content 엔티티 업데이트
-        content.update(request.getTitle(), request.getContent(), newThumbnailUrl, request.getAccessType(), updatedCategories);
+        // 3. 콘텐츠 핵심 정보 및 카테고리 매핑 업데이트
+        Set<ContentCategory> categoriesToUpdate = new HashSet<>();
+        if (request.getCategoryNames() != null && !request.getCategoryNames().isEmpty()) {
+            for (String categoryName : request.getCategoryNames()) {
+                ContentCategory category = contentCategoryRepository.findByName(categoryName)
+                        .orElseGet(() -> contentCategoryRepository.save(ContentCategory.builder().name(categoryName).build()));
+                categoriesToUpdate.add(category);
+            }
+        }
 
-        // 5. 첨부파일 처리
-        // 기존 첨부파일 중 유지할 파일 ID 목록을 기반으로 삭제할 파일 식별
-        Set<Attachment> existingAttachments = content.getAttachments(); // Content 엔티티에서 현재 첨부파일 가져옴
+        // 4. 첨부파일 처리 (수정된 부분)
+        // 기존 첨부파일 중 유지할 파일 ID 목록
         Set<Long> existingAttachmentIdsToKeep = request.getExistingAttachmentIds() != null ?
-                request.getExistingAttachmentIds().stream().collect(Collectors.toSet()) : Collections.emptySet();
+                new HashSet<>(request.getExistingAttachmentIds()) : new HashSet<>();
 
-        // 삭제할 첨부파일 식별 및 S3/DB에서 제거
-        existingAttachments.stream()
-                .filter(att -> !existingAttachmentIdsToKeep.contains(att.getAttachmentId()))
-                .forEach(att -> {
-                    fileStorageService.deleteFile(att.getFileUrl()); // S3에서 파일 삭제
-                    attachmentRepository.delete(att); // DB에서 첨부파일 삭제
-                });
+        // 삭제할 첨부파일을 임시로 담을 리스트
+        List<Attachment> attachmentsToDeleteFromCollection = new ArrayList<>();
 
-        // 새로 추가될 첨부파일 저장
-        if (request.getNewAttachmentFiles() != null && !request.getNewAttachmentFiles().isEmpty()) {
-            List<Attachment> newAttachments = request.getNewAttachmentFiles().stream()
-                    .map(file -> {
-                        String fileUrl = null;
-                        String storedFileName = UUID.randomUUID().toString();
-                        try {
-                            fileUrl = fileStorageService.uploadFile(file, "attachments");
-                            storedFileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
-                        } catch (IOException e) {
-                            log.error("새 첨부파일 업로드 실패: {}", file.getOriginalFilename(), e);
-                            throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "새 첨부파일 업로드에 실패했습니다.", e);
-                        }
-                        return Attachment.builder()
-                                .content(content)
-                                .fileUrl(fileUrl)
-                                .originalFileName(file.getOriginalFilename())
-                                .storedFileName(storedFileName)
-                                .fileType(file.getContentType())
-                                .fileSize(file.getSize())
-                                .build();
-                    })
-                    .collect(Collectors.toList());
-            attachmentRepository.saveAll(newAttachments);
-            // Content 엔티티에 첨부파일 목록 다시 설정
-            content.getAttachments().addAll(newAttachments); // 기존 목록에 새 파일 추가
+        // 기존 첨부파일을 순회하며 삭제할 파일 식별
+        if (content.getAttachments() != null) {
+            for (Attachment existingAttachment : content.getAttachments()) {
+                if (!existingAttachmentIdsToKeep.contains(existingAttachment.getAttachmentId())) {
+                    attachmentsToDeleteFromCollection.add(existingAttachment);
+                    fileStorageService.deleteFile(existingAttachment.getFileUrl()); // S3에서 파일 삭제
+                }
+            }
         }
 
-        // 변경 감지(Dirty Checking)에 의해 content가 자동 저장됨
+        // 식별된 첨부파일들을 Content 엔티티의 컬렉션에서 제거
+        // Content 엔티티의 @OneToMany(orphanRemoval=true) 설정으로 인해 이 제거가 DB 삭제로 이어집니다.
+        content.getAttachments().removeAll(attachmentsToDeleteFromCollection);
+
+
+        // 새로 추가될 첨부파일 처리
+        if (request.getNewAttachmentFiles() != null && !request.getNewAttachmentFiles().isEmpty()) {
+            for (MultipartFile file : request.getNewAttachmentFiles()) {
+                if (!file.isEmpty()) {
+                    String fileUrl = null;
+                    String storedFileName = null; // 초기화
+                    try {
+                        fileUrl = fileStorageService.uploadFile(file, "attachments");
+                        storedFileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+                    } catch (IOException e) {
+                        log.error("새 첨부파일 업로드 실패: {}", file.getOriginalFilename(), e);
+                        throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "새 첨부파일 업로드에 실패했습니다.", e);
+                    }
+                    Attachment newAttachment = Attachment.builder()
+                            .content(content) // 연관관계 설정
+                            .fileUrl(fileUrl)
+                            .originalFileName(file.getOriginalFilename())
+                            .storedFileName(storedFileName)
+                            .fileType(file.getContentType())
+                            .fileSize(file.getSize())
+                            .build();
+                    // Content 엔티티의 컬렉션에 새 첨부파일 추가
+                    // Content 엔티티의 @OneToMany(cascade=CascadeType.ALL) 설정으로 인해 이 추가가 DB 저장으로 이어집니다.
+                    content.getAttachments().add(newAttachment);
+                }
+            }
+        }
+        // 5. Content 엔티티의 update 메서드 호출
+        content.update(
+                request.getTitle(),
+                request.getContent(),
+                newThumbnailUrl,
+                request.getAccessType(),
+                categoriesToUpdate
+        );
+        //6. 저장
         log.info("콘텐츠 수정 완료: {}", contentId);
-        return ContentResponse.from(content);
+        Content updatedContent = contentRepository.save(content);
+        return ContentResponse.from(updatedContent);
     }
 
-    /**
-     * 특정 ID의 콘텐츠를 삭제합니다.
-     * 관련 첨부파일 및 카테고리 매핑도 함께 삭제됩니다.
-     *
-     * @param contentId 삭제할 콘텐츠의 ID
-     * @param creatorId 삭제 요청을 하는 사용자의 ID (권한 확인용)
-     */
+   // 콘텐츠 삭제
     @Transactional // 쓰기 작업이므로 트랜잭션 적용
     public void deleteContent(Long contentId, Long creatorId) {
         Content content = contentRepository.findById(contentId)
@@ -306,10 +295,7 @@ public class ContentService {
         log.info("콘텐츠 삭제 완료: {}", contentId);
     }
 
-    /**
-     * 초기 카테고리를 설정하는 메서드 (개발/테스트용)
-     * @param categoryNames 초기화할 카테고리 이름 목록
-     */
+
     @Transactional
     public void initializeCategories(Set<String> categoryNames) {
         categoryNames.forEach(name -> {
