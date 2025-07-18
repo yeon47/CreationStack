@@ -74,14 +74,6 @@ public class Content {
         this.viewCount++;
     }
 
-    /**
-     * 콘텐츠 정보를 업데이트하는 메서드입니다.
-     * @param title 새로운 제목
-     * @param content 새로운 내용
-     * @param thumbnailUrl 새로운 썸네일 URL
-     * @param accessType 새로운 접근 타입
-     * @param updatedCategories 새로운 카테고리 목록
-     */
     public void update(String title, String content, String thumbnailUrl, AccessType accessType, Set<ContentCategory> updatedCategories) {
         this.title = title;
         this.content = content;
