@@ -8,6 +8,7 @@ PortOne 관련 API
 savePaymentMethod : 결제수단 DB 저장 API
 requestIssueBillingKey : 포트원 빌링키 발급 SDK 요청
 readAllPaymentMethod : 모든 결제수단 조회 API
+deletePaymentMethod : 결제수단 삭제 API
 */
 
 // 등록된 모든 결제수단 조회 API
@@ -75,14 +76,14 @@ export const requestIssueBillingKey = async (storeId, channelKey, name, email) =
   return response;
 };
 
-
 // 결제수단 삭제 deleteCardMethod
-export const deleteCardMethod = async paymentMethodId => {
+export const deletePaymentMethod = async (paymentMethodId, reason) => {
   try {
     const response = await axios.post(
-      'http://localhost:8080/api/billings/card',
+      'http://localhost:8080/api/billings/keys',
       {
         paymentMethodId: paymentMethodId,
+        reason: reason,
       },
       {
         headers: {
