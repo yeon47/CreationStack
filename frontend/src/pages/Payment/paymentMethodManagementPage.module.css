@@ -23,17 +23,17 @@
   color: #666666;
 }
 
-.register_button{
+.register_button {
   height: 40px;
-    max-width: 250px;
+  max-width: 250px;
   width: 100%;
 }
 
-.register{
+.register {
   display: flex;
   align-items: center;
   justify-content: center;
   margin-top: 40px;
   margin-bottom: 40px;
-    width: 100%;
+  width: 100%;
 }

@@ -39,6 +39,8 @@
   left: 0;
   right: 0;
   margin-top: 10px;
+  background-color: #e0e0e0; /* 연한 회색 선 */
+  height: 1px;
 }
 
 .benefits_box {

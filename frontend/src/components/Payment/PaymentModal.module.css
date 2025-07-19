@@ -42,7 +42,7 @@
   width: 100%;
   padding: 24px 32px;
   box-sizing: border-box;
-  font-family: "Poppins", Helvetica, sans-serif;
+  font-family: 'Poppins', Helvetica, sans-serif;
 }
 
 .popupHeader {
@@ -96,7 +96,8 @@
   justify-content: center;
   transition: box-shadow 0.2s;
 }
-.cardItem:active, .cardItem:focus {
+.cardItem:active,
+.cardItem:focus {
   box-shadow: 0 4px 18px #0003;
 }
 
@@ -204,7 +205,7 @@
   height: 140px;
   margin: 24px auto;
   position: relative;
-  overflow: hidden;   
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -215,6 +216,5 @@
   flex-direction: row;
   height: 120px;
   will-change: transform;
- width: fit-content; 
-
+  width: fit-content;
 }
