@@ -7,6 +7,8 @@ import com.creationstack.backend.domain.payment.PaymentMethod;
 
 import com.creationstack.backend.domain.payment.PaymentStatus;
 import com.creationstack.backend.domain.subscription.Subscription;
+import com.creationstack.backend.domain.user.User;
+import com.creationstack.backend.domain.user.UserDetail;
 import com.creationstack.backend.dto.Payment.AmountDto;
 import com.creationstack.backend.dto.Payment.BillingKeyPaymentRequestDto;
 import com.creationstack.backend.dto.Payment.BillingKeyPaymentResponseDto;
@@ -18,6 +20,8 @@ import com.creationstack.backend.dto.Payment.PortOnePaymentRequestDto;
 import com.creationstack.backend.dto.Payment.PortOneReservationRequestDto;
 import com.creationstack.backend.dto.Payment.PortOneReservationResponseDto;
 import com.creationstack.backend.repository.PaymentRepository;
+import com.creationstack.backend.repository.UserDetailRepository;
+import com.creationstack.backend.repository.UserRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -26,6 +30,8 @@ import java.time.ZoneId;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,15 +43,24 @@ public class PaymentService {
   private final PaymentRepository paymentRepository;
   private final PaymentMethodService paymentMethodService;
   private final PortOneClient portOneClient;
+  private final UserRepository userRepository;
+  private final UserDetailRepository userDetailRepository;
 
-  //결제
+  // 구독 요청 시 결제 진행
   public BillingKeyPaymentResponseDto processingBillingKeyPay(BillingKeyPaymentRequestDto req) {
-    log.info("[processingBillingKeyPay] req paymentMethodId: {}", req.getPaymentMethodId());
+
+
     // 결제수단과 연결된 빌링키
     PaymentMethod paymentMethod = paymentMethodService.getPaymentMethodForBillingKey(req.getPaymentMethodId());
     log.info("[processingBillingKeyPay] paymentMethodService.getPaymentMethodForBillingKey: {}", paymentMethod);
 
-    CustomerDto customer = new CustomerDto("1","test@gmail.com",new Name("test")); // 테스트 user
+    // 구매하는
+//    CustomerDto customer = new CustomerDto("1","test@gmail.com",new Name("test")); // 테스트 user
+
+    // 구매하는 사용자 정보 가져와 구매자 객체 생성
+    Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    UserDetail userDetail = userDetailRepository.findById(userId).orElse(null);
+    CustomerDto customer = new CustomerDto(userId+"",userDetail.getEmail(),new Name(userDetail.getUsername()));
 
     //request Body 설정
     PortOnePaymentRequestDto requestBody = PortOnePaymentRequestDto.builder()
@@ -64,6 +79,7 @@ public class PaymentService {
     PortOneBillingResponseDto response = portOneClient.processingBillingKeyPay(requestBody);
     log.info("[processingBillingKeyPay] portOneClient.processingBillingKeyPay: {}", response);
     // 구독 내역 active 변경 로직
+//    subscriptionService.activateSubscription(response.);
 
 //    Subscription subscription = subscriptionRepository.findById(1L).orElse(null);
 //    log.info("[processingBillingKeyPay] subscription: {}", subscription);
