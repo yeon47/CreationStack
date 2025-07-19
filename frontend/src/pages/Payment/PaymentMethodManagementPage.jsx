@@ -2,7 +2,12 @@ import React, { useEffect, useState } from 'react';
 import styles from './paymentMethodManagementPage.module.css';
 import PaymentMethodList from '../../components/Payment/PaymentMethodList';
 import WarningModal from '../../components/Payment/WarningModal';
-import { requestIssueBillingKey, savePaymentMethod, readAllPaymentMethod, deleteCardMethod } from '../../api/payment';
+import {
+  requestIssueBillingKey,
+  savePaymentMethod,
+  readAllPaymentMethod,
+  deletePaymentMethod,
+} from '../../api/payment';
 
 function PaymentMethodManagementPage() {
   const [cards, setCards] = useState([]);
@@ -68,19 +73,24 @@ function PaymentMethodManagementPage() {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedCard(null);
+    setModalType(''); // 혹은 null, '' 등 초기 상태로 변경
   };
 
   // 결제수단 삭제 확인 후 삭제진행 + 완료/실패 팝업
   const handleDeleteConfirm = async card => {
     // 기존 모달 닫기
     setIsModalVisible(false);
+    const reason = card.cardName + '을 삭제합니다.';
 
     // 300ms 후 새 모달 보여주기 (애니메이션 타이밍)
     setTimeout(async () => {
       try {
-        await deleteCardMethod(card.paymentMethodId);
-        setCards(prev => prev.filter(c => c.paymentMethodId !== selectedCard.paymentMethodId));
-        setModalType('delete-success');
+        const response = await deletePaymentMethod(card.paymentMethodId, reason);
+
+        if (card.paymentMethodId === response.paymentMethodId) {
+          setCards(prev => prev.filter(c => c.paymentMethodId !== card.paymentMethodId));
+          setModalType('delete-success');
+        }
       } catch (error) {
         setModalType('delete-fail');
       }

@@ -99,8 +99,12 @@ const WarningModal = ({ isOpen, onClose, isVisible = true, cardData, type, onCon
                 className={styles.button}
                 onClick={() => {
                   if (type === 'confirm-delete') {
+                    console.log('📦 WarningModal 전달할 cardData:', cardData);
+
                     onConfirm?.(cardData); // optional chaining 사용
                   } else if (type === 'register-success' || type === 'register-fail') {
+                    onClose();
+                  } else if (type === 'delete-success' || type === 'delete-fail') {
                     onClose();
                   } else {
                     onConfirm?.();
