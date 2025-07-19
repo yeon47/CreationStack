@@ -5,7 +5,6 @@ import com.creationstack.backend.config.PortOneClient;
 import com.creationstack.backend.domain.payment.Payment;
 import com.creationstack.backend.domain.payment.PaymentMethod;
 import com.creationstack.backend.domain.subscription.Subscription;
-import com.creationstack.backend.domain.subscription.SubscriptionStatus;
 import com.creationstack.backend.dto.Payment.DeletePaymentMethodRequestDto;
 import com.creationstack.backend.dto.Payment.DeletePaymentMethodResponseDto;
 import com.creationstack.backend.dto.Payment.PaymentMethodResponseDto;
@@ -16,7 +15,6 @@ import com.creationstack.backend.exception.CustomException;
 import com.creationstack.backend.repository.PaymentMethodRepository;
 import com.creationstack.backend.repository.PaymentRepository;
 import com.creationstack.backend.repository.SubscriptionRepository;
-import com.creationstack.backend.repository.SubscriptionStatusRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +33,6 @@ public class PaymentMethodService {
   private final PortOneClient portOneClient;
   private final SubscriptionRepository subscriptionRepository;
   private final PaymentRepository paymentRepository;
-  private final SubscriptionStatusRepository subscriptionStatusRepository;
 
   // 1. 결제수단 저장
   @Transactional
@@ -76,7 +73,7 @@ public class PaymentMethodService {
         )).toList();
   }
 
-  // 3. 빌링키 이용해 결제수단 삭제
+  // 3. 빌링키 이용해 결제수단 삭제(결제수단 단독 삭제)
   @Transactional
   public DeletePaymentMethodResponseDto deletePaymentMethod(DeletePaymentMethodRequestDto req) {
     Long paymentMethodId = req.getPaymentMethodId();

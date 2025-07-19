@@ -1,6 +1,5 @@
 package com.creationstack.backend.config;
 
-import com.creationstack.backend.dto.Payment.DeletePaymentMethodResponseDto;
 import com.creationstack.backend.dto.Payment.PortOneBillingResponseDto;
 import com.creationstack.backend.dto.Payment.PortOnePaymentRequestDto;
 import com.creationstack.backend.dto.Payment.DeletePaymentMethodRequestDto;
@@ -68,16 +67,24 @@ public class PortOneClient {
 
   //카드 이용한 결제 진행
   public PortOneBillingResponseDto processingBillingKeyPay(PortOnePaymentRequestDto requestBody) {
+
+    // 주문 ID 생성(portone 등록)
     String portOnePaymentId = "order-"+generateWithTimestamp();
+
+    // 요청 url 설정
     String requestUrl = API_HOSTNAME + "/payments/" + portOnePaymentId + "/billing-key";
+
+    // 헤더 설정
     HttpHeaders headers = new HttpHeaders();
     headers.set("Authorization", "PortOne " + API_SECRET);
     headers.setContentType(MediaType.APPLICATION_JSON);
     log.info("[PortOneClient] requestBody:{}", requestBody.getBillingKey());
     requestBody.setStoreId(STORE_ID);
+
     HttpEntity<PortOnePaymentRequestDto> entity = new HttpEntity<>(requestBody, headers);
      log.info("[PortOneClient] entity:{}", entity);
 
+     // 요청 전송
     ResponseEntity<String> response =
         restTemplate.exchange(requestUrl, HttpMethod.POST, entity, String.class);
 
