@@ -52,16 +52,16 @@ public class PaymentService {
     log.info("[processingBillingKeyPay] paymentMethodService.getPaymentMethodForBillingKey: {}", paymentMethod);
 
     // 구매하는 사용자 정보 가져와 구매자 객체 생성
-    Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long userId = 2L;
     UserDetail userDetail = userDetailRepository.findById(userId).orElse(null);
     CustomerDto customer = new CustomerDto(userId+"",userDetail.getEmail(),new Name(userDetail.getUsername()));
 
     Subscription subscription = subscriptionRepository.findById(req.getSubscriptionId()).orElse(null);
 
-    assert subscription != null;
-    if(!subscription.getStatus().equals(SubscriptionStatusName.PENDING)){
-      throw new CustomException(HttpStatus.NOT_FOUND,"구독 내역이 생성되지 않았습니다.");
-    }
+//    assert subscription != null;
+//    if(!subscription.getStatus().equals(SubscriptionStatusName.PENDING)){
+//      throw new CustomException(HttpStatus.NOT_FOUND,"구독 내역이 생성되지 않았습니다.");
+//    }
 
     // 결제 내역 생성
     Payment payment = Payment.builder()

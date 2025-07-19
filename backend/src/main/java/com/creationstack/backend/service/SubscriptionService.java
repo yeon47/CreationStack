@@ -83,6 +83,7 @@ public class SubscriptionService {
         } else {
             subscription = new Subscription();
             subscription.setSubscriberId(subscriberId);
+            subscription.setAmount(4900);
             subscription.setCreatorId(request.getCreatorId());
             subscription.setStatus(pendingStatus);
             subscription.setStartedAt(now);

@@ -20,9 +20,8 @@ public class PaymentController {
 
   @PostMapping("/api/billings/payments")
   public ResponseEntity<BillingKeyPaymentResponseDto> processBillingKeyPay(
-      @AuthenticationPrincipal Long userId, @RequestBody BillingKeyPaymentRequestDto req) {
+      @RequestBody BillingKeyPaymentRequestDto req) {
     log.info("Processing billing key payment request: {}", req.getPaymentMethodId());
-    log.info("[processingBillingKeyPay] userId: {}", userId);
     BillingKeyPaymentResponseDto res = paymentService.processingBillingKeyPay(req);
     return ResponseEntity.ok(res);
   }

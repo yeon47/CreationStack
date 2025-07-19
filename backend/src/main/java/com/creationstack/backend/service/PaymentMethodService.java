@@ -42,7 +42,7 @@ public class PaymentMethodService {
       JsonNode card = portOneClient.getBillingKeyInfo(billingKey);
 
       PaymentMethod paymentMethod = PaymentMethod.builder()
-          .userId(1L) // TODO: 실제 userId 할당
+          .userId(2L) // TODO: 실제 userId 할당
           .billingKey(billingKey)
           .cardName(card.get("name").asText())
           .cardBrand(card.get("brand").asText())

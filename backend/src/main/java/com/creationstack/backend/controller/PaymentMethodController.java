@@ -31,7 +31,7 @@ public class PaymentMethodController {
   // 2. 사용자의 모든 결제 수단 조회
   @GetMapping("/api/payments")
   public ResponseEntity<List<PaymentMethodResponseDto>> getAllPaymentMethods(){
-    return ResponseEntity.ok(paymentMethodService.getPaymentMethod(1L));
+    return ResponseEntity.ok(paymentMethodService.getPaymentMethod(2L));
   }
 
   // 3. 결제 수단 삭제
