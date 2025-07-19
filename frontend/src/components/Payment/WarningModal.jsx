@@ -49,6 +49,29 @@ const WarningModal = ({ isOpen, onClose, isVisible = true, cardData, type, onCon
       );
       showCancel = false;
       break;
+    case 'register-success':
+      title = '결제수단이 등록되었습니다.';
+      message = (
+        <>
+          결제수단 등록이 완료되었습니다.
+          <br />
+          결제를 진행해주세요.
+        </>
+      );
+      showCancel = false;
+      showConfirm = true;
+      break;
+    case 'register-fail':
+      title = '결제수단 등록에 실패했습니다.';
+      message = (
+        <>
+          결제수단 등록에 실패했습니다.
+          <br />
+          다시 시도해주세요.
+        </>
+      );
+      showCancel = false;
+      break;
     default:
       break;
   }
@@ -75,8 +98,14 @@ const WarningModal = ({ isOpen, onClose, isVisible = true, cardData, type, onCon
               <button
                 className={styles.button}
                 onClick={() => {
-                  if (type === 'confirm-delete') onConfirm(cardData); // 삭제 시 삭제할 카드 데이터 전달
-                  else onClose();
+                  if (type === 'confirm-delete') {
+                    onConfirm?.(cardData); // optional chaining 사용
+                  } else if (type === 'register-success' || type === 'register-fail') {
+                    onClose();
+                  } else {
+                    onConfirm?.();
+                    onClose();
+                  }
                 }}>
                 {confirmText}
               </button>
