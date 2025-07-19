@@ -2,7 +2,6 @@ import axios from 'axios';
 import PortOne from '@portone/browser-sdk/v2';
 import { v4 as uuidv4 } from 'uuid';
 axios.defaults.withCredentials = true;
-
 /*
 PortOne 관련 API
 savePaymentMethod : 결제수단 DB 저장 API
@@ -48,7 +47,7 @@ export const savePaymentMethod = async billingKey => {
 };
 
 //포트원 SDK 호출(결제수단 등록)
-export const requestIssueBillingKey = async (storeId, channelKey, name, email) => {
+export const registerBillingKey= async (storeId, channelKey, name, email) => {
   const customerId = `user-${uuidv4()}`;
 
   // 결제수단 사용자 정보
@@ -94,5 +93,60 @@ export const deletePaymentMethod = async (paymentMethodId, reason) => {
     return response.data;
   } catch (error) {
     return error;
+  }
+};
+
+
+export const requestPayment = async (paymentInfo) => {
+  try {
+    const saveSubscription = await axios.post(
+      'http://localhost:8080/api/subscriptions/pending',
+      {
+        paymentMethodId: paymentInfo.paymentMethodId,
+        creatorId: paymentInfo.creatorId,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    console.log(saveSubscription)
+
+
+    const savePayment = await axios.post(
+      'http://localhost:8080/api/billings/payments',
+      {
+        paymentMethodId: paymentInfo.paymentMethodId,
+        subscriptionId: saveSubscription.data.subscriptionId,
+        amount: paymentInfo.amount,
+        creatorId:saveSubscription.data.creatorId,
+        orderName:'개발퀸 정기구독권'
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+
+
+    const updateSubscriptionStatus = await axios.post(
+  `http://localhost:8080/api/subscriptions/${saveSubscription.data.subscriptionId}/activate`,
+      {
+        paymentId:  savePayment.data.paymentId,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return updateSubscriptionStatus;
+
+  } catch (error) {
+    throw error;
   }
 };

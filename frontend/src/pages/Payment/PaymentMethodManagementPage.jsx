@@ -3,7 +3,7 @@ import styles from './paymentMethodManagementPage.module.css';
 import PaymentMethodList from '../../components/Payment/PaymentMethodList';
 import WarningModal from '../../components/Payment/WarningModal';
 import {
-  requestIssueBillingKey,
+  registerBillingKey,
   savePaymentMethod,
   readAllPaymentMethod,
   deletePaymentMethod,
@@ -101,7 +101,7 @@ function PaymentMethodManagementPage() {
   //빌링키 발급 후 결제수단 조회해 보여주는 메소드
   const handleCardRegister = async () => {
     // 빌링키 발급 (로그인한 사용자로 test, test@gmail.com 부분 바꿀 예정)
-    const issueResponse = await requestIssueBillingKey(storeId, channelKey, 'test', 'test@gmail.com');
+    const issueResponse = await registerBillingKey(storeId, channelKey, '김희연', 'happylotus145@gmail.com');
     // 발급된 빌링키 이용한 결제수단 조회 (빌링키 발급단계에서 이루어진 결제수단 조회)
     const saveResponse = await savePaymentMethod(issueResponse.billingKey);
 
@@ -110,14 +110,7 @@ function PaymentMethodManagementPage() {
 
     setCards(prev => [...prev, cardWithoutUsername]);
   };
-
-  //  const handleCardRegister = async () => {
-  //     const issueResponse = await requestIssueBillingKey(storeId, channelKey, 'test', 'test@gmail.com');
-  //     const saveResponse = await savePaymentMethod(issueResponse.billingKey);
-  //     const { username, ...cardWithoutUsername } = saveResponse;
-  //     setCards(prev => [...prev, cardWithoutUsername]);
-  //   };
-
+  
   return (
     <div className={styles.payment_container}>
       {/* 결제수단관리 헤더 */}

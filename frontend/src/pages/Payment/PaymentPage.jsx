@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import SubscriptionDetails from '../../components/Payment/SubscriptionDetails';
 import PaymentModal from '../../components/Payment/PaymentModal';
 import WarningModal from '../../components/Payment/WarningModal';
-import { requestIssueBillingKey, savePaymentMethod, readAllPaymentMethod } from '../../api/payment';
+import { registerBillingKey, savePaymentMethod, readAllPaymentMethod } from '../../api/payment';
 import styles from './PaymentPage.module.css';
 // import SubscriptionSummary from "../../components/Payment/SubscriptionSummary";
 
@@ -41,6 +41,7 @@ function PaymentPage() {
   const [modalType, setModalType] = useState('method-fail'); // 'confirm-delete', 'delete-success', 'delete-fail'
   const [selectedCard, setSelectedCard] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(true);
+  const [cardData, setCards] = useState([]);
 
   const openPayModal = () => setIsPayModalOpen(true);
   const closePayModal = () => setIsPayModalOpen(false);
@@ -49,27 +50,23 @@ function PaymentPage() {
   const closeWarningModal = () => setIsWarningModalOpen(false);
   const storeId = import.meta.env.VITE_STORE_ID;
   const channelKey = import.meta.env.VITE_CHANNEL_KEY;
-  const cardData = [
-    // {
-    //   brand: 'Visa',
-    //   number: '**** **** **** 1234',
-    //   expired: '12/28',
-    //   bank: '신한은행',
-    // },
-    // {
-    //   brand: 'MasterCard',
-    //   number: '**** **** **** 5678',
-    //   expired: '08/27',
-    //   bank: '국민은행',
-    // },
-    // {
-    //   brand: 'Toss',
-    //   number: '**** **** **** 4321',
-    //   expired: '03/26',
-    //   bank: '토스뱅크',
-    // },
-  ];
+ // 컴포넌트가 마운트될 때 카드 정보 불러오기
+   useEffect(() => {
+     const fetchCards = async () => {
+       try {
+         const res = await readAllPaymentMethod(); // API 호출
+         console.log(res)
+ 
+         
+         // 실제 카드 + 테스트 카드 결합
+         setCards(res);
 
+       } catch (err) {
+         console.error('카드 정보를 불러오는 데 실패했습니다.', err);
+       }
+     };
+     fetchCards();
+   }, []); // 빈 배열 → 최초 한 번만 실행됨
   // 예시용 데이터
   const creator = {
     name: '크리에이터 닉네임',
