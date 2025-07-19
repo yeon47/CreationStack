@@ -8,20 +8,20 @@ function formatCardNumber(number) {
 
 function getCardCompanyLogo(company) {
   switch (company?.toUpperCase()) {
-    case 'Shinhan Card' :
+    case 'Shinhan Card':
     case '신한카드':
       return '/img/card_logo/shinhan_logo.png';
     case 'Hyundai Card':
-    case'현대카드':
+    case '현대카드':
       return '/img/card_logo/hyundai_logo.png';
     case 'KB Kookmin Card':
     case '국민카드':
       return '/img/card_logo/kb_logo.png';
     case 'Hana Card':
-    case'하나카드':
+    case '하나카드':
       return '/img/card_logo/hana_logo.png';
     case 'NH Nonghyup Card':
-    case'농협카드':
+    case '농협카드':
       return '/img/card_logo/nh_logo.png';
     case 'BC Card':
     case '비씨카드':
@@ -52,17 +52,15 @@ function PaymentMethodList({ cards, onDeleteCard }) {
               <strong>{card.cardName}</strong>
             </p>
             <p className={styles.card_box_text}>{formatCardNumber(card.cardNumber)}</p>
-            
+
             <div className={styles.card_brand}>
-              {card.cardBrand === 'MASTER' && (
-                <img src="/img/card_logo/mastercard_logo.png" alt="MasterCard" />
-              )}
-              {card.cardBrand === 'VISA' && (
-                <img src="/img/card_logo/visa_logo.png" alt="Visa" />
-              )}
+              {card.cardBrand === 'MASTER' && <img src="/img/card_logo/mastercard_logo.png" alt="MasterCard" />}
+              {card.cardBrand === 'VISA' && <img src="/img/card_logo/visa_logo.png" alt="Visa" />}
             </div>
           </div>
-          <button className={styles.card_delete_button} onClick={() => onDeleteCard(card.paymentMethodId)}>삭제</button>         
+          <button className={styles.card_delete_button} onClick={() => onDeleteCard(card.paymentMethodId)}>
+            삭제
+          </button>
         </div>
       ))}
     </div>

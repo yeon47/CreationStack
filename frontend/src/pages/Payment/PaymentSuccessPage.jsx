@@ -3,7 +3,6 @@ import SubscriptionDetails from '../../components/Payment/SubscriptionDetails';
 import styles from './PaymentPage.module.css';
 
 function PaymentSuccessPage() {
-
   // 예시용 데이터
   const creator = {
     name: '크리에이터 닉네임',
@@ -39,7 +38,7 @@ function PaymentSuccessPage() {
           </div>
 
           <SubscriptionDetails subscriptionDetails={subscriptionDetails} benefits={benefits} />
- 
+
           {/* Action Buttons */}
           <button className={styles.backButton}>
             <span className={styles.icon}>←</span>
