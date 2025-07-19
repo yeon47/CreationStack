@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import styles from './paymentMethodManagementPage.module.css';
 import PaymentMethodList from '../../components/Payment/PaymentMethodList';
+import WarningModal from '../../components/Payment/WarningModal';
 import { requestIssueBillingKey, savePaymentMethod, readAllPaymentMethod, deleteCardMethod } from '../../api/payment';
 
-// paymentMethodManagement page
 function PaymentMethodManagementPage() {
   const [cards, setCards] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('confirm-delete'); // 'confirm-delete', 'delete-success', 'delete-fail'
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(true);
+
   const storeId = import.meta.env.VITE_STORE_ID;
   const channelKey = import.meta.env.VITE_CHANNEL_KEY;
 
@@ -14,41 +19,74 @@ function PaymentMethodManagementPage() {
     const fetchCards = async () => {
       try {
         const res = await readAllPaymentMethod(); // API 호출
-        const testCards = [
-        {
-          cardName: '국민카드',
-          cardNumber: '11111111****111*',
-          cardType: '신용카드',
-          cardBrand:'VISA'
-        },
-        {
-          cardName: '토스뱅크',
-          cardNumber: '11111111****111*',
-          cardType: '신용카드',
-          cardBrand:'VISA'
-        },
-        {
-          cardName: '농협카드',
-          cardNumber: '11111111****111*',
-          cardType: '신용카드',
-          cardBrand:'MASTER'
-        },
-        {
-          cardName: '비씨카드',
-          cardNumber: '11111111****111*',
-          cardType: '신용카드',
-          cardBrand:'MASTER'
-        },
-      ];
 
-      // 실제 카드 + 테스트 카드 결합
-      setCards([...res, ...testCards]);
+        // 샘플 데이터 삭제 예정
+        const testCards = [
+          {
+            cardName: '국민카드',
+            cardNumber: '11111111****111*',
+            cardType: '신용카드',
+            cardBrand: 'VISA',
+          },
+          {
+            cardName: '토스뱅크',
+            cardNumber: '11111111****111*',
+            cardType: '신용카드',
+            cardBrand: 'VISA',
+          },
+          {
+            cardName: '농협카드',
+            cardNumber: '11111111****111*',
+            cardType: '신용카드',
+            cardBrand: 'MASTER',
+          },
+          {
+            cardName: '비씨카드',
+            cardNumber: '11111111****111*',
+            cardType: '신용카드',
+            cardBrand: 'MASTER',
+          },
+        ];
+
+        // 실제 카드 + 테스트 카드 결합
+        setCards([...res, ...testCards]);
       } catch (err) {
         console.error('카드 정보를 불러오는 데 실패했습니다.', err);
       }
     };
     fetchCards();
   }, []); // 빈 배열 → 최초 한 번만 실행됨
+
+  // 결제수단 삭제 여부 팝업
+  const handleCardDeleteClick = card => {
+    setSelectedCard(card);
+    setModalType('confirm-delete');
+    setIsModalOpen(true);
+  };
+
+  // 팝업 닫기
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedCard(null);
+  };
+
+  // 결제수단 삭제 확인 후 삭제진행 + 완료/실패 팝업
+  const handleDeleteConfirm = async card => {
+    // 기존 모달 닫기
+    setIsModalVisible(false);
+
+    // 300ms 후 새 모달 보여주기 (애니메이션 타이밍)
+    setTimeout(async () => {
+      try {
+        await deleteCardMethod(card.paymentMethodId);
+        setCards(prev => prev.filter(c => c.paymentMethodId !== selectedCard.paymentMethodId));
+        setModalType('delete-success');
+      } catch (error) {
+        setModalType('delete-fail');
+      }
+      setIsModalVisible(true);
+    }, 300); // CSS 애니메이션과 맞춤
+  };
 
   //빌링키 발급 후 결제수단 조회해 보여주는 메소드
   const handleCardRegister = async () => {
@@ -63,16 +101,12 @@ function PaymentMethodManagementPage() {
     setCards(prev => [...prev, cardWithoutUsername]);
   };
 
-  // 결제수단 삭제
-  const handleCardDelete = async (paymentMethodId) => {
-    alert("정말로 이 카드를 삭제하시겠어요?"); // 임시 모달창
-
-    // const deleteResponse = await deleteCardMethod(paymentId);
-    
-    // setCards((prevCards) =>
-    //     prevCards.filter((card) => card.paymentMethodId !== paymentMethodId)
-    //   );
-  }
+  //  const handleCardRegister = async () => {
+  //     const issueResponse = await requestIssueBillingKey(storeId, channelKey, 'test', 'test@gmail.com');
+  //     const saveResponse = await savePaymentMethod(issueResponse.billingKey);
+  //     const { username, ...cardWithoutUsername } = saveResponse;
+  //     setCards(prev => [...prev, cardWithoutUsername]);
+  //   };
 
   return (
     <div className={styles.payment_container}>
@@ -83,7 +117,7 @@ function PaymentMethodManagementPage() {
       </div>
 
       {/* 등록된 카드 리스트 */}
-      <PaymentMethodList cards={cards} onDeleteCard={handleCardDelete} />
+      <PaymentMethodList cards={cards} onDeleteCard={handleCardDeleteClick} />
 
       {/* 카드 등록 버튼 */}
       <div className={styles.register}>
@@ -91,6 +125,16 @@ function PaymentMethodManagementPage() {
           <p>카드 등록</p>
         </button>
       </div>
+
+      {/* 결제수단 삭제 관련 모달창 */}
+      <WarningModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        type={modalType}
+        isVisible={isModalVisible} // 추가
+        cardData={selectedCard}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }
