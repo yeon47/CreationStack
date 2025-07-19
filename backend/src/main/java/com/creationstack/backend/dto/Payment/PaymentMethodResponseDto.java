@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+// 카드 정보 dto
 @Getter
 @Setter
 @AllArgsConstructor
