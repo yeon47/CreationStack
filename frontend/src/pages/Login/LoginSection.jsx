@@ -70,8 +70,11 @@ export const LoginSection = () => {
   };
 
   const handleKakaoLogin = () => {
-    // 카카오 로그인 처리
-    window.location.href = '/api/auth/kakao';
+    const KAKAO_REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
+    const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
+
+    const kakaoLoginUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code`;
+    window.location.href = kakaoLoginUrl;
   };
 
   const handleSignupClick = () => {
