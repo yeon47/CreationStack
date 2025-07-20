@@ -7,7 +7,7 @@ export const SearchCreatorCardList = ({ contents }) => {
     <PaginatedGrid
       items={contents}
       itemsPerPage={9}
-      renderItem={creator => <CreatorCard key={creator.nickname} creator={creator} />}
+      renderItem={creator => <CreatorCard key={creator.id} creator={creator} />}
     />
   );
 };

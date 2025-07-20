@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { CreatorListSection } from "../../components/Search/SearchCreator/CreatorListSection/CreatorListSection";
-import { CreatorSearching } from "../../components/Search/SearchCreator/CreatorSearching/CreatorSearching";
-import { searchCreator } from "../../api/search";
-import "./CreatorSearchPage.css";
+import React, { useEffect, useState } from 'react';
+import { CreatorListSection } from '../../components/Search/SearchCreator/CreatorListSection/CreatorListSection';
+import { CreatorSearching } from '../../components/Search/SearchCreator/CreatorSearching/CreatorSearching';
+import { searchCreator } from '../../api/search';
+import './CreatorSearchPage.css';
 
 export const CreatorSearchPage = () => {
   const [creators, setCreators] = useState([]);
-  const [keyword, setKeyword] = useState("");
-  const [inputValue, setInputValue] = useState("");
+  const [keyword, setKeyword] = useState('');
+  const [inputValue, setInputValue] = useState('');
 
   useEffect(() => {
     const fetchCreators = async () => {
@@ -18,7 +18,8 @@ export const CreatorSearchPage = () => {
           return;
         }
 
-        const mapped = result.contents.map((item) => ({
+        const mapped = result.contents.map(item => ({
+          id: item.contentId,
           name: item.creator.nickname, // nickname을 name으로 매핑
           job: item.creator.job,
           description: item.creator.bio, // bio를 description으로 매핑
@@ -27,7 +28,7 @@ export const CreatorSearchPage = () => {
         }));
         setCreators(mapped);
       } catch (error) {
-        console.error("Failed to fetch creators:", error);
+        console.error('Failed to fetch creators:', error);
       }
     };
 
