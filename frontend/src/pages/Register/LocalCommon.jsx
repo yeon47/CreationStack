@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { Button } from '../../components/Member/Button';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '../../components/Member/Card';
 import { Input } from '../../components/Member/Input';
 import { SimpleLabel } from '../../components/Member/SimpleLabel';
 import styles from './LocalCommon.module.css';
+
+import Eye from '../../components/Member/Eye';
+import EyeOff from '../../components/Member/EyeOff';
 
 export const LocalCommon = ({ onBack }) => {
   const [formData, setFormData] = useState({
@@ -16,7 +18,47 @@ export const LocalCommon = ({ onBack }) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Form field data with labels and placeholders
+  // 비밀번호 보이기/숨기기 상태
+  const [passwordVisibility, setPasswordVisibility] = useState({
+    password: false,
+    confirmPassword: false,
+  });
+
+  // 닉네임 중복 실시간 처리
+  const [nicknameStatus, setNicknameStatus] = useState({
+    message: '',
+    isAvailable: null, // null: 초기, true: 사용 가능, false: 중복
+  });
+
+  // 이메일 중복 처리
+  const [emailStatus, setEmailStatus] = useState({
+    message: '',
+    isAvailable: null,
+  });
+
+  useEffect(() => {
+    const nickname = formData.nickname.trim();
+    if (nickname.length < 2) {
+      setNicknameStatus({ message: '', isAvailable: null });
+      return;
+    }
+
+    const handler = setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/users/check-nickname?nickname=${nickname}`);
+        const result = await response.json();
+        setNicknameStatus({
+          message: result.message,
+          isAvailable: result.available,
+        });
+      } catch (error) {
+        console.error('Nickname check failed:', error);
+        setNicknameStatus({ message: '확인 중 오류 발생', isAvailable: false });
+      }
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [formData.nickname]);
   const formFields = [
     {
       id: 'email',
@@ -60,12 +102,33 @@ export const LocalCommon = ({ onBack }) => {
       ...prev,
       [id]: value,
     }));
+
+    if (id === 'email') {
+      setEmailStatus({ message: '', isAvailable: null });
+    }
+  };
+
+  // 비밀번호 보이기/숨기기 토글 핸들러
+  const togglePasswordVisibility = fieldId => {
+    setPasswordVisibility(prev => ({
+      ...prev,
+      [fieldId]: !prev[fieldId],
+    }));
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
 
-    // 비밀번호 확인 검증
+    if (emailStatus.isAvailable === false) {
+      alert('이미 사용 중인 이메일입니다. 다른 이메일을 사용해주세요.');
+      return;
+    }
+
+    if (nicknameStatus.isAvailable === false) {
+      alert('이미 사용 중인 닉네임입니다. 다른 닉네임을 사용해주세요.');
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       alert('비밀번호가 일치하지 않습니다.');
       return;
@@ -81,9 +144,10 @@ export const LocalCommon = ({ onBack }) => {
         },
         body: JSON.stringify({
           email: formData.email,
-          name: formData.name,
+          username: formData.name,
           nickname: formData.nickname,
           password: formData.password,
+          role: 'USER',
         }),
       });
 
@@ -108,18 +172,17 @@ export const LocalCommon = ({ onBack }) => {
       alert('이메일을 입력해주세요.');
       return;
     }
-
     try {
       const response = await fetch(`/api/users/check-email?email=${formData.email}`);
       const result = await response.json();
-
-      if (result.available) {
-        alert('사용 가능한 이메일입니다.');
-      } else {
-        alert('이미 사용 중인 이메일입니다.');
-      }
+      // alert 대신 상태를 업데이트합니다.
+      setEmailStatus({
+        message: result.message,
+        isAvailable: result.available,
+      });
     } catch (error) {
-      alert('이메일 중복 확인 중 오류가 발생했습니다.');
+      console.error('Email check error:', error);
+      setEmailStatus({ message: '확인 중 오류가 발생했습니다.', isAvailable: false });
     }
   };
 
@@ -131,7 +194,6 @@ export const LocalCommon = ({ onBack }) => {
     <div className={styles.container}>
       <Card className={styles.card}>
         <CardContent className={styles.cardContent}>
-          {/* Header Section */}
           <div className={styles.header}>
             <div className={styles.headerLeft}>
               <div className={styles.welcomeText}>
@@ -140,7 +202,6 @@ export const LocalCommon = ({ onBack }) => {
               </div>
               <div className={styles.title}>회원가입</div>
             </div>
-
             <div className={styles.headerRight}>
               <div className={styles.loginPrompt}>계정이 있으신가요?</div>
               <button className={styles.loginLink} onClick={handleLoginClick}>
@@ -149,15 +210,31 @@ export const LocalCommon = ({ onBack }) => {
             </div>
           </div>
 
-          {/* Form Fields */}
           <form onSubmit={handleSubmit}>
             <div className={styles.formFields}>
               {formFields.map(field => (
                 <div key={field.id} className={styles.fieldContainer}>
-                  <SimpleLabel htmlFor={field.id} className={styles.fieldLabel}>
-                    {field.label} {field.required && <span className={styles.required}>*</span>}
-                  </SimpleLabel>
-
+                  <div className={styles.labelWrapper}>
+                    <SimpleLabel htmlFor={field.id} className={styles.fieldLabel}>
+                      {field.label} {field.required && <span className={styles.required}>*</span>}
+                    </SimpleLabel>
+                    {field.id === 'email' && emailStatus.message && (
+                      <span
+                        className={`${styles.statusMessage} ${
+                          emailStatus.isAvailable ? styles.available : styles.unavailable
+                        }`}>
+                        {emailStatus.message}
+                      </span>
+                    )}
+                    {field.id === 'nickname' && nicknameStatus.message && (
+                      <span
+                        className={`${styles.statusMessage} ${
+                          nicknameStatus.isAvailable ? styles.available : styles.unavailable
+                        }`}>
+                        {nicknameStatus.message}
+                      </span>
+                    )}
+                  </div>
                   {field.hasButton ? (
                     <div className={styles.inputWithButton}>
                       <div className={styles.inputWrapper}>
@@ -178,20 +255,39 @@ export const LocalCommon = ({ onBack }) => {
                     <div className={styles.inputWrapperRegular}>
                       <Input
                         id={field.id}
-                        type={field.type || 'text'}
+                        // 상태에 따라 type을 동적으로 변경
+                        type={
+                          field.type === 'password'
+                            ? passwordVisibility[field.id]
+                              ? 'text'
+                              : 'password'
+                            : field.type || 'text'
+                        }
                         placeholder={field.placeholder}
                         className={styles.input}
                         value={formData[field.id]}
                         onChange={handleInputChange}
                         required={field.required}
                       />
+                      {/* 비밀번호 필드일 경우 아이콘 버튼 추가 */}
+                      {field.type === 'password' && (
+                        <button
+                          type="button"
+                          onClick={() => togglePasswordVisibility(field.id)}
+                          className={styles.passwordIcon}>
+                          {passwordVisibility[field.id] ? (
+                            <EyeOff size={20} color="#8D8D8D" />
+                          ) : (
+                            <Eye size={20} color="#8D8D8D" />
+                          )}
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
               ))}
             </div>
 
-            {/* Submit Button */}
             <div className={styles.submitSection}>
               <div className={styles.buttonContainer}>
                 {onBack && (
