@@ -51,6 +51,8 @@ public class UserDetail {
     public enum Platform {
         LOCAL, KAKAO
     }
-    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_id")
+    private Job job;
  
 }
