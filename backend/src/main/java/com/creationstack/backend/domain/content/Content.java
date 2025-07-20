@@ -5,7 +5,9 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -67,6 +69,11 @@ public class Content {
     @Builder.Default
     private Set<Attachment> attachments = new HashSet<>(); // HashSet으로 초기화
 
+    //콘텐츠 좋아요
+    @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Like> likes = new ArrayList<>();
+
+    
     /**
      * 조회수를 1 증가시키는 메서드입니다.
      */

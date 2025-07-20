@@ -1,15 +1,22 @@
 package com.creationstack.backend.controller.content; // 실제 프로젝트 패키지 경로로 변경
 
 import com.creationstack.backend.dto.content.ContentCreateRequest;
+import com.creationstack.backend.dto.content.ContentList;
 import com.creationstack.backend.dto.content.ContentResponse;
 import com.creationstack.backend.dto.content.ContentUpdateRequest;
 import com.creationstack.backend.service.ContentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 // import org.springframework.security.core.annotation.AuthenticationPrincipal; // @AuthenticationPrincipal 임포트 제거 (임시)
 import org.springframework.web.bind.annotation.*;
 
@@ -73,6 +80,30 @@ public class ContentController {
         contentService.deleteContent(contentId, creatorId);
         return ResponseEntity.noContent().build(); // 204 No Content 반환
     }
+    
+    // 콘텐츠 좋아요
+ // 좋아요 토글
+    @PostMapping("/{contentId}/like")
+    public ResponseEntity<String> toggleContentLike(
+            @PathVariable Long contentId,
+            @RequestParam("userId") Long userId  // ← requestParam으로 받음
+    ) {
+        boolean isLiked = contentService.toggleLike(contentId, userId);
+        return ResponseEntity.ok(isLiked ? "liked" : "unliked");
+    }
+
+    
+    // 좋아요 콘텐츠 목록 조회-페이징
+    @GetMapping("/liked")
+    public ResponseEntity<?> getLikedContents(
+            @RequestParam("userId") Long userId,
+            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        Page<ContentList> likedContents = contentService.getLikedContents(userId, pageable);
+        return ResponseEntity.ok(likedContents);
+    }
+
+    
 
 
 //    @PostMapping("/categories/initialize")

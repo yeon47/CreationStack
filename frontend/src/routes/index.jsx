@@ -5,23 +5,22 @@ import { LoginSection } from '../pages/Login/LoginSection';
 import { MemberRegister } from '../pages/Register/MemberRegister';
 
 import PaymentMethodManagementPage from '../pages/Payment/PaymentMethodManagementPage';
-import PaymentPage from "../pages/Payment/PaymentPage";
+import PaymentPage from '../pages/Payment/PaymentPage';
 import PaymentSuccessPage from '../pages/Payment/PaymentSuccessPage';
 import ContentFormPage from '../pages/ContentForm/ContentFormPage';
 import { MyCreatorPage } from '../pages/MyPage/MyCreatorPage';
 import { MyUserPage } from '../pages/MyPage/MyUserPage';
 import { SubscriptionManage } from '../pages/ManageSubscriptionPage/SubscriptionManage';
 import { UserMainPage } from '../pages/MainPage/UserMainPage/UserMainPage';
-
 import MainLayout from '../layouts/mainLayout';
 import ReplyTestPage from '../pages/ContentDetail/ReplyTestPage';
-import FavoriteContent from '../pages/FavoriteContent/FavoriteContent';
+import FavoriteContent from '../pages/FavoriteContent/FavoriteContentPage';
 import { CreatorMainPage } from '../pages/MainPage/CreatorMainPage/CreatorMainPage';
 //import CreatorManagementPage from '../pages/CreatorManagement/CreatorManagementPage';
 
-import { CreatorSearchPage } from "../pages/CreatorSearchPage/CreatorSearchPage";
-import { ContentSearchPage } from "../pages/ContentSearchPage/ContentSearchPage";
-import { UnifiedSearchPage } from "../pages/UnifiedSearchPage/UnifiedSearchPage";
+import { CreatorSearchPage } from '../pages/CreatorSearchPage/CreatorSearchPage';
+import { ContentSearchPage } from '../pages/ContentSearchPage/ContentSearchPage';
+import { UnifiedSearchPage } from '../pages/UnifiedSearchPage/UnifiedSearchPage';
 
 export default function AppRoutes() {
   return (
@@ -29,7 +28,6 @@ export default function AppRoutes() {
       <Route element={<MainLayout />}>
         {/* 홈 경로 */}
         <Route path="/" element={<Home />} />
-
         <Route path="/payments" element={<PaymentMethodManagementPage />} />
         <Route path="/payments/summary" element={<PaymentPage />} />
         <Route path="/payments/success" element={<PaymentSuccessPage />} />
