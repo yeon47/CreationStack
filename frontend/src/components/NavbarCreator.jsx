@@ -76,13 +76,13 @@ export const NavbarCreator = () => {
   return (
     <nav className={styles.navbarCreator}>
       {/* 로고 섹션 */}
-      <div className={styles.logoSection}>
+      <Link to="/" className={styles.logoSection}>
         <img
           className={styles.logoImg}
           alt="Logo"
           src="https://c.animaapp.com/md45uvjzPxvxqT/img/mask-group-2.svg"
         />
-      </div>
+      </Link>
 
       {/* 링크 메뉴바 */}
       <div className={styles.linkSection}>
