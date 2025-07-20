@@ -1,5 +1,6 @@
 package com.creationstack.backend.repository;
 
+import com.creationstack.backend.domain.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,4 +14,5 @@ public interface UserDetailRepository extends JpaRepository<UserDetail, Long> {
     Optional<UserDetail> findByNickname(String nickname);
     boolean existsByEmail(String email);
     boolean existsByNickname(String nickname);
+    Optional<UserDetail> findByUser(User user);
 }
