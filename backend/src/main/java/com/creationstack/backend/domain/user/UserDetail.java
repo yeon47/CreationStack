@@ -51,4 +51,6 @@ public class UserDetail {
     public enum Platform {
         LOCAL, KAKAO
     }
+    
+ 
 }

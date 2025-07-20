@@ -5,18 +5,24 @@ import com.creationstack.backend.domain.content.Attachment;
 import com.creationstack.backend.domain.content.Content;
 import com.creationstack.backend.domain.content.ContentCategory;
 import com.creationstack.backend.domain.content.ContentCategoryMapping;
+import com.creationstack.backend.domain.content.Like;
 import com.creationstack.backend.domain.user.User;
 import com.creationstack.backend.dto.content.ContentCreateRequest;
+import com.creationstack.backend.dto.content.ContentList;
 import com.creationstack.backend.dto.content.ContentResponse;
 import com.creationstack.backend.dto.content.ContentUpdateRequest;
 import com.creationstack.backend.exception.CustomException; // CustomException 임포트
 import com.creationstack.backend.repository.content.AttachmentRepository;
 import com.creationstack.backend.repository.content.ContentCategoryRepository;
 import com.creationstack.backend.repository.content.ContentRepository;
+import com.creationstack.backend.repository.LikeRepository;
 import com.creationstack.backend.repository.UserRepository;
 import com.creationstack.backend.service.FileStorageService; // FileStorageService 임포트
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus; // HttpStatus 임포트
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +47,8 @@ public class ContentService {
     private final ContentCategoryRepository contentCategoryRepository;
     private final AttachmentRepository attachmentRepository;
     private final FileStorageService fileStorageService; // S3 연동을 위한 FileStorageService 주입
-
+    private final LikeRepository likeRepository;
+    
     // 콘텐츠 생성
     @Transactional // 쓰기 작업이므로 트랜잭션 적용
     public ContentResponse createContent(ContentCreateRequest request, Long creatorId) {
@@ -305,4 +312,71 @@ public class ContentService {
             }
         });
     }
+    
+    // 콘텐츠 좋아요/취소
+    @Transactional
+    public boolean toggleLike(Long contentId, Long userId) {
+        Content content = contentRepository.findById(contentId)
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "콘텐츠가 존재하지 않습니다."));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "사용자가 존재하지 않습니다."));
+
+        Optional<Like> existingLike = likeRepository.findByUserAndContent(user, content);
+
+        if (existingLike.isPresent()) {
+            Like like = existingLike.get();
+            boolean wasActive = like.getIsActive();
+            like.setIsActive(!wasActive);
+            likeRepository.save(like);
+
+            // 좋아요 수 증감
+            if (wasActive) {
+                content.setLikeCount(content.getLikeCount() - 1);
+            } else {
+                content.setLikeCount(content.getLikeCount() + 1);
+            }
+            contentRepository.save(content);
+
+            return like.getIsActive();
+        } else {
+            Like like = new Like();
+            like.setUser(user);
+            like.setContent(content);
+            like.setIsActive(true);
+            likeRepository.save(like);
+
+            content.setLikeCount(content.getLikeCount() + 1);
+            contentRepository.save(content);
+
+            return true;
+        }
+    }
+    
+    // 좋아요 콘텐츠 조회
+    /*public Page<ContentList> getLikedContents(Long userId, Pageable pageable) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
+
+        return likeRepository.findByUserAndIsActiveTrue(user, pageable)
+                .map(like -> ContentList.from(like.getContent())); 
+    }*/
+    public Page<ContentList> getLikedContents(Long userId, Pageable pageable) {
+        Page<Like> likes = likeRepository.findByUserIdAndIsActiveTrue(userId, pageable);
+
+        System.out.println("총 좋아요 수: " + likes.getTotalElements());
+
+        for (Like like : likes) {
+            System.out.println("LIKE ID: " + like.getLikeId());
+            System.out.println("CONTENT: " + like.getContent()); // 이게 null이면 content가 없는 것
+        }
+
+        return likes.map(like -> ContentList.from(like.getContent()));
+    }
+
+
+
+
+
+
 }

@@ -3,6 +3,7 @@ package com.creationstack.backend.service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -223,6 +224,7 @@ public class AuthService {
                                                         .message("이메일 또는 비밀번호가 올바르지 않습니다.")
                                                         .build();
                                 }
+
                         }
 
                         log.info("로그인 인증 성공: {}", request.getEmail());
@@ -389,6 +391,7 @@ public class AuthService {
                         log.error("로그아웃 처리 중 오류 발생: {}", e.getMessage(), e);
                         return LogoutResponse.error("로그아웃 처리 중 오류가 발생했습니다.");
                 }
+
         }
 
         /**

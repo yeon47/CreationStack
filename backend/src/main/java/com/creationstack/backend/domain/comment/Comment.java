@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import com.creationstack.backend.domain.content.Content;
 import com.creationstack.backend.domain.user.User;
-import com.creationstack.backend.dto.CommentResponseDto;
+import com.creationstack.backend.dto.comment.CommentResponseDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,7 +21,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name="comments")
+@Table(name="comment")
 public class Comment {
 	
 @Id
