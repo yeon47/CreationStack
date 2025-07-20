@@ -8,6 +8,7 @@ savePaymentMethod : 결제수단 DB 저장 API
 requestIssueBillingKey : 포트원 빌링키 발급 SDK 요청
 readAllPaymentMethod : 모든 결제수단 조회 API
 deletePaymentMethod : 결제수단 삭제 API
+requestPayment : 결제 요청 API
 */
 
 // 등록된 모든 결제수단 조회 API
@@ -42,13 +43,14 @@ export const savePaymentMethod = async billingKey => {
     );
     return response.data;
   } catch (error) {
-    return error;
+    throw error;
   }
 };
 
 //포트원 SDK 호출(결제수단 등록)
-export const registerBillingKey= async (storeId, channelKey, name, email) => {
-  const customerId = `user-${uuidv4()}`;
+export const registerBillingKey = async (storeId, channelKey, name, email) => {
+  try {
+    const customerId = `user-${uuidv4()}`;
 
   // 결제수단 사용자 정보
   const customer = {
@@ -73,6 +75,10 @@ export const registerBillingKey= async (storeId, channelKey, name, email) => {
   });
   alert('이 billingkey를 .env sample billingkey로 사용하세요' + response.billingKey);
   return response;
+    
+  } catch (error) {
+    throw error;
+  }
 };
 
 // 결제수단 삭제 deleteCardMethod
@@ -92,11 +98,11 @@ export const deletePaymentMethod = async (paymentMethodId, reason) => {
     );
     return response.data;
   } catch (error) {
-    return error;
+    throw error;
   }
 };
 
-
+// 결제 진행
 export const requestPayment = async (paymentInfo) => {
   try {
     const saveSubscription = await axios.post(
@@ -111,9 +117,6 @@ export const requestPayment = async (paymentInfo) => {
         },
       }
     );
-
-    console.log(saveSubscription)
-
 
     const savePayment = await axios.post(
       'http://localhost:8080/api/billings/payments',
@@ -131,8 +134,6 @@ export const requestPayment = async (paymentInfo) => {
       }
     );
 
-
-
     const updateSubscriptionStatus = await axios.post(
   `http://localhost:8080/api/subscriptions/${saveSubscription.data.subscriptionId}/activate`,
       {
@@ -144,8 +145,8 @@ export const requestPayment = async (paymentInfo) => {
         },
       }
     );
-    return updateSubscriptionStatus;
 
+    return updateSubscriptionStatus;
   } catch (error) {
     throw error;
   }
