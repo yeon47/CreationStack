@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 
 import { LoginSection } from '../pages/Login/LoginSection';
 import { MemberRegister } from '../pages/Register/MemberRegister';
+import AuthCallback from '../pages/Register/KakaoRegisterCallback';
 
 import PaymentMethodManagementPage from '../pages/Payment/PaymentMethodManagementPage';
 import PaymentPage from '../pages/Payment/PaymentPage';
@@ -48,6 +49,7 @@ export default function AppRoutes() {
 
       <Route path="/login" element={<LoginSection />} />
       <Route path="/register" element={<MemberRegister />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
 
       {/* 404 처리 */}
       <Route path="*" element={<div>404 - Page Not Found</div>} />

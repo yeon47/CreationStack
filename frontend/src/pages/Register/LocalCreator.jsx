@@ -4,7 +4,6 @@ import styles from './LocalCreator.module.css';
 import { Card, CardContent } from '../../components/Member/Card';
 import { Input } from '../../components/Member/Input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/Member/Select';
-import { SimpleLabel } from '../../components/Member/SimpleLabel';
 import Eye from '../../components/Member/Eye';
 import EyeOff from '../../components/Member/EyeOff';
 
@@ -18,10 +17,29 @@ export const LocalCreator = ({ onBack }) => {
     confirmPassword: '',
   });
 
+  const [jobs, setJobs] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordVisibility, setPasswordVisibility] = useState({ password: false, confirmPassword: false });
   const [nicknameStatus, setNicknameStatus] = useState({ message: '', isAvailable: null });
   const [emailStatus, setEmailStatus] = useState({ message: '', isAvailable: null });
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const response = await fetch('/api/jobs');
+        if (response.ok) {
+          const result = await response.json();
+          // 백엔드 응답의 data 필드에 직업 목록이 담겨있음
+          setJobs(result.data || []);
+        } else {
+          console.error('직업 목록을 불러오는 데 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('직업 목록 요청 중 오류 발생:', error);
+      }
+    };
+    fetchJobs();
+  }, []); // 빈 배열을 전달하여 컴포넌트가 처음 렌더링될 때 한 번만 실행
 
   useEffect(() => {
     const nickname = formData.nickname.trim();
@@ -221,11 +239,12 @@ export const LocalCreator = ({ onBack }) => {
                   <SelectTrigger className={styles.selectTrigger}>
                     <SelectValue placeholder="직업을 선택해주세요" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">개발자</SelectItem>
-                    <SelectItem value="2">디자이너</SelectItem>
-                    <SelectItem value="3">기획자</SelectItem>
-                    <SelectItem value="4">기타</SelectItem>
+                  <SelectContent side="top" sideOffset={4}>
+                    {jobs.map(job => (
+                      <SelectItem key={job.jobId} value={String(job.jobId)}>
+                        {job.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
