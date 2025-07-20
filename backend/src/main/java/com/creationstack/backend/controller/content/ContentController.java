@@ -16,6 +16,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 // import org.springframework.security.core.annotation.AuthenticationPrincipal; // @AuthenticationPrincipal 임포트 제거 (임시)
 import org.springframework.web.bind.annotation.*;
@@ -44,9 +45,11 @@ public class ContentController {
 
     //특정 콘텐츠 조회
     @GetMapping("/{contentId}")
-    public ResponseEntity<ContentResponse> getContentById(@PathVariable Long contentId) {
+    public ResponseEntity<ContentResponse> getContentById(@PathVariable Long contentId, Authentication authentication) {
         log.info("콘텐츠 조회 요청 수신: Content ID={}", contentId);
-        ContentResponse response = contentService.getContentById(contentId);
+        
+        Long rqUserId = Long.parseLong(authentication.getName());
+        ContentResponse response = contentService.getContentById(contentId, rqUserId);
         return ResponseEntity.ok(response);
     }
 

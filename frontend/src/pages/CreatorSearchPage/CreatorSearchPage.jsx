@@ -1,43 +1,39 @@
-import React, { useEffect, useState } from "react";
-import { Pagination } from "../../components/Search/Pagination/Pagination";
-import { CreatorListSection } from "../../components/Search/SearchCreator/CreatorListSection/CreatorListSection";
-import { CreatorSearching } from "../../components/Search/SearchCreator/CreatorSearching/CreatorSearching";
-import { searchCreator } from "../../api/search";
-import "./CreatorSearchPage.css";
+import React, { useEffect, useState } from 'react';
+import { CreatorListSection } from '../../components/Search/SearchCreator/CreatorListSection/CreatorListSection';
+import { CreatorSearching } from '../../components/Search/SearchCreator/CreatorSearching/CreatorSearching';
+import { searchCreator } from '../../api/search';
+import './CreatorSearchPage.css';
 
 export const CreatorSearchPage = () => {
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
   const [creators, setCreators] = useState([]);
-  const [keyword, setKeyword] = useState("");
-  const [inputValue, setInputValue] = useState("");
+  const [keyword, setKeyword] = useState('');
+  const [inputValue, setInputValue] = useState('');
 
   useEffect(() => {
     const fetchCreators = async () => {
       try {
-        const result = await searchCreator(page, keyword);
+        const result = await searchCreator(0, keyword); // Always fetch from page 0 for new searches
         if (!result || !result.contents) {
           setCreators([]);
-          setTotalPages(0);
           return;
         }
 
-        const mapped = result.contents.map((item) => ({
-          nickname: item.creator.nickname,
+        const mapped = result.contents.map(item => ({
+          id: item.contentId,
+          name: item.creator.nickname, // nickname을 name으로 매핑
           job: item.creator.job,
-          bio: item.creator.bio,
+          description: item.creator.bio, // bio를 description으로 매핑
           profileImageUrl: item.creator.profileImageUrl,
           subscriberCount: item.creator.subscriberCount,
         }));
         setCreators(mapped);
-        setTotalPages(result.totalPages);
       } catch (error) {
-        console.error("Failed to fetch creators:", error);
+        console.error('Failed to fetch creators:', error);
       }
     };
 
     fetchCreators();
-  }, [page, keyword]);
+  }, [keyword]);
 
   return (
     <div className="creator-search-page" data-model-id="84:71">
@@ -47,10 +43,9 @@ export const CreatorSearchPage = () => {
             inputValue={inputValue}
             setInputValue={setInputValue}
             setKeyword={setKeyword}
-            setPage={setPage}
+            setPage={() => {}} // setPage is no longer needed here
           />
           <CreatorListSection creators={creators} />
-          <Pagination page={page} totalPages={totalPages} setPage={setPage} />
         </div>
       </div>
     </div>

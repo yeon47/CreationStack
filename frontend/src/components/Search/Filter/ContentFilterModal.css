@@ -7,7 +7,7 @@
 
 .content-filter-modal .heading {
   color: #23262a;
-  font-family: "Poppins", Helvetica;
+  font-family: 'Poppins', Helvetica;
   font-size: 24px;
   font-weight: 600;
   left: 69px;
@@ -20,7 +20,7 @@
 
 .content-filter-modal .exit-button {
   color: #23262a;
-  font-family: "Poppins", Helvetica;
+  font-family: 'Poppins', Helvetica;
   font-size: 24px;
   font-weight: 300;
   left: 497px;
@@ -41,7 +41,7 @@
 
 .content-filter-modal .text-wrapper {
   color: #23262a;
-  font-family: "Poppins", Helvetica;
+  font-family: 'Poppins', Helvetica;
   font-size: 16px;
   font-weight: 600;
   left: 0;
@@ -84,7 +84,7 @@
 
 .content-filter-modal .text-wrapper-2 {
   color: #23262a;
-  font-family: "Poppins", Helvetica;
+  font-family: 'Poppins', Helvetica;
   font-size: 14px;
   font-weight: 500;
   left: 30px;
@@ -151,7 +151,7 @@
 
 .content-filter-modal .text-wrapper-3 {
   color: #60656e;
-  font-family: "Poppins", Helvetica;
+  font-family: 'Poppins', Helvetica;
   font-size: 14px;
   font-weight: 400;
   left: 165px;
@@ -173,11 +173,7 @@
 .content-filter-modal .overlap-group {
   background-color: #4682a9;
   border-radius: 8px;
-  box-shadow:
-    0px 0px 0px transparent,
-    0px 0px 0px transparent,
-    0px 0px 0px transparent,
-    0px 0px 0px transparent,
+  box-shadow: 0px 0px 0px transparent, 0px 0px 0px transparent, 0px 0px 0px transparent, 0px 0px 0px transparent,
     0px 2px 4px #4318d133;
   height: 45px;
   position: relative;
@@ -185,8 +181,8 @@
 }
 
 .content-filter-modal .text-wrapper-4 {
-  color: #ffffff;
-  font-family: "Poppins", Helvetica;
+  color: #23262a;
+  font-family: 'Poppins', Helvetica;
   font-size: 14px;
   font-weight: 600;
   left: 30px;

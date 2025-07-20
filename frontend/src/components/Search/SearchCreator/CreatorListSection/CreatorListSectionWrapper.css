@@ -1,55 +1,10 @@
 .creator-list-section-wrapper {
-  align-items: flex-start;
-  display: flex;
-  flex-direction: column;
-  gap: 64px;
+  display: block; /* 또는 flex-direction을 제거하고 display: grid;로 변경 */
   position: relative;
   width: 100%;
-  max-width: 1216px;
   margin: 0 auto;
 }
 
-.creator-list-section-wrapper .creator-card-list-instance {
-  background: linear-gradient(
-    0deg,
-    rgba(162, 168, 205, 1) 0%,
-    rgba(162, 168, 205, 1) 100%
-  ) !important;
-  background-image: unset !important;
-  background-position: unset !important;
-  background-size: unset !important;
-}
-
-.creator-list-section-wrapper .design-component-instance-node {
-  align-self: stretch !important;
-  flex: 0 0 auto !important;
-  width: 100% !important;
-}
-
-.creator-list-section-wrapper .creator-card-list-2 {
-  font-weight: 300 !important;
-}
-
-.creator-list-section-wrapper .creator-card-list-instance {
-  background: linear-gradient(
-    0deg,
-    rgba(162, 168, 205, 1) 0%,
-    rgba(162, 168, 205, 1) 100%
-  ) !important;
-  background-image: unset !important;
-  background-position: unset !important;
-  background-size: unset !important;
-}
-
-.creator-list-section-wrapper .design-component-instance-node {
-  align-self: stretch !important;
-  flex: 0 0 auto !important;
-  width: 100% !important;
-}
-
-.creator-list-section-wrapper .creator-card-list-2 {
-  font-weight: 300 !important;
-}
 .no-search-result {
   font-size: 24px;
   font-weight: bold;
