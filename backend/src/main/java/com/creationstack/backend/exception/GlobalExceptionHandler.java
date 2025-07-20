@@ -100,7 +100,11 @@ public class GlobalExceptionHandler {
   private String extractPortOneErrorMessage(String responseBody) {
     try {
       JsonNode node = new ObjectMapper().readTree(responseBody);
-      return node.has("message") ? node.get("message").asText() : "에러 메시지를 찾을 수 없습니다.";
+      if (node.has("message")) {
+        JsonNode messageNode = node.get("message");
+        return messageNode.isTextual() ? messageNode.asText() : messageNode.toString();
+      }
+      return "에러 메시지를 찾을 수 없습니다.";
     } catch (Exception e) {
       return "에러 응답 파싱 실패";
     }

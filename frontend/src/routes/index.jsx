@@ -6,6 +6,8 @@ import { MemberRegister } from '../pages/Register/MemberRegister';
 import AuthCallback from '../pages/Register/KakaoRegisterCallback';
 
 import PaymentMethodManagementPage from '../pages/Payment/PaymentMethodManagementPage';
+import PaymentPage from "../pages/Payment/PaymentPage";
+import PaymentSuccessPage from '../pages/Payment/PaymentSuccessPage';
 import ContentFormPage from '../pages/ContentForm/ContentFormPage';
 import { MyCreatorPage } from '../pages/MyPage/MyCreatorPage';
 import { MyUserPage } from '../pages/MyPage/MyUserPage';
@@ -18,6 +20,10 @@ import FavoriteContent from '../pages/FavoriteContent/FavoriteContent';
 import { CreatorMainPage } from '../pages/MainPage/CreatorMainPage/CreatorMainPage';
 //import CreatorManagementPage from '../pages/CreatorManagement/CreatorManagementPage';
 
+import { CreatorSearchPage } from "../pages/CreatorSearchPage/CreatorSearchPage";
+import { ContentSearchPage } from "../pages/ContentSearchPage/ContentSearchPage";
+import { UnifiedSearchPage } from "../pages/UnifiedSearchPage/UnifiedSearchPage";
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -25,6 +31,8 @@ export default function AppRoutes() {
         {/* 홈 경로 */}
         <Route path="/" element={<Home />} />
         <Route path="/payments" element={<PaymentMethodManagementPage />} />
+        <Route path="/payments/summary" element={<PaymentPage />} />
+        <Route path="/payments/success" element={<PaymentSuccessPage />} />
         <Route path="/reply-test" element={<ReplyTestPage />} />
         <Route path="/favorites" element={<FavoriteContent />} />
         {/* <Route path="/creator-management" element={<CreatorManagementPage />} /> */}
@@ -34,6 +42,9 @@ export default function AppRoutes() {
         <Route path="/subscription-manage" element={<SubscriptionManage />} />
         <Route path="/user-main" element={<UserMainPage />} />
         <Route path="/creator-main/:creatorNickname" element={<CreatorMainPage />} />
+        <Route path="/creators" element={<CreatorSearchPage />} />
+        <Route path="/contents" element={<ContentSearchPage />} />
+        <Route path="/search" element={<UnifiedSearchPage />} />
       </Route>
 
       <Route path="/login" element={<LoginSection />} />
