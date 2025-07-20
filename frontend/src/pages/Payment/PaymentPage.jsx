@@ -1,5 +1,6 @@
 // PaymentPage.jsx
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SubscriptionDetails from '../../components/Payment/SubscriptionDetails';
 import PaymentModal from '../../components/Payment/PaymentModal';
 import WarningModal from '../../components/Payment/WarningModal';
@@ -8,32 +9,6 @@ import styles from './PaymentPage.module.css';
 // import SubscriptionSummary from "../../components/Payment/SubscriptionSummary";
 
 function PaymentPage() {
-  // props 데이터 선언 또는 상태 관리
-
-  //     const [creator, setCreator] = useState(null);
-  //     const [subscriptionDetails, setSubscriptionDetails] = useState([]);
-  //     const [benefits, setBenefits] = useState([]);
-
-  //     useEffect(() => {
-  //         setCreator({
-  //   name: "크리에이터 닉네임",
-  //   image: "https://c.animaapp.com/md94mkfi7RFWrF/img/creatorimage.png",
-  //         })
-
-  //         setSubscriptionDetails([
-  //   { label: "구독 상품", value: "프리미엄 멤버십" },
-  //   { label: "가격", value: "₩15,000/월", highlight: true },
-  //   { label: "부가세", value: "₩0", bold: false },
-  //             { label: "총 결제 금액", value: "₩15,000", bold: true },
-
-  //             set([
-  //   "독점 콘텐츠 제공",
-  //   "광고 제거",
-  //   "라이브 방송 참여",
-  // ])
-  // ])
-  //     }, []);
-
   // 모달 열기/닫기 핸들러
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
@@ -42,6 +17,7 @@ function PaymentPage() {
   const [selectedCard, setSelectedCard] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(true);
   const [cardData, setCards] = useState([]);
+  const navigate = useNavigate();
 
   const openPayModal = () => setIsPayModalOpen(true);
   const closePayModal = () => setIsPayModalOpen(false);
@@ -76,7 +52,6 @@ function PaymentPage() {
   const subscriptionDetails = [
     { label: '구독 상품', value: '프리미엄 멤버십' },
     { label: '가격', value: '₩15,000/월', highlight: true },
-    { label: '부가세', value: '₩0', bold: false },
     { label: '총 결제 금액', value: '₩15,000', bold: true },
   ];
 
@@ -112,6 +87,12 @@ function PaymentPage() {
       setModalType('register-fail');
       setIsWarningModalOpen(true);
     }
+  };
+
+  // 결제 성공 시 결제완료 페이지 이동
+    // 결제 성공 시 실행될 콜백
+  const handlePaymentSuccess = () => {
+    navigate('/payments/success');
   };
 
   return (
@@ -162,7 +143,7 @@ function PaymentPage() {
 
       {/* ✅ 모달 렌더링 */}
 
-      <PaymentModal isOpen={isPayModalOpen} onClose={closePayModal} cardData={cardData} />
+      <PaymentModal isOpen={isPayModalOpen} onClose={closePayModal} cardData={cardData} onSuccess={handlePaymentSuccess} />
       {/* 결제수단 미등록 알림 모달 */}
       <WarningModal
         isOpen={isWarningModalOpen}

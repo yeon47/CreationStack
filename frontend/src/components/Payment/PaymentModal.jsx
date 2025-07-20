@@ -1,12 +1,13 @@
 // components/PaymentModal.jsx
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {requestPayment} from "../../api/payment"
 import styles from './PaymentModal.module.css';
 
 const CARD_WIDTH = 480; // 카드 1개 너비(px)
 const SWIPE_THRESHOLD = 250; // 슬라이드 전환 임계치
 
-const PaymentModal = ({ isOpen, onClose, cardData }) => {
+const PaymentModal = ({ isOpen, onClose, cardData, onSuccess }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -62,17 +63,12 @@ const handlePayment = async () => {
       };
 
       const result = await requestPayment(paymentInfo);
-
-      navigate('/payments/success'); // 결제 완료 페이지로 이동
+      onSuccess(); 
     } catch (error) {
       alert('결제에 실패했습니다. 다시 시도해주세요.');
       console.error(error);
     }
   };
-
-
-
-
 
   if (!isOpen) return null;
 
