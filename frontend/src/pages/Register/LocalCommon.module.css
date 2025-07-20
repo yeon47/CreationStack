@@ -249,3 +249,19 @@
   background-color: #cccccc;
   cursor: not-allowed;
 }
+
+.labelWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.statusMessage {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.available {
+  color: #10b981;
+}
+.unavailable {
+  color: #ef4444;
+}
