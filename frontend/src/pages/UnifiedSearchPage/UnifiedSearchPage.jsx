@@ -3,6 +3,9 @@ import { ContentSearchWrapper } from "../../components/Search/SearchUnifined/Con
 import { Section } from "../../components/Search/SearchUnifined/Section/Section";
 import { ContentFilterModal } from "../../components/Search/Filter/ContentFilterModal";
 import { searchUnified } from "../../api/search";
+import UnifiedCreatorCard from "./UnifiedCreatorCard";
+import { SearchResultHeader } from "../../components/Search/SearchUnifined/SearchResultHeader/SearchResultHeader";
+import { useNavigate } from "react-router-dom";
 import "./UnifiedSearchPage.css";
 
 export const UnifiedSearchPage = () => {
@@ -10,6 +13,7 @@ export const UnifiedSearchPage = () => {
   const [creators, setCreators] = useState([]);
   const [contents, setContents] = useState([]);
   const [keyword, setKeyword] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -18,9 +22,9 @@ export const UnifiedSearchPage = () => {
 
         // creators
         const creatorMapped = (result.creators || []).map((item) => ({
-          nickname: item.creator?.nickname,
+          name: item.creator?.nickname, // nickname을 name으로 매핑
           profileImageUrl: item.creator?.profileImageUrl,
-          bio: item.creator?.bio,
+          description: item.creator?.bio, // bio를 description으로 매핑
           job: item.creator?.job,
           subscriberCount: item.creator?.subscriberCount,
         }));
@@ -62,7 +66,19 @@ export const UnifiedSearchPage = () => {
               </div>
             </div>
           </div>
-          {creators.length > 0 && <Section creators={creators} />}
+          {creators.length > 0 && (
+            <div className="creator-search">
+              <SearchResultHeader
+                className="search-result-header-instance"
+                onMoreClick={() => navigate("/creators")}
+              />
+              <div className="unified-creator-card-list">
+                {creators.slice(0, 3).map((creator, index) => (
+                  <UnifiedCreatorCard key={index} creator={creator} />
+                ))}
+              </div>
+            </div>
+          )}
           {contents.length > 0 && <ContentSearchWrapper contents={contents} />}
         </div>
       </div>
