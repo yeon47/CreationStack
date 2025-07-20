@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import SubscriptionDetails from '../../components/Payment/SubscriptionDetails';
 import PaymentModal from '../../components/Payment/PaymentModal';
+import WarningModal from '../../components/Payment/WarningModal';
+import { registerBillingKey, savePaymentMethod, readAllPaymentMethod } from '../../api/payment';
 import styles from './PaymentPage.module.css';
 // import SubscriptionSummary from "../../components/Payment/SubscriptionSummary";
 
@@ -33,32 +35,38 @@ function PaymentPage() {
   //     }, []);
 
   // 모달 열기/닫기 핸들러
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPayModalOpen, setIsPayModalOpen] = useState(false);
+  const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('method-fail'); // 'confirm-delete', 'delete-success', 'delete-fail'
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(true);
+  const [cardData, setCards] = useState([]);
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  const openPayModal = () => setIsPayModalOpen(true);
+  const closePayModal = () => setIsPayModalOpen(false);
 
-  const cardData = [
-    {
-      brand: 'Visa',
-      number: '**** **** **** 1234',
-      expired: '12/28',
-      bank: '신한은행',
-    },
-    {
-      brand: 'MasterCard',
-      number: '**** **** **** 5678',
-      expired: '08/27',
-      bank: '국민은행',
-    },
-    {
-      brand: 'Toss',
-      number: '**** **** **** 4321',
-      expired: '03/26',
-      bank: '토스뱅크',
-    },
-  ];
+  const openWarningModal = () => setIsWarningModalOpen(true);
+  const closeWarningModal = () => setIsWarningModalOpen(false);
+  const storeId = import.meta.env.VITE_STORE_ID;
+  const channelKey = import.meta.env.VITE_CHANNEL_KEY;
+ // 컴포넌트가 마운트될 때 카드 정보 불러오기
+   useEffect(() => {
+     const fetchCards = async () => {
+       try {
+         const res = await readAllPaymentMethod(); // API 호출
+         console.log(res)
+ 
+         
+         // 실제 카드 + 테스트 카드 결합
+         setCards(res);
 
+       } catch (err) {
+         console.error('카드 정보를 불러오는 데 실패했습니다.', err);
+       }
+     };
+     fetchCards();
+   }, []); // 빈 배열 → 최초 한 번만 실행됨
   // 예시용 데이터
   const creator = {
     name: '크리에이터 닉네임',
@@ -74,6 +82,38 @@ function PaymentPage() {
 
   const benefits = ['독점 콘텐츠 제공', '광고 제거', '라이브 방송 참여'];
 
+  // 결제 진행 버튼 클릭
+  const handlePayClick = () => {
+    if (cardData.length === 0) {
+      // 카드가 없으면 경고 모달 띄움
+      setIsWarningModalOpen(true);
+    } else {
+      // 카드 있으면 결제 모달 열기
+      setIsPayModalOpen(true);
+    }
+  };
+
+  // 결제수단 등록
+  const handleCardRegister = async () => {
+    try {
+      const issueResponse = await requestIssueBillingKey(storeId, channelKey, 'test', 'test@gmail.com');
+      const saveResponse = await savePaymentMethod(issueResponse.billingKey);
+
+      // 카드 객체에서 username 제외
+      const { username, ...cardWithoutUsername } = saveResponse;
+
+      // 카드 리스트에 추가
+      cardData.push(cardWithoutUsername); // 또는 상태로 카드 관리하고 있다면 setCards([...cards, cardWithoutUsername]);
+
+      // 모달 상태 전환
+      setModalType('register-success');
+      setIsWarningModalOpen(true);
+    } catch (error) {
+      setModalType('register-fail');
+      setIsWarningModalOpen(true);
+    }
+  };
+
   return (
     <div className={styles.summary_container}>
       <div className={styles.card}>
@@ -83,12 +123,6 @@ function PaymentPage() {
             <h1 className={styles.summary_title}>결제 요약</h1>
             <p className={styles.summary_subtitle}>구독 정보를 확인하고 결제를 진행하세요</p>
           </div>
-
-          {/* <SubscriptionSummary 
-                      creator={creator},
-                  subscriptionDetails={subscriptionDetails},
-              benefits={benefits}
-                  /> */}
 
           {/* Creator Information */}
           <div className={styles.creator_info}>
@@ -100,19 +134,6 @@ function PaymentPage() {
           </div>
 
           <SubscriptionDetails subscriptionDetails={subscriptionDetails} benefits={benefits} />
-
-          {/* Benefits List */}
-          {/* <div className={styles.benefits_box}>
-            <h3 className={styles.benefits_title}>구독 혜택</h3>
-            <ul className={styles.benefits_list}>
-              {benefits.map((benefit, index) => (
-                <li key={index} className={styles.benefit_item}>
-                  <span className={styles.check}>✔</span>
-                  <span>{benefit}</span>
-                </li>
-              ))}
-            </ul>
-          </div> */}
 
           {/* Payment Alert */}
           <div className={styles.alert}>
@@ -127,7 +148,7 @@ function PaymentPage() {
           </div>
 
           {/* Action Buttons */}
-          <button className={styles.payButton} onClick={openModal}>
+          <button className={styles.payButton} onClick={handlePayClick}>
             <span className={styles.icon}>→</span>
             <span>결제 진행</span>
           </button>
@@ -141,7 +162,15 @@ function PaymentPage() {
 
       {/* ✅ 모달 렌더링 */}
 
-      <PaymentModal isOpen={isModalOpen} onClose={closeModal} cardData={cardData} />
+      <PaymentModal isOpen={isPayModalOpen} onClose={closePayModal} cardData={cardData} />
+      {/* 결제수단 미등록 알림 모달 */}
+      <WarningModal
+        isOpen={isWarningModalOpen}
+        onClose={closeWarningModal}
+        type={modalType}
+        isVisible={isModalVisible}
+        onConfirm={handleCardRegister}
+      />
     </div>
   );
 }

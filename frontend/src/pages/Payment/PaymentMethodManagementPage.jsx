@@ -2,7 +2,12 @@ import React, { useEffect, useState } from 'react';
 import styles from './paymentMethodManagementPage.module.css';
 import PaymentMethodList from '../../components/Payment/PaymentMethodList';
 import WarningModal from '../../components/Payment/WarningModal';
-import { requestIssueBillingKey, savePaymentMethod, readAllPaymentMethod, deleteCardMethod } from '../../api/payment';
+import {
+  registerBillingKey,
+  savePaymentMethod,
+  readAllPaymentMethod,
+  deletePaymentMethod,
+} from '../../api/payment';
 
 function PaymentMethodManagementPage() {
   const [cards, setCards] = useState([]);
@@ -68,19 +73,24 @@ function PaymentMethodManagementPage() {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedCard(null);
+    setModalType(''); // 혹은 null, '' 등 초기 상태로 변경
   };
 
   // 결제수단 삭제 확인 후 삭제진행 + 완료/실패 팝업
   const handleDeleteConfirm = async card => {
     // 기존 모달 닫기
     setIsModalVisible(false);
+    const reason = card.cardName + '을 삭제합니다.';
 
     // 300ms 후 새 모달 보여주기 (애니메이션 타이밍)
     setTimeout(async () => {
       try {
-        await deleteCardMethod(card.paymentMethodId);
-        setCards(prev => prev.filter(c => c.paymentMethodId !== selectedCard.paymentMethodId));
-        setModalType('delete-success');
+        const response = await deletePaymentMethod(card.paymentMethodId, reason);
+
+        if (card.paymentMethodId === response.paymentMethodId) {
+          setCards(prev => prev.filter(c => c.paymentMethodId !== card.paymentMethodId));
+          setModalType('delete-success');
+        }
       } catch (error) {
         setModalType('delete-fail');
       }
@@ -91,7 +101,7 @@ function PaymentMethodManagementPage() {
   //빌링키 발급 후 결제수단 조회해 보여주는 메소드
   const handleCardRegister = async () => {
     // 빌링키 발급 (로그인한 사용자로 test, test@gmail.com 부분 바꿀 예정)
-    const issueResponse = await requestIssueBillingKey(storeId, channelKey, 'test', 'test@gmail.com');
+    const issueResponse = await registerBillingKey(storeId, channelKey, '김희연', 'happylotus145@gmail.com');
     // 발급된 빌링키 이용한 결제수단 조회 (빌링키 발급단계에서 이루어진 결제수단 조회)
     const saveResponse = await savePaymentMethod(issueResponse.billingKey);
 
@@ -100,14 +110,7 @@ function PaymentMethodManagementPage() {
 
     setCards(prev => [...prev, cardWithoutUsername]);
   };
-
-  //  const handleCardRegister = async () => {
-  //     const issueResponse = await requestIssueBillingKey(storeId, channelKey, 'test', 'test@gmail.com');
-  //     const saveResponse = await savePaymentMethod(issueResponse.billingKey);
-  //     const { username, ...cardWithoutUsername } = saveResponse;
-  //     setCards(prev => [...prev, cardWithoutUsername]);
-  //   };
-
+  
   return (
     <div className={styles.payment_container}>
       {/* 결제수단관리 헤더 */}
