@@ -1,5 +1,4 @@
 import { Routes, Route } from 'react-router-dom';
-import Home from '../pages/Home';
 
 import { LoginSection } from '../pages/Login/LoginSection';
 import { MemberRegister } from '../pages/Register/MemberRegister';
@@ -21,6 +20,8 @@ import { CreatorMainPage } from '../pages/MainPage/CreatorMainPage/CreatorMainPa
 import { CreatorSearchPage } from '../pages/CreatorSearchPage/CreatorSearchPage';
 import { ContentSearchPage } from '../pages/ContentSearchPage/ContentSearchPage';
 import { UnifiedSearchPage } from '../pages/UnifiedSearchPage/UnifiedSearchPage';
+
+import { Home } from '../pages/Home/Home';
 
 export default function AppRoutes() {
   return (
