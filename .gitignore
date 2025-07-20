@@ -299,3 +299,4 @@ $RECYCLE.BIN/
 **/.metadata/
 **/.factorypath
 
+src/main/resources/application-secret.yml
