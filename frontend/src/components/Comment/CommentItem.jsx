@@ -1,6 +1,6 @@
 import React from 'react';
-import styles from '../../styles/commentItem.module.css';
-import btnstyles from '../../styles/commentBtn.module.css';
+import styles from '../../styles/comment/commentItem.module.css';
+import btnstyles from '../../styles/comment/commentBtn.module.css';
 
 const CommentItem = ({
   comment,

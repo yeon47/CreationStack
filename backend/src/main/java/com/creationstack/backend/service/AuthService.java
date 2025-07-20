@@ -3,6 +3,7 @@ package com.creationstack.backend.service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Transactional
 public class AuthService {
-
+	
         private final UserRepository userRepository;
         private final UserDetailRepository userDetailRepository;
         private final JobRepository jobRepository;
@@ -172,6 +173,11 @@ public class AuthService {
                         }
 
                         // 4. 비밀번호 검증
+                        log.info("입력된 이메일: [{}]", request.getEmail());
+                        log.info("입력된 비밀번호: [{}], 길이: {}", request.getPassword(), request.getPassword().length());
+                        log.info("DB 저장된 해시: [{}]", userDetail.getPassword());
+                        log.info("비교 결과: {}", passwordEncoder.matches(request.getPassword(), userDetail.getPassword()));
+
                         if (!passwordEncoder.matches(request.getPassword(), userDetail.getPassword())) {
                                 log.warn("비밀번호 불일치: {}", request.getEmail());
                                 return LoginResponse.builder()
@@ -369,6 +375,7 @@ public class AuthService {
                         log.error("로그아웃 처리 중 오류 발생: {}", e.getMessage(), e);
                         return LogoutResponse.error("로그아웃 처리 중 오류가 발생했습니다.");
                 }
+                
         }
 
         public boolean isEmailAvailable(String email) { // 이메일 실시간 중복 체크
@@ -379,3 +386,4 @@ public class AuthService {
                 return !userDetailRepository.existsByNickname(nickname);
         }
 }
+        

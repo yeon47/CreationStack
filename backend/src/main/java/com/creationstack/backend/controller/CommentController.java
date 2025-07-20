@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.creationstack.backend.dto.CommentCreateDto;
-import com.creationstack.backend.dto.CommentResponseDto;
-import com.creationstack.backend.dto.CommentUpdateDto;
+import com.creationstack.backend.dto.comment.CommentCreateDto;
+import com.creationstack.backend.dto.comment.CommentResponseDto;
+import com.creationstack.backend.dto.comment.CommentUpdateDto;
 import com.creationstack.backend.service.CommentService;
 
 import lombok.RequiredArgsConstructor;

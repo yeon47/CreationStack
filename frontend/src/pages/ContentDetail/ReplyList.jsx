@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import CommentItem from '../../components/Comments/CommentItem';
-import styles from '../../styles/replyList.module.css';
-import btnstyles from '../../styles/commentBtn.module.css';
+import CommentItem from '../../components/Comment/CommentItem';
+import styles from '../../styles/comment/replyList.module.css';
+import btnstyles from '../../styles/comment/commentBtn.module.css';
 
 const ReplyList = ({ contentId }) => {
   const [comments, setComments] = useState([]);
@@ -26,7 +26,6 @@ const ReplyList = ({ contentId }) => {
       },
     };
   };
-  console.log(getAuthHeaders());
 
   const fetchComments = async () => {
     try {

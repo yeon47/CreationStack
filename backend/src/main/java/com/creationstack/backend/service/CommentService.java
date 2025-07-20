@@ -11,9 +11,9 @@ import com.creationstack.backend.domain.comment.Comment;
 import com.creationstack.backend.domain.content.Content;
 import com.creationstack.backend.domain.comment.CommentLike;
 import com.creationstack.backend.domain.user.User;
-import com.creationstack.backend.dto.CommentCreateDto;
-import com.creationstack.backend.dto.CommentResponseDto;
-import com.creationstack.backend.dto.CommentUpdateDto;
+import com.creationstack.backend.dto.comment.CommentCreateDto;
+import com.creationstack.backend.dto.comment.CommentResponseDto;
+import com.creationstack.backend.dto.comment.CommentUpdateDto;
 import com.creationstack.backend.repository.CommentLikeRepository;
 import com.creationstack.backend.repository.CommentRepository;
 import com.creationstack.backend.repository.UserRepository;
@@ -93,21 +93,30 @@ public class CommentService {
 	// 댓글 좋아요
 	@Transactional
 	public boolean toggleLike(Long commentId, Long userId) {
-		Comment comment = commentRepository.findById(commentId)
-				.orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+	    Comment comment = commentRepository.findById(commentId)
+	            .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+	    User user = userRepository.findById(userId)
+	            .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
-		User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+	    CommentLike commentLike = commentLikeRepository.findByUserAndComment(user, comment).orElse(null);
 
-		CommentLike commentLike = commentLikeRepository.findByUserAndComment(user, comment).orElse(null);
+	    if (commentLike == null) {
+	        commentLike = new CommentLike(comment, user);
+	        commentLikeRepository.save(commentLike);
+	        comment.setLikeCount(comment.getLikeCount() + 1);
+	    } else {
+	        commentLike.toggle();
+	        commentLikeRepository.save(commentLike);
 
-		if (commentLike == null) {
-			commentLike = new CommentLike(comment, user);
-		} else {
-			commentLike.toggle();
-		}
+	        if (commentLike.isActive()) {
+	            comment.setLikeCount(comment.getLikeCount() + 1);
+	        } else {
+	            comment.setLikeCount(Math.max(0, comment.getLikeCount() - 1));
+	        }
+	    }
 
-		commentLikeRepository.save(commentLike);
-		return commentLike.isActive();
+	    commentRepository.save(comment);
+	    return commentLike.isActive();
 	}
 
 	// 응답용 dto 반환

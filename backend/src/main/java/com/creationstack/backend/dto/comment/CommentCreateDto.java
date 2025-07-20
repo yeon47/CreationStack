@@ -1,4 +1,4 @@
-package com.creationstack.backend.dto;
+package com.creationstack.backend.dto.comment;
 
 import lombok.Getter;
 import lombok.Setter;
