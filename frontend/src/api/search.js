@@ -16,12 +16,13 @@ export const searchCreator = async (page, keyword = "") => {
   }
 };
 
-export const searchContent = async (page, keyword = "") => {
+export const searchContent = async (page, keyword = "", size = 9) => {
   try {
     const response = await axios.get("/api/contents", {
       params: {
         keyword,
         page,
+        size,
       },
     });
 
