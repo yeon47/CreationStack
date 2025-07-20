@@ -153,6 +153,7 @@ export const LocalCommon = ({ onBack }) => {
 
       if (response.ok) {
         const result = await response.json();
+        console.log("result accesstoken: ", result.data.tokens.accessToken);
         alert('회원가입이 완료되었습니다!');
         window.location.href = '/login';
       } else {

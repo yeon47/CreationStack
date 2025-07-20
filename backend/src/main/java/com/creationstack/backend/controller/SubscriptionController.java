@@ -1,5 +1,6 @@
 package com.creationstack.backend.controller;
 
+import com.creationstack.backend.dto.Subscription.ActivateSubscriptionRequestDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,10 +32,11 @@ public class SubscriptionController {
             Authentication authentication,
             // @RequestBody User user,
             @RequestBody SubscriptionRequestDto request) {
-        Long subscriberId = Long.parseLong(authentication.getName()); // userId from JWT
-            
+//        Long subscriberId = Long.parseLong(authentication.getName()); // userId from JWT
+//
         // Long subscriberId = user.getUserId();
-        // 구독 생성 요청subscriberId 
+        // 구독 생성 요청subscriberId
+        Long subscriberId = 2L;
         SubscriptionResponseDto response = subscriptionService.createPendingSubscription(subscriberId, request);
         return ResponseEntity.ok(response);
     }
@@ -43,9 +45,9 @@ public class SubscriptionController {
     @PostMapping("/subscriptions/{subscriptionId}/activate")
     public ResponseEntity<String> activateSubscription(
             @PathVariable Long subscriptionId,
-            @RequestBody Long paymentId) {
+            @RequestBody ActivateSubscriptionRequestDto dto) {
 
-        subscriptionService.activateSubscription(subscriptionId, paymentId); 
+        subscriptionService.activateSubscription(subscriptionId, dto.getPaymentId());
         return ResponseEntity.ok("구독이 활성화되었습니다.");
     }
 
