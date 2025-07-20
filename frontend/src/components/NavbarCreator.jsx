@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import styles from "../styles/layout.module.css";
+import logo from "../assets/img/logo.svg"
 import { useNavigate, Link } from "react-router-dom"; // Link 임포트
 
 export const NavbarCreator = () => {
@@ -74,7 +75,7 @@ export const NavbarCreator = () => {
         <img
           className={styles.logoImg}
           alt="Logo"
-          src="https://c.animaapp.com/md45uvjzPxvxqT/img/mask-group-2.svg"
+          src={logo}
         />
       </div>
 

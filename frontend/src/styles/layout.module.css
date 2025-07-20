@@ -69,10 +69,12 @@
 /* 로고 섹션 */
 .logoSection {
   flex-shrink: 0; /* New */
+  display: flex;
+  align-items: center; 
 }
 
 .logoImg {
-  height: 40px; /* Retained */
+  height: 60px; /* Retained */
   width: auto; /* New */
   cursor: pointer; /* New */
   object-fit: contain; /* Retained (was in previous version of this class) */
