@@ -34,7 +34,7 @@ export const ContentSearchWrapper = ({ contents = [] }) => {
         />
         <div className="heading-and-content">
           <div className={gridStyles.grid}>
-            {contents.slice(0, 9).map(item => (
+            {contents.slice(0, 6).map(item => (
               <ContentCard
                 key={item.contentId}
                 id={item.contentId}
@@ -47,7 +47,7 @@ export const ContentSearchWrapper = ({ contents = [] }) => {
             ))}
           </div>
         </div>
-        {contents.length > 9 && (
+        {contents.length > 6 && (
           <div className="arrow-up-right" onClick={handleMoreClick}>
             더보기
           </div>

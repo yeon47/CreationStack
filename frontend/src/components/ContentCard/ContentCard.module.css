@@ -64,6 +64,7 @@
   padding-left: 12px;
   font-size: 13px;
   color: #777;
+  z-index: 10;
 }
 
 .meta {
@@ -90,6 +91,7 @@
 
 .likes {
   color: #666666;
+  z-index: 10;
 }
 
 a:hover {

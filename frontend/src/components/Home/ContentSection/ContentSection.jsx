@@ -15,12 +15,12 @@ export const ContentSection = ({ contents = [] }) => {
           <div className={gridStyles.grid}>
             {contents.map(item => (
               <ContentCard
-                key={item.contentId}
-                id={item.contentId}
-                creator={item.creator.nickname}
+                key={item.id}
+                id={item.id}
+                creator={item.creator}
                 thumbnailUrl={item.thumbnailUrl}
                 title={item.title}
-                likes={item.likeCount}
+                likes={item.likes}
                 categoryNames={item.categoryNames}
               />
             ))}
