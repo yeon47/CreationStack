@@ -35,7 +35,7 @@ export const LoginSection = () => {
 
     try {
       // 실제 API 호출 (백엔드로 프록시됨)
-      const response = await fetch('/api/auth/signin', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +48,6 @@ export const LoginSection = () => {
 
       if (response.ok) {
         const result = await response.json();
-        // 로그인 성공 처리
         localStorage.setItem('token', result.token);
         window.location.href = '/';
       } else {
