@@ -2,7 +2,7 @@ import styles from './ContentCard.module.css';
 import { Link } from 'react-router-dom';
 import SubsIcon from '../../assets/img/subs_icon.svg';
 
-export const ContentCard = ({ id, thumbnailUrl, creator, title, likes, isSubscriber }) => {
+export const ContentCard = ({ id, thumbnailUrl, creator, title, likes, isSubscriber, categoryNames = [] }) => {
   return (
     <Link to={`/contents/${id}`} className={styles.card}>
       {/* 썸네일 */}
@@ -19,6 +19,11 @@ export const ContentCard = ({ id, thumbnailUrl, creator, title, likes, isSubscri
         <div className={styles.title}>{title}</div>
         <div className={styles.meta}>
           <span className={styles.likes}>❤️ ({likes})</span>
+          <div className={styles.categories}>
+            {categoryNames.map((category, index) => (
+              <span key={index} className={styles.category}>{category}</span>
+            ))}
+          </div>
         </div>
       </div>
     </Link>

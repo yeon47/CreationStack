@@ -69,9 +69,23 @@
 .meta {
   display: flex;
   justify-content: space-between;
+  align-items: center; /* 세로 정렬 추가 */
   padding: 0 12px 12px;
   font-size: 13px;
   color: #777;
+}
+
+.categories {
+  display: flex;
+  gap: 6px;
+}
+
+.category {
+  background-color: #f0f0f0;
+  color: #555;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
 }
 
 .likes {
