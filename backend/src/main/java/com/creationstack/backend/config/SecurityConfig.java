@@ -49,6 +49,8 @@ public class SecurityConfig {
                                     "/api/auth/login", // 로그인
                                     "/api/auth/refresh", // 토큰 갱신
                                     "/api/auth/logout", // 로그아웃 (refresh token 방식)
+                                    "/api/auth/kakao/callback", // 카카오 로그인 콜백 경로
+                                    "/api/auth/kakao/user-info", // 카카오 정보 가져오는 경로
                                     "/api/content/**", // 모든 /api/content 경로 허용
                                     "/api/upload/image", // 이미지 업로드 경로 허용
                                     "/api/billings/**",

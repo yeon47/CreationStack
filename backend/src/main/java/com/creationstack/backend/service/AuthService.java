@@ -42,7 +42,13 @@ public class AuthService {
         private final PasswordEncoder passwordEncoder;
         private final JwtUtil jwtUtil;
 
+        /**
+         * 회원가입 처리 (일반 사용자 및 카카오 사용자 모두 지원)
+         */
         public SignupResponse signup(SignupRequest request) {
+                log.info("회원가입 시작: email={}, platform={}", request.getEmail(), request.getPlatform());
+
+                // 이메일 중복 체크
                 if (userDetailRepository.existsByEmail(request.getEmail())) {
                         return SignupResponse.builder()
                                         .success(false)
@@ -60,13 +66,33 @@ public class AuthService {
 
                 // 크리에이터인 경우 직업 존재 여부 확인
                 Job job = null;
-                if (request.getRole() == UserRole.CREATOR) { // 수정: UserRole.USER.CREATOR → UserRole.CREATOR
+                if (request.getRole() == UserRole.CREATOR) {
                         job = jobRepository.findById(request.getJobId())
                                         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직업입니다."));
                 }
 
-                // 비밀번호 암호화
-                String encodedPassword = passwordEncoder.encode(request.getPassword());
+                // 플랫폼별 처리
+                UserDetail.Platform platform = request.isKakaoUser()
+                                ? UserDetail.Platform.KAKAO
+                                : UserDetail.Platform.LOCAL;
+
+                String encodedPassword = null;
+                if (request.isLocalUser() && request.getPassword() != null) {
+                        encodedPassword = passwordEncoder.encode(request.getPassword());
+                }
+
+                // 카카오 사용자 중복 체크
+                if (request.isKakaoUser()) {
+                        Optional<UserDetail> existingKakaoUser = userDetailRepository
+                                        .findByPlatformAndPlatformId(UserDetail.Platform.KAKAO,
+                                                        request.getPlatformId());
+                        if (existingKakaoUser.isPresent()) {
+                                return SignupResponse.builder()
+                                                .success(false)
+                                                .message("이미 가입된 카카오 계정입니다.")
+                                                .build();
+                        }
+                }
 
                 // User 엔티티 생성
                 User user = User.builder()
@@ -81,7 +107,8 @@ public class AuthService {
                                 .username(request.getUsername())
                                 .nickname(request.getNickname())
                                 .bio(request.getBio())
-                                .platform(UserDetail.Platform.LOCAL)
+                                .platform(platform)
+                                .platformId(request.getPlatformId())
                                 .email(request.getEmail())
                                 .password(encodedPassword)
                                 .build();
@@ -102,6 +129,8 @@ public class AuthService {
 
                 // Refresh Token 저장
                 saveRefreshToken(savedUser.getUserId(), refreshToken);
+
+                log.info("회원가입 성공: userId={}, email={}", savedUser.getUserId(), userDetail.getEmail());
 
                 // 응답 생성
                 return SignupResponse.builder()
@@ -124,14 +153,16 @@ public class AuthService {
                                                                 .accessToken(accessToken)
                                                                 .refreshToken(refreshToken)
                                                                 .tokenType("Bearer")
-                                                                .expiresIn(jwtUtil
-                                                                                .getAccessTokenExpirationInSeconds())
+                                                                .expiresIn(jwtUtil.getAccessTokenExpirationInSeconds())
                                                                 .build())
                                                 .build())
                                 .redirect("/")
                                 .build();
         }
 
+        /**
+         * 로그인 처리 (일반 사용자만, 카카오 사용자는 OAuth로 처리)
+         */
         public LoginResponse login(LoginRequest request) {
                 log.info("로그인 시작: {}", request.getEmail());
 
@@ -147,9 +178,19 @@ public class AuthService {
                         }
 
                         UserDetail userDetail = userDetailOpt.get();
-                        log.info("UserDetail 조회 성공: userId={}", userDetail.getUserId());
+                        log.info("UserDetail 조회 성공: userId={}, platform={}",
+                                        userDetail.getUserId(), userDetail.getPlatform());
 
-                        // 2. User 조회
+                        // 2. 카카오 사용자인 경우 일반 로그인 차단
+                        if (userDetail.getPlatform() == UserDetail.Platform.KAKAO) {
+                                log.warn("카카오 사용자가 일반 로그인 시도: {}", request.getEmail());
+                                return LoginResponse.builder()
+                                                .success(false)
+                                                .message("카카오 계정으로 가입된 사용자입니다. 카카오 로그인을 이용해주세요.")
+                                                .build();
+                        }
+
+                        // 3. User 조회
                         Optional<User> userOpt = userRepository.findById(userDetail.getUserId());
                         if (userOpt.isEmpty()) {
                                 log.warn("User 조회 실패: userId={}", userDetail.getUserId());
@@ -162,7 +203,7 @@ public class AuthService {
                         User user = userOpt.get();
                         log.info("User 조회 성공: userId={}, role={}", user.getUserId(), user.getRole());
 
-                        // 3. 계정 활성화 확인
+                        // 4. 계정 활성화 확인
                         if (!user.getIsActive()) {
                                 log.warn("비활성화된 계정: {}", request.getEmail());
                                 return LoginResponse.builder()
@@ -171,18 +212,22 @@ public class AuthService {
                                                 .build();
                         }
 
-                        // 4. 비밀번호 검증
-                        if (!passwordEncoder.matches(request.getPassword(), userDetail.getPassword())) {
-                                log.warn("비밀번호 불일치: {}", request.getEmail());
-                                return LoginResponse.builder()
-                                                .success(false)
-                                                .message("이메일 또는 비밀번호가 올바르지 않습니다.")
-                                                .build();
+                        // 5. 비밀번호 검증 (LOCAL 사용자만)
+                        if (userDetail.getPlatform() == UserDetail.Platform.LOCAL) {
+                                if (userDetail.getPassword() == null ||
+                                                !passwordEncoder.matches(request.getPassword(),
+                                                                userDetail.getPassword())) {
+                                        log.warn("비밀번호 불일치: {}", request.getEmail());
+                                        return LoginResponse.builder()
+                                                        .success(false)
+                                                        .message("이메일 또는 비밀번호가 올바르지 않습니다.")
+                                                        .build();
+                                }
                         }
 
-                        log.info("비밀번호 검증 성공");
+                        log.info("로그인 인증 성공: {}", request.getEmail());
 
-                        // 5. JWT 토큰 생성
+                        // 6. JWT 토큰 생성
                         String accessToken = jwtUtil.generateAccessToken(
                                         user.getUserId(),
                                         userDetail.getEmail(),
@@ -191,10 +236,10 @@ public class AuthService {
 
                         String refreshToken = jwtUtil.generateRefreshToken(user.getUserId());
 
-                        // 6. 리프레시 토큰 저장
+                        // 7. 리프레시 토큰 저장
                         saveRefreshToken(user.getUserId(), refreshToken);
 
-                        // 7. 성공 응답 생성
+                        // 8. 성공 응답 생성
                         return LoginResponse.builder()
                                         .success(true)
                                         .message("로그인이 완료되었습니다.")
@@ -237,7 +282,9 @@ public class AuthService {
                 }
         }
 
-        // 기존 refreshToken 메서드는 그대로 유지
+        /**
+         * 토큰 갱신
+         */
         public TokenRefreshResponse refreshToken(TokenRefreshRequest request) {
                 String refreshToken = request.getRefreshToken();
 
@@ -283,28 +330,8 @@ public class AuthService {
                                 .build();
         }
 
-        private void saveRefreshToken(Long userId, String token) {
-                // 기존 토큰들 무효화
-                refreshTokenRepository.revokeAllByUserId(userId);
-
-                // 새 토큰 저장
-                RefreshToken refreshTokenEntity = RefreshToken.builder()
-                                .token(token)
-                                .userId(userId)
-                                .expiresAt(LocalDateTime.now()
-                                                .plusSeconds(jwtUtil.getRefreshTokenExpirationInSeconds()))
-                                .createdAt(LocalDateTime.now())
-                                .isRevoked(false)
-                                .build();
-
-                refreshTokenRepository.save(refreshTokenEntity);
-        }
-
         /**
-         * 로그아웃 - Refresh Token 삭제 방식
-         * 
-         * @param request 로그아웃 요청 (refreshToken 포함)
-         * @return 로그아웃 응답
+         * 로그아웃 - Refresh Token 무효화
          */
         public LogoutResponse logout(LogoutRequest request) {
                 try {
@@ -328,10 +355,6 @@ public class AuthService {
                                 log.warn("무효화할 토큰이 없음 - 이미 로그아웃된 상태일 수 있음");
                         }
 
-                        if (revokedCount == 0) {
-                                log.warn("무효화할 토큰이 없음 - 이미 로그아웃된 상태일 수 있음");
-                        }
-
                         return LogoutResponse.success();
 
                 } catch (Exception e) {
@@ -341,10 +364,7 @@ public class AuthService {
         }
 
         /**
-         * Access Token을 통한 로그아웃 (토큰에서 사용자 정보 추출)
-         * 
-         * @param accessToken JWT Access Token
-         * @return 로그아웃 응답
+         * Access Token을 통한 로그아웃
          */
         public LogoutResponse logoutWithAccessToken(String accessToken) {
                 try {
@@ -371,11 +391,37 @@ public class AuthService {
                 }
         }
 
-        public boolean isEmailAvailable(String email) { // 이메일 실시간 중복 체크
+        /**
+         * Refresh Token 저장
+         */
+        public void saveRefreshToken(Long userId, String token) {
+                // 기존 토큰들 무효화
+                refreshTokenRepository.revokeAllByUserId(userId);
+
+                // 새 토큰 저장
+                RefreshToken refreshTokenEntity = RefreshToken.builder()
+                                .token(token)
+                                .userId(userId)
+                                .expiresAt(LocalDateTime.now()
+                                                .plusSeconds(jwtUtil.getRefreshTokenExpirationInSeconds()))
+                                .createdAt(LocalDateTime.now())
+                                .isRevoked(false)
+                                .build();
+
+                refreshTokenRepository.save(refreshTokenEntity);
+        }
+
+        /**
+         * 이메일 사용 가능 여부 확인
+         */
+        public boolean isEmailAvailable(String email) {
                 return !userDetailRepository.existsByEmail(email);
         }
 
-        public boolean isNicknameAvailable(String nickname) { // 닉네임 실시간 중복 체크
+        /**
+         * 닉네임 사용 가능 여부 확인
+         */
+        public boolean isNicknameAvailable(String nickname) {
                 return !userDetailRepository.existsByNickname(nickname);
         }
 }
