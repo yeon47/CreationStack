@@ -35,7 +35,7 @@ export const LoginSection = () => {
 
     try {
       // 실제 API 호출 (백엔드로 프록시됨)
-      const response = await fetch('/api/auth/signin', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
