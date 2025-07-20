@@ -3,24 +3,42 @@ import { ContentSearchWrapper } from "../../components/Search/SearchUnifined/Con
 import { Section } from "../../components/Search/SearchUnifined/Section/Section";
 import { ContentFilterModal } from "../../components/Search/Filter/ContentFilterModal";
 import { searchUnified } from "../../api/search";
+import UnifiedCreatorCard from "./UnifiedCreatorCard";
+import { SearchResultHeader } from "../../components/Search/SearchUnifined/SearchResultHeader/SearchResultHeader";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./UnifiedSearchPage.css";
 
 export const UnifiedSearchPage = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [creators, setCreators] = useState([]);
   const [contents, setContents] = useState([]);
+  const navigate = useNavigate();
+  const location = useLocation();
   const [keyword, setKeyword] = useState("");
 
   useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const urlKeyword = queryParams.get("keyword") || "";
+    setKeyword(urlKeyword);
+  }, [location.search]);
+
+  useEffect(() => {
     const fetchData = async () => {
+      if (!keyword) {
+        // 키워드가 없으면 검색을 수행하지 않음
+        setCreators([]);
+        setContents([]);
+        return;
+      }
       try {
         const result = await searchUnified({ keyword }); // 인자 구조 맞춤
+        console.log("Unified Search API Result:", result);
 
         // creators
         const creatorMapped = (result.creators || []).map((item) => ({
-          nickname: item.creator?.nickname,
+          name: item.creator?.nickname, // nickname을 name으로 매핑
           profileImageUrl: item.creator?.profileImageUrl,
-          bio: item.creator?.bio,
+          description: item.creator?.bio, // bio를 description으로 매핑
           job: item.creator?.job,
           subscriberCount: item.creator?.subscriberCount,
         }));
@@ -62,8 +80,26 @@ export const UnifiedSearchPage = () => {
               </div>
             </div>
           </div>
-          {creators.length > 0 && <Section creators={creators} />}
-          {contents.length > 0 && <ContentSearchWrapper contents={contents} />}
+          {creators.length > 0 ? (
+            <div className="creator-search">
+              <SearchResultHeader
+                className="search-result-header-instance"
+                onMoreClick={() => navigate("/creators")}
+              />
+              <div className="unified-creator-card-list">
+                {creators.slice(0, 3).map((creator, index) => (
+                  <UnifiedCreatorCard key={index} creator={creator} />
+                ))}
+              </div>
+            </div>
+          ) : (
+            keyword && <div className="no-search-result">크리에이터 검색 결과가 없습니다.</div>
+          )}
+          {contents.length > 0 ? (
+            <ContentSearchWrapper contents={contents} />
+          ) : (
+            keyword && <div className="no-search-result">콘텐츠 검색 결과가 없습니다.</div>
+          )}
         </div>
       </div>
       {isFilterOpen && (

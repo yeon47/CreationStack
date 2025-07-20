@@ -1,8 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
-import Home from '../pages/Home';
 
 import { LoginSection } from '../pages/Login/LoginSection';
 import { MemberRegister } from '../pages/Register/MemberRegister';
+import AuthCallback from '../pages/Register/KakaoRegisterCallback';
 
 import PaymentMethodManagementPage from '../pages/Payment/PaymentMethodManagementPage';
 import PaymentPage from '../pages/Payment/PaymentPage';
@@ -21,6 +21,8 @@ import { CreatorMainPage } from '../pages/MainPage/CreatorMainPage/CreatorMainPa
 import { CreatorSearchPage } from '../pages/CreatorSearchPage/CreatorSearchPage';
 import { ContentSearchPage } from '../pages/ContentSearchPage/ContentSearchPage';
 import { UnifiedSearchPage } from '../pages/UnifiedSearchPage/UnifiedSearchPage';
+
+import { Home } from '../pages/Home/Home';
 
 export default function AppRoutes() {
   return (
@@ -47,6 +49,7 @@ export default function AppRoutes() {
 
       <Route path="/login" element={<LoginSection />} />
       <Route path="/register" element={<MemberRegister />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
 
       {/* 404 처리 */}
       <Route path="*" element={<div>404 - Page Not Found</div>} />

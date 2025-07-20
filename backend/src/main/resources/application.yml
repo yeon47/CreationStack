@@ -99,3 +99,7 @@ cloud:
       static: ap-northeast-2 # ← 한국(서울) 리전으로 고정
     stack:
       auto: false # CloudFormation 스택 자동 생성 비활성화
+
+kakao:
+  client-id: ${Kakao_Client_Id}
+  redirect-uri: ${Kakao_Redirect_Uri}
