@@ -45,9 +45,9 @@
 .selectContent {
   position: relative;
   z-index: 50;
-  max-height: 24rem;
+  max-height: 15rem;
   min-width: 8rem;
-  overflow: hidden;
+  overflow-y: auto;
   border-radius: 6px;
   border: 1px solid #e5e7eb;
   background-color: white;
