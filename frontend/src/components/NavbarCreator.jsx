@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import styles from "../styles/layout.module.css";
-import { useNavigate, Link } from "react-router-dom"; // Link 임포트
+import { useNavigate, Link } from "react-router-dom";
+import { searchUnified } from "../api/search";
 
 export const NavbarCreator = () => {
   const [searchValue, setSearchValue] = useState("");
@@ -27,11 +28,16 @@ export const NavbarCreator = () => {
     setSearchValue(e.target.value);
   };
 
-  const handleSearchSubmit = (e) => {
+  const handleSearchSubmit = async (e) => {
     e.preventDefault();
     if (searchValue.trim()) {
-      // 검색 로직 구현
-      console.log("검색어:", searchValue);
+      try {
+        const searchResult = await searchUnified({ keyword: searchValue });
+        console.log("검색 결과:", searchResult);
+        navigate(`/search?keyword=${searchValue}`);
+      } catch (error) {
+        console.error("통합 검색 실패:", error);
+      }
     }
   };
 
