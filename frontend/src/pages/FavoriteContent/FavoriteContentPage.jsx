@@ -66,12 +66,12 @@ const FavoriteContentPage = () => {
   return (
     <div className={styles.favoriteContentPage}>
       <div className={styles.container}>
-        <h1 className={styles.title}>좋아요한 컨텐츠 목록</h1>
+        <h1 className={styles.title}>좋아요한 콘텐츠 목록</h1>
 
         {loading ? (
           <p className={styles.state}>데이터를 불러오는 중...</p>
         ) : posts.length === 0 ? (
-          <p className={styles.state}>좋아요한 컨텐츠가 없습니다.</p>
+          <p className={styles.state}>좋아요한 콘텐츠가 없습니다.</p>
         ) : (
           <>
             <div className={styles.list}>
