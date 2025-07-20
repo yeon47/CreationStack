@@ -6,14 +6,12 @@ import PaymentModal from '../../components/Payment/PaymentModal';
 import WarningModal from '../../components/Payment/WarningModal';
 import { registerBillingKey, savePaymentMethod, readAllPaymentMethod } from '../../api/payment';
 import styles from './PaymentPage.module.css';
-// import SubscriptionSummary from "../../components/Payment/SubscriptionSummary";
 
 function PaymentPage() {
   // 모달 열기/닫기 핸들러
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
-  // const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType, setModalType] = useState('method-fail'); // 'confirm-delete', 'delete-success', 'delete-fail'
+  const [modalType, setModalType] = useState('method-fail');
   const [selectedCard, setSelectedCard] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(true);
   const [cardData, setCards] = useState([]);
@@ -21,28 +19,24 @@ function PaymentPage() {
 
   const openPayModal = () => setIsPayModalOpen(true);
   const closePayModal = () => setIsPayModalOpen(false);
-
   const openWarningModal = () => setIsWarningModalOpen(true);
   const closeWarningModal = () => setIsWarningModalOpen(false);
+
   const storeId = import.meta.env.VITE_STORE_ID;
   const channelKey = import.meta.env.VITE_CHANNEL_KEY;
- // 컴포넌트가 마운트될 때 카드 정보 불러오기
-   useEffect(() => {
-     const fetchCards = async () => {
-       try {
-         const res = await readAllPaymentMethod(); // API 호출
-         console.log(res)
- 
-         
-         // 실제 카드 + 테스트 카드 결합
-         setCards(res);
 
-       } catch (err) {
-         console.error('카드 정보를 불러오는 데 실패했습니다.', err);
-       }
-     };
-     fetchCards();
-   }, []); // 빈 배열 → 최초 한 번만 실행됨
+  // 컴포넌트가 마운트될 때 카드 정보 불러오기
+  useEffect(() => {
+    const fetchCards = async () => {
+      try {
+        const res = await readAllPaymentMethod(); // API 호출
+        setCards(res);
+      } catch (err) {
+        console.error('카드 정보를 불러오는 데 실패했습니다.', err);
+      }
+    };
+    fetchCards();
+  }, []); // 빈 배열 → 최초 한 번만 실행됨
   // 예시용 데이터
   const creator = {
     name: '크리에이터 닉네임',
@@ -78,7 +72,7 @@ function PaymentPage() {
       const { username, ...cardWithoutUsername } = saveResponse;
 
       // 카드 리스트에 추가
-      cardData.push(cardWithoutUsername); // 또는 상태로 카드 관리하고 있다면 setCards([...cards, cardWithoutUsername]);
+      setCards([...cards, cardWithoutUsername]);
 
       // 모달 상태 전환
       setModalType('register-success');
@@ -90,9 +84,15 @@ function PaymentPage() {
   };
 
   // 결제 성공 시 결제완료 페이지 이동
-    // 결제 성공 시 실행될 콜백
   const handlePaymentSuccess = () => {
     navigate('/payments/success');
+  };
+
+  // 결제 실패 시 결제 실패 모달창 호출
+  const handlePaymentFailure = () => {
+    setIsPayModalOpen(false); // PaymentModal 닫기
+    setModalType('payment-fail'); // WarningModal 메시지 타입 지정
+    setIsWarningModalOpen(true); // WarningModal 열기
   };
 
   return (
@@ -141,9 +141,15 @@ function PaymentPage() {
         </div>
       </div>
 
-      {/* ✅ 모달 렌더링 */}
+      {/* 모달 렌더링 */}
+      <PaymentModal
+        isOpen={isPayModalOpen}
+        onClose={closePayModal}
+        cardData={cardData}
+        onSuccess={handlePaymentSuccess}
+        onFailure={handlePaymentFailure}
+      />
 
-      <PaymentModal isOpen={isPayModalOpen} onClose={closePayModal} cardData={cardData} onSuccess={handlePaymentSuccess} />
       {/* 결제수단 미등록 알림 모달 */}
       <WarningModal
         isOpen={isWarningModalOpen}

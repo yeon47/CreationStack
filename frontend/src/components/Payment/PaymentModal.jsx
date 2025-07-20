@@ -1,13 +1,13 @@
 // components/PaymentModal.jsx
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {requestPayment} from "../../api/payment"
+import { requestPayment } from '../../api/payment';
 import styles from './PaymentModal.module.css';
 
 const CARD_WIDTH = 480; // 카드 1개 너비(px)
 const SWIPE_THRESHOLD = 250; // 슬라이드 전환 임계치
 
-const PaymentModal = ({ isOpen, onClose, cardData, onSuccess }) => {
+const PaymentModal = ({ isOpen, onClose, cardData, onSuccess, onFailure }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -16,6 +16,7 @@ const PaymentModal = ({ isOpen, onClose, cardData, onSuccess }) => {
   const startX = useRef(0);
   const [offset, setOffset] = useState(null);
   const cardRef = useRef(null);
+
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : 'auto';
     return () => {
@@ -51,22 +52,19 @@ const PaymentModal = ({ isOpen, onClose, cardData, onSuccess }) => {
     setDragX(0);
   }
 
-
-const handlePayment = async () => {
-
-  try {
+  const handlePayment = async () => {
+    try {
       // 결제 요청에 필요한 정보 구성 (예시)
       const paymentInfo = {
         paymentMethodId: selectedCard.paymentMethodId, // id값이 있다고 가정
         amount: 4900, // 결제 금액 예시
-        creatorId: 3
+        creatorId: 3,
       };
 
       const result = await requestPayment(paymentInfo);
-      onSuccess(); 
+      onSuccess();
     } catch (error) {
-      alert('결제에 실패했습니다. 다시 시도해주세요.');
-      console.error(error);
+      onFailure();
     }
   };
 
@@ -121,7 +119,11 @@ const handlePayment = async () => {
                 transition: dragging ? 'none' : 'transform 0.4s cubic-bezier(.39,.58,.57,1.13)',
               }}>
               {cardData.map((card, idx) => (
-                <div className={styles.cardItem} key={idx} ref={idx === 0 ? cardRef : null} onClick={() => setSelectedCard(card)}>
+                <div
+                  className={styles.cardItem}
+                  key={idx}
+                  ref={idx === 0 ? cardRef : null}
+                  onClick={() => setSelectedCard(card)}>
                   <div className={styles.cardContent}>
                     <div className={styles.cardName}>{card.cardName}</div>
                     <div className={styles.cardBrand}>{card.cardBrand}</div>
@@ -136,18 +138,16 @@ const handlePayment = async () => {
           <div className={styles.selectedCardInfo}>
             <p className={styles.selectedLabel}>선택된 카드</p>
             {selectedCard ? (
-    <div className={styles.selectedCardBox}>
-      <div className={styles.selectedCardName}>{selectedCard.cardName}</div>
-      <div className={styles.selectedCardNumber}>
-        **** **** **** {selectedCard.cardNumber.slice(-4)}
-      </div>
-    </div>
-  ) : (
-    <div className={styles.selectedCardBox}>
-      <div className={styles.selectedCardName}>카드를 선택해주세요</div>
-      <div className={styles.selectedCardNumber}>----</div>
-    </div>
-  )}
+              <div className={styles.selectedCardBox}>
+                <div className={styles.selectedCardName}>{selectedCard.cardName}</div>
+                <div className={styles.selectedCardNumber}>**** **** **** {selectedCard.cardNumber.slice(-4)}</div>
+              </div>
+            ) : (
+              <div className={styles.selectedCardBox}>
+                <div className={styles.selectedCardName}>카드를 선택해주세요</div>
+                <div className={styles.selectedCardNumber}>----</div>
+              </div>
+            )}
           </div>
 
           {/* 결제 버튼 */}
