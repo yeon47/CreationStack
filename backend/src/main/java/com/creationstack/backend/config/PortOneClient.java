@@ -7,6 +7,7 @@ import com.creationstack.backend.dto.Payment.PortOneReservationRequestDto;
 import com.creationstack.backend.dto.Payment.PortOneReservationResponseDto;
 import com.creationstack.backend.dto.Payment.PortOneReservationResponseDto.ScheduleDto;
 import com.creationstack.backend.exception.CustomException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
@@ -40,7 +41,7 @@ public class PortOneClient {
   private String API_HOSTNAME;
 
   @Value("${portone.storeid}")
-  private String storeId;
+  private String STORE_ID;
 
   // billingkey에 등록된 카드 정보 요청
   public JsonNode getBillingKeyInfo(String billingKey) {
@@ -66,16 +67,24 @@ public class PortOneClient {
 
   //카드 이용한 결제 진행
   public PortOneBillingResponseDto processingBillingKeyPay(PortOnePaymentRequestDto requestBody) {
+
+    // 주문 ID 생성(portone 등록)
     String portOnePaymentId = "order-"+generateWithTimestamp();
+
+    // 요청 url 설정
     String requestUrl = API_HOSTNAME + "/payments/" + portOnePaymentId + "/billing-key";
+
+    // 헤더 설정
     HttpHeaders headers = new HttpHeaders();
     headers.set("Authorization", "PortOne " + API_SECRET);
     headers.setContentType(MediaType.APPLICATION_JSON);
     log.info("[PortOneClient] requestBody:{}", requestBody.getBillingKey());
-    requestBody.setStoreId(storeId);
+    requestBody.setStoreId(STORE_ID);
+
     HttpEntity<PortOnePaymentRequestDto> entity = new HttpEntity<>(requestBody, headers);
      log.info("[PortOneClient] entity:{}", entity);
 
+     // 요청 전송
     ResponseEntity<String> response =
         restTemplate.exchange(requestUrl, HttpMethod.POST, entity, String.class);
 
@@ -87,9 +96,6 @@ public class PortOneClient {
       throw new CustomException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
-
-  // 결제 예약 취소
-
 
   // 결제 예약
   public PortOneReservationResponseDto reservationPayment(PortOneReservationRequestDto requestBody){
@@ -112,43 +118,29 @@ public class PortOneClient {
     }
   }
 
-  // 결제 예약 다건 조회
-  public String getScheduleStatus() {
-    String requestUrl = API_HOSTNAME + "/payment-schedules";
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.set("Authorization", "PortOne " + API_SECRET);
-    HttpEntity<Void> entity = new HttpEntity<>(headers);
-
-    ResponseEntity<String> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, String.class);
-
-    try {
-      return objectMapper.readTree(response.getBody()).get("status").asText(); // SUCCEEDED, FAILED 등
-    } catch (Exception e) {
-      throw new CustomException(HttpStatus.BAD_REQUEST, "조회 실패: " + e.getMessage());
-    }
-  }
-
-
-
-
-  public JsonNode deleteBillingKey(DeletePaymentMethodRequestDto req) {
+  // 결제수단 삭제
+  public JsonNode deleteBillingKey(DeletePaymentMethodRequestDto req, String billingKey) {
+    // 요청 url 설정
     String requestUrl =
-        API_HOSTNAME + "/billing-keys/" + req.getBillingKey() + "?reason=" + req.getReason();
+        API_HOSTNAME + "/billing-keys/" + billingKey + "?reason=" + req.getReason();
 
+    // header 설정
     HttpHeaders headers = new HttpHeaders();
     headers.set("Authorization", "PortOne " + API_SECRET);
     headers.setContentType(MediaType.APPLICATION_JSON);
 
+    // 요청 request param, header 설정
     HttpEntity<Void> entity = new HttpEntity<>(headers);
 
+    // 요청 전송
     ResponseEntity<String> response =
         restTemplate.exchange(requestUrl, HttpMethod.DELETE, entity, String.class);
-
+    log.info("[PortOneClient] deleteBillingKey 요청 전송후 응답옴:{}", "삭제 완료");
     try {
+      // JSON 파싱 오류 발생 가능성 있음
       return objectMapper.readTree(response.getBody());
-    } catch (Exception e) {
-      throw new RuntimeException("포트원 응답 파싱 실패" + e);
+    } catch (JsonProcessingException e) {
+      throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "응답 파싱 중 오류가 발생했습니다.");
     }
   }
 
