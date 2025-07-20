@@ -18,7 +18,6 @@ import com.creationstack.backend.dto.Payment.PortOnePaymentRequestDto;
 import com.creationstack.backend.dto.Payment.PortOneReservationRequestDto;
 import com.creationstack.backend.dto.Payment.PortOneReservationResponseDto;
 import com.creationstack.backend.repository.PaymentRepository;
-import com.creationstack.backend.repository.SubscriptionRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -38,7 +37,6 @@ public class PaymentService {
   private final PaymentRepository paymentRepository;
   private final PaymentMethodService paymentMethodService;
   private final PortOneClient portOneClient;
-  private final SubscriptionRepository subscriptionRepository;
 
   //결제
   public BillingKeyPaymentResponseDto processingBillingKeyPay(BillingKeyPaymentRequestDto req) {

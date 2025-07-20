@@ -74,3 +74,24 @@ export const requestIssueBillingKey = async (storeId, channelKey, name, email) =
   alert('이 billingkey를 .env sample billingkey로 사용하세요' + response.billingKey);
   return response;
 };
+
+
+// 결제수단 삭제 deleteCardMethod
+export const deleteCardMethod = async paymentMethodId => {
+  try {
+    const response = await axios.post(
+      'http://localhost:8080/api/billings/card',
+      {
+        paymentMethodId: paymentMethodId,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    return error;
+  }
+};

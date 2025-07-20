@@ -1,7 +1,6 @@
 package com.creationstack.backend.etc;
 
 import com.creationstack.backend.service.PaymentService;
-import com.creationstack.backend.service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableScheduling;
