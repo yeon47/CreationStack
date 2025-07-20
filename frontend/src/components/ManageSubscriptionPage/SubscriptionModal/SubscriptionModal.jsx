@@ -13,7 +13,7 @@ export const SubscriptionModal = ({ type, onClose, onConfirm }) => {
     resume: {
       title: "구독을 다시 시작하시겠습니까?",
       description: "즉시 결제가 진행되며,\n구독이 다시 활성화됩니다.",
-      confirmText: "구독 시작",
+      confirmText: "구독 하기",
     },
   };
 
