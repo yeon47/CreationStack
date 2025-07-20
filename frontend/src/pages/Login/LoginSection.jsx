@@ -1,11 +1,12 @@
+import { useNavigate } from 'react-router-dom';
 import React, { useState } from 'react';
-import { Button } from '../../components/Member/Button';
 import { Card, CardContent } from '../../components/Member/Card';
 import { Input } from '../../components/Member/Input';
 import { Label } from '../../components/Member/Label';
 import styles from './Login.module.css';
 
 export const LoginSection = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -13,7 +14,6 @@ export const LoginSection = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Data for the left side content
   const leftSideContent = {
     title: '로그인',
     subtitle: '개발자 커뮤니티',
@@ -34,7 +34,6 @@ export const LoginSection = () => {
     setIsSubmitting(true);
 
     try {
-      // 실제 API 호출 (백엔드로 프록시됨)
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
@@ -48,8 +47,16 @@ export const LoginSection = () => {
 
       if (response.ok) {
         const result = await response.json();
-        localStorage.setItem('token', result.token);
-        window.location.href = '/';
+        const nickname = result.data.user.nickname;
+        const accessToken = result.data.tokens.accessToken;
+        const refreshToken = result.data.tokens.refreshToken;
+
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+
+        alert(`${nickname}님 어서오세요.`);
+        navigate('/');
+        window.location.reload();
       } else {
         const error = await response.json();
         alert(`로그인 실패: ${error.message}`);
