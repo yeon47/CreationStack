@@ -93,9 +93,6 @@ const WarningModal = ({ isOpen, onClose, isVisible = true, cardData, type, onCon
         <div className={styles.modal}>
           <div className={styles.popupHeader}>
             <h2 className={styles.titleText}>{title}</h2>
-            <span className={styles.cancelButton} onClick={onClose}>
-              ×
-            </span>
           </div>
           <p className={styles.subText}>{message}</p>
           <div className={styles.separator} />
@@ -115,7 +112,7 @@ const WarningModal = ({ isOpen, onClose, isVisible = true, cardData, type, onCon
                     onClose();
                   } else if (type === 'delete-success' || type === 'delete-fail') {
                     onClose();
-                  } else if (type === 'payment-fail') {
+                  } else if (type === 'payment-fail' || type === 'method-fail') {
                     onClose();
                   } else {
                     onConfirm?.();

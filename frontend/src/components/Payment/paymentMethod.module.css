@@ -151,3 +151,8 @@
 .card_list_container {
   color: black;
 }
+
+.empty_message {
+  color: #595959;
+  font-size: 16px;
+}
