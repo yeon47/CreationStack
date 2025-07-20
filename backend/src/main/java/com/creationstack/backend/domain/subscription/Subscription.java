@@ -55,7 +55,4 @@ public class Subscription {
 
     @Column(nullable = false)
     private LocalDateTime lastPaymentAt; // 마지막 결제 시각
-
-    @Column(length = 255)
-    private String scheduleId; // 매달 정기결제용 (포트원에서 넘어오는 값)
 }
