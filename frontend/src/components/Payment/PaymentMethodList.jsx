@@ -58,7 +58,7 @@ function PaymentMethodList({ cards, onDeleteCard }) {
               {card.cardBrand === 'VISA' && <img src="/img/card_logo/visa_logo.png" alt="Visa" />}
             </div>
           </div>
-          <button className={styles.card_delete_button} onClick={() => onDeleteCard(card.paymentMethodId)}>
+          <button className={styles.card_delete_button} onClick={() => onDeleteCard(card)}>
             삭제
           </button>
         </div>

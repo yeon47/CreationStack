@@ -1,7 +1,5 @@
 package com.creationstack.backend.dto.Payment;
 
-import com.creationstack.backend.domain.payment.PaymentStatus;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,10 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BillingKeyPaymentResponseDto {
+  private Long subscriptionId;
   private Long paymentId;
-  private PaymentStatus paymentStatus;
-  private LocalDateTime tryAt;
-  private LocalDateTime successAt;
-  private String orderName;
-  private int amount;
 }
