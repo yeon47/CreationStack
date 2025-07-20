@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 
 const Home = () => {
-  return <div>안녕하세요</div>;
+  <div>Home</div>;
 };
 
 export default Home;

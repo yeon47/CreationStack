@@ -52,7 +52,5 @@ public class UserDetail {
         LOCAL, KAKAO
     }
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_id")
-    private Job job;
+ 
 }

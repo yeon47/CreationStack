@@ -1,78 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import styles from './LocalCreator.module.css';
+
 import { Card, CardContent } from '../../components/Member/Card';
 import { Input } from '../../components/Member/Input';
-import { Button } from '../../components/Member/Button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/Member/Select';
-import styles from './LocalCreator.module.css';
+import { SimpleLabel } from '../../components/Member/SimpleLabel';
+import Eye from '../../components/Member/Eye';
+import EyeOff from '../../components/Member/EyeOff';
 
 export const LocalCreator = ({ onBack }) => {
   const [formData, setFormData] = useState({
     email: '',
     name: '',
     nickname: '',
-    job: '',
+    jobId: '',
     password: '',
     confirmPassword: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [passwordVisibility, setPasswordVisibility] = useState({ password: false, confirmPassword: false });
+  const [nicknameStatus, setNicknameStatus] = useState({ message: '', isAvailable: null });
+  const [emailStatus, setEmailStatus] = useState({ message: '', isAvailable: null });
+
+  useEffect(() => {
+    const nickname = formData.nickname.trim();
+    if (nickname.length < 2) {
+      setNicknameStatus({ message: '', isAvailable: null });
+      return;
+    }
+    const handler = setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/users/check-nickname?nickname=${nickname}`);
+        const result = await response.json();
+        setNicknameStatus({ message: result.message, isAvailable: result.available });
+      } catch (error) {
+        setNicknameStatus({ message: '확인 중 오류 발생', isAvailable: false });
+      }
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [formData.nickname]);
 
   const handleInputChange = e => {
     const { id, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [id]: value,
-    }));
+    setFormData(prev => ({ ...prev, [id]: value }));
+    if (id === 'email') {
+      setEmailStatus({ message: '', isAvailable: null });
+    }
   };
 
   const handleJobChange = value => {
-    setFormData(prev => ({
-      ...prev,
-      job: value,
-    }));
+    setFormData(prev => ({ ...prev, jobId: value }));
   };
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-
-    // 비밀번호 확인 검증
-    if (formData.password !== formData.confirmPassword) {
-      alert('비밀번호가 일치하지 않습니다.');
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch('/api/users/creator', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          name: formData.name,
-          nickname: formData.nickname,
-          job: formData.job,
-          password: formData.password,
-          userType: 'creator',
-        }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        alert('크리에이터 회원가입이 완료되었습니다!');
-        window.location.href = '/login';
-      } else {
-        const error = await response.json();
-        alert(`회원가입 실패: ${error.message}`);
-      }
-    } catch (error) {
-      alert('서버 오류가 발생했습니다.');
-      console.error('Registration error:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
+  const togglePasswordVisibility = fieldId => {
+    setPasswordVisibility(prev => ({ ...prev, [fieldId]: !prev[fieldId] }));
   };
 
   const checkEmailDuplicate = async () => {
@@ -80,23 +62,58 @@ export const LocalCreator = ({ onBack }) => {
       alert('이메일을 입력해주세요.');
       return;
     }
-
     try {
       const response = await fetch(`/api/users/check-email?email=${formData.email}`);
       const result = await response.json();
-
-      if (result.available) {
-        alert('사용 가능한 이메일입니다.');
-      } else {
-        alert('이미 사용 중인 이메일입니다.');
-      }
+      setEmailStatus({ message: result.message, isAvailable: result.available });
     } catch (error) {
-      alert('이메일 중복 확인 중 오류가 발생했습니다.');
+      setEmailStatus({ message: '확인 중 오류가 발생했습니다.', isAvailable: false });
     }
   };
 
   const handleLoginClick = () => {
     window.location.href = '/login';
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    if (emailStatus.isAvailable === false) {
+      alert('이미 사용 중인 이메일입니다.');
+      return;
+    }
+    if (nicknameStatus.isAvailable === false) {
+      alert('이미 사용 중인 닉네임입니다.');
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      alert('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          username: formData.name,
+          nickname: formData.nickname,
+          password: formData.password,
+          role: 'CREATOR',
+          jobId: formData.jobId,
+        }),
+      });
+      const result = await response.json();
+      alert(result.message);
+      if (response.ok) {
+        window.location.href = '/login';
+      }
+    } catch (error) {
+      alert('회원가입 처리 중 오류가 발생했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -121,11 +138,21 @@ export const LocalCreator = ({ onBack }) => {
 
           <form onSubmit={handleSubmit}>
             <div className={styles.formContainer}>
-              {/* Email field with duplicate check button */}
+              {/* 이메일 */}
               <div className={styles.fieldContainer}>
-                <div className={styles.fieldLabel}>
-                  <span>이메일 주소 </span>
-                  <span className={styles.required}>*</span>
+                <div className={styles.labelWrapper}>
+                  <div className={styles.fieldLabel}>
+                    <span>이메일 주소 </span>
+                    <span className={styles.required}>*</span>
+                  </div>
+                  {emailStatus.message && (
+                    <span
+                      className={`${styles.statusMessage} ${
+                        emailStatus.isAvailable ? styles.available : styles.unavailable
+                      }`}>
+                      {emailStatus.message}
+                    </span>
+                  )}
                 </div>
                 <div className={styles.emailContainer}>
                   <Input
@@ -142,7 +169,7 @@ export const LocalCreator = ({ onBack }) => {
                 </div>
               </div>
 
-              {/* Name field */}
+              {/* 이름 */}
               <div className={styles.fieldContainer}>
                 <div className={styles.fieldLabel}>
                   <span>이름 </span>
@@ -158,11 +185,21 @@ export const LocalCreator = ({ onBack }) => {
                 />
               </div>
 
-              {/* Nickname field */}
+              {/* 닉네임 */}
               <div className={styles.fieldContainer}>
-                <div className={styles.fieldLabel}>
-                  <span>닉네임 </span>
-                  <span className={styles.required}>*</span>
+                <div className={styles.labelWrapper}>
+                  <div className={styles.fieldLabel}>
+                    <span>닉네임 </span>
+                    <span className={styles.required}>*</span>
+                  </div>
+                  {nicknameStatus.message && (
+                    <span
+                      className={`${styles.statusMessage} ${
+                        nicknameStatus.isAvailable ? styles.available : styles.unavailable
+                      }`}>
+                      {nicknameStatus.message}
+                    </span>
+                  )}
                 </div>
                 <Input
                   id="nickname"
@@ -174,73 +211,86 @@ export const LocalCreator = ({ onBack }) => {
                 />
               </div>
 
-              {/* Job/Occupation dropdown */}
+              {/* 직업 */}
               <div className={styles.fieldContainer}>
                 <div className={styles.fieldLabel}>
                   <span>직업 </span>
                   <span className={styles.required}>*</span>
                 </div>
-                <Select value={formData.job} onValueChange={handleJobChange}>
+                <Select value={formData.jobId} onValueChange={handleJobChange}>
                   <SelectTrigger className={styles.selectTrigger}>
                     <SelectValue placeholder="직업을 선택해주세요" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="developer">개발자</SelectItem>
-                    <SelectItem value="designer">디자이너</SelectItem>
-                    <SelectItem value="manager">매니저</SelectItem>
-                    <SelectItem value="other">기타</SelectItem>
+                    <SelectItem value="1">개발자</SelectItem>
+                    <SelectItem value="2">디자이너</SelectItem>
+                    <SelectItem value="3">기획자</SelectItem>
+                    <SelectItem value="4">기타</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Password field */}
+              {/* 비밀번호 */}
               <div className={styles.fieldContainer}>
                 <div className={styles.fieldLabel}>
                   <span>비밀번호 </span>
                   <span className={styles.required}>*</span>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  className={styles.regularInput}
-                  placeholder="비밀번호를 입력해주세요"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  required
-                />
+                <div className={styles.passwordWrapper}>
+                  <Input
+                    id="password"
+                    type={passwordVisibility.password ? 'text' : 'password'}
+                    className={styles.regularInput}
+                    placeholder="비밀번호를 입력해주세요"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePasswordVisibility('password')}
+                    className={styles.passwordIcon}>
+                    {passwordVisibility.password ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </div>
 
-              {/* Password confirmation field */}
+              {/* 비밀번호 확인 */}
               <div className={styles.fieldContainer}>
                 <div className={styles.fieldLabel}>
                   <span>비밀번호 확인 </span>
                   <span className={styles.required}>*</span>
                 </div>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  className={styles.regularInput}
-                  placeholder="비밀번호를 입력해주세요"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  required
-                />
+                <div className={styles.passwordWrapper}>
+                  <Input
+                    id="confirmPassword"
+                    type={passwordVisibility.confirmPassword ? 'text' : 'password'}
+                    className={styles.regularInput}
+                    placeholder="비밀번호를 다시 입력해주세요"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePasswordVisibility('confirmPassword')}
+                    className={styles.passwordIcon}>
+                    {passwordVisibility.confirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Sign up button */}
             <div className={styles.submitContainer}>
-              <div className={styles.submitButtonWrapper}>
-                <div className={styles.buttonContainer}>
-                  {onBack && (
-                    <button type="button" className={styles.backButton} onClick={onBack}>
-                      이전
-                    </button>
-                  )}
-                  <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
-                    {isSubmitting ? '처리 중...' : '회원가입'}
+              <div className={styles.buttonContainer}>
+                {onBack && (
+                  <button type="button" className={styles.backButton} onClick={onBack}>
+                    이전
                   </button>
-                </div>
+                )}
+                <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
+                  {isSubmitting ? '처리 중...' : '회원가입'}
+                </button>
               </div>
             </div>
           </form>

@@ -18,7 +18,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "comment_likes", uniqueConstraints = { @UniqueConstraint(columnNames = { "comment_id", "user_id" }) })
+@Table(name = "comment_like", uniqueConstraints = { @UniqueConstraint(columnNames = { "comment_id", "user_id" }) })
 public class CommentLike {
 
 	@Id

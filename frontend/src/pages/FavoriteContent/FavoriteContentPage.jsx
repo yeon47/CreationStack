@@ -1,50 +1,52 @@
 import React, { useEffect, useState } from 'react';
 import FavoriteContentItem from '../../components/Comment/LikeContentItem';
 import styles from '../../styles/comment/likeContentPage.module.css';
+import { fetchLikedContents, toggleLikeContent } from '../../api/likeList';
 
 const FavoriteContentPage = () => {
   const [posts, setPosts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
+  const userId = localStorage.getItem('userId');
   const postsPerPage = 5;
 
   useEffect(() => {
     fetchFavoritePosts();
-  }, []);
+  }, [currentPage]);
 
   const fetchFavoritePosts = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/favorite-posts');
-      if (!response.ok) throw new Error('API 호출 실패');
-      const data = await response.json();
-      setPosts(data.posts || data);
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        console.error('userId가 없습니다.');
+        setPosts([]);
+        setTotalPages(0);
+        return;
+      }
+
+      const data = await fetchLikedContents(currentPage - 1, userId);
+      setPosts(data.content);
+      setTotalPages(data.totalPages);
     } catch (error) {
-      console.error(error);
-      setPosts([]); // API 실패 시 빈 배열
+      console.error('좋아요한 콘텐츠 조회 실패', error);
+      setPosts([]);
+      setTotalPages(0);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUnlike = async postId => {
+  const handleUnlike = async (contentId, userId) => {
     try {
-      const response = await fetch(`/api/posts/${postId}/unlike`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (!response.ok) throw new Error('좋아요 취소 실패');
-      setPosts(prev => prev.filter(p => p.id !== postId));
+      await toggleLikeContent(contentId, userId);
+      fetchFavoritePosts();
     } catch (err) {
-      console.error(err);
-      alert('좋아요 취소 실패');
+      console.error('좋아요 취소 실패', err);
+      alert('좋아요 취소에 실패했습니다.');
     }
   };
-
-  const indexOfLast = currentPage * postsPerPage;
-  const indexOfFirst = indexOfLast - postsPerPage;
-  const currentPosts = posts.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(posts.length / postsPerPage);
 
   const getPageNumbers = () => {
     const pages = [];
@@ -73,13 +75,13 @@ const FavoriteContentPage = () => {
         ) : (
           <>
             <div className={styles.list}>
-              {currentPosts.map(post => (
-                <FavoriteContentItem key={post.id} post={post} onUnlike={handleUnlike} />
+              {posts.map(post => (
+                <FavoriteContentItem key={post.contentId} post={post} onUnlike={handleUnlike} userId={userId} />
               ))}
             </div>
 
             <div className={styles.pagination}>
-              <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
+              <button onClick={() => setCurrentPage(prev => prev - 1)} disabled={currentPage === 1}>
                 &lt; Prev
               </button>
               {getPageNumbers().map((num, idx) => (
@@ -91,7 +93,7 @@ const FavoriteContentPage = () => {
                   {num}
                 </button>
               ))}
-              <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
+              <button onClick={() => setCurrentPage(prev => prev + 1)} disabled={currentPage === totalPages}>
                 Next &gt;
               </button>
             </div>

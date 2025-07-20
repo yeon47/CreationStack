@@ -2,16 +2,31 @@ import React, { useState } from 'react';
 import styles from './Select.module.css';
 
 const Select = ({ children, value, onValueChange, defaultValue }) => {
+  const [internalValue, setInternalValue] = useState(value || defaultValue || '');
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState(value || defaultValue || '');
+
+  React.useEffect(() => {
+    setInternalValue(value);
+  }, [value]);
 
   const handleValueChange = newValue => {
-    setSelectedValue(newValue);
+    setInternalValue(newValue);
     if (onValueChange) {
       onValueChange(newValue);
     }
     setIsOpen(false);
   };
+
+  let selectedDisplayValue = null;
+  const content = React.Children.toArray(children).find(child => child.type === SelectContent);
+  if (content) {
+    const selectedItem = React.Children.toArray(content.props.children).find(
+      child => child.props.value === internalValue
+    );
+    if (selectedItem) {
+      selectedDisplayValue = selectedItem.props.children;
+    }
+  }
 
   return (
     <div style={{ position: 'relative' }}>
@@ -20,13 +35,15 @@ const Select = ({ children, value, onValueChange, defaultValue }) => {
           return React.cloneElement(child, {
             isOpen,
             setIsOpen,
-            selectedValue,
+            children: React.cloneElement(child.props.children, {
+              displayValue: selectedDisplayValue,
+            }),
           });
         }
         if (child.type === SelectContent) {
           return React.cloneElement(child, {
             isOpen,
-            selectedValue,
+            selectedValue: internalValue,
             onValueChange: handleValueChange,
           });
         }
@@ -36,7 +53,7 @@ const Select = ({ children, value, onValueChange, defaultValue }) => {
   );
 };
 
-const SelectTrigger = ({ className = '', children, isOpen, setIsOpen, selectedValue, ...props }) => {
+const SelectTrigger = ({ className = '', children, isOpen, setIsOpen, ...props }) => {
   return (
     <button
       type="button"
@@ -49,8 +66,8 @@ const SelectTrigger = ({ className = '', children, isOpen, setIsOpen, selectedVa
   );
 };
 
-const SelectValue = ({ placeholder }) => {
-  return <span>{placeholder}</span>;
+const SelectValue = ({ placeholder, displayValue }) => {
+  return <span>{displayValue || placeholder}</span>;
 };
 
 const SelectContent = ({ className = '', children, isOpen, selectedValue, onValueChange }) => {
@@ -59,7 +76,7 @@ const SelectContent = ({ className = '', children, isOpen, selectedValue, onValu
   return (
     <div
       className={`${styles.selectContent} ${className}`}
-      style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50 }}>
+      style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, marginTop: '4px' }}>
       <div className={styles.selectViewport}>
         {React.Children.map(children, child => {
           if (child.type === SelectItem) {
@@ -77,7 +94,6 @@ const SelectContent = ({ className = '', children, isOpen, selectedValue, onValu
 
 const SelectItem = ({ className = '', children, value, selectedValue, onValueChange, ...props }) => {
   const isSelected = selectedValue === value;
-
   return (
     <div className={`${styles.selectItem} ${className}`} onClick={() => onValueChange(value)} {...props}>
       {children}
@@ -86,12 +102,4 @@ const SelectItem = ({ className = '', children, value, selectedValue, onValueCha
   );
 };
 
-const SelectLabel = ({ className = '', ...props }) => (
-  <div className={`${styles.selectLabel} ${className}`} {...props} />
-);
-
-const SelectSeparator = ({ className = '', ...props }) => (
-  <div className={`${styles.selectSeparator} ${className}`} {...props} />
-);
-
-export { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectLabel, SelectSeparator };
+export { Select, SelectTrigger, SelectValue, SelectContent, SelectItem };

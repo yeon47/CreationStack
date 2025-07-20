@@ -1,28 +1,35 @@
+// src/api/likeList.js
 import axios from 'axios';
 
-const likeList = axios.create({
+const likeListApi = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '',
   withCredentials: true,
 });
 
-likeList.interceptors.request.use(config => {
-  const token = localStorage.getItem('accessToken');
+// 인터셉터: 토큰 자동 설정
+likeListApi.interceptors.request.use(config => {
+  const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// 좋아요한 콘텐츠 목록 불러오기
-export const fetchLikedContents = async () => {
-  const response = await likeList.get('/api/users/me/likes');
+// 좋아요한 콘텐츠 목록 조회
+export const fetchLikedContents = async (page, userId) => {
+  const response = await likeListApi.get('/api/content/liked', {
+    params: {
+      page,
+      userId,
+    },
+  });
   return response.data;
 };
 
-//좋아요 버튼 클릭
-export const toggleLike = async contentId => {
-  const response = await likeList.post(`/api/contents/${contentId}/like`);
+// 좋아요 취소 (토글 API)
+export const toggleLikeContent = async (contentId, userId) => {
+  const response = await likeListApi.post(`/api/content/${contentId}/like`, null, {
+    params: { userId },
+  });
   return response.data;
 };
-
-export default likeList;

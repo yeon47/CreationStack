@@ -1,22 +1,26 @@
 import React from 'react';
 import styles from '../../styles/comment/likeContentItem.module.css';
 
-const FavoriteContentItem = ({ post, onUnlike }) => {
-  const formattedDate = new Date(post.createdAt.replace(' ', 'T')).toLocaleDateString('ko-KR');
+const LikeContentItem = ({ post, onUnlike, userId }) => {
+  const formattedDate = new Date(post.createdAt).toLocaleDateString('ko-KR');
+
+  const goToDetail = () => {
+    navigate(`/content/${post.contentId}`);
+  };
 
   return (
-    <div className={styles.item}>
+    <div className={styles.item} onClick={goToDetail} style={{ cursor: 'pointer' }}>
       <div className={styles.left}>
         <div className={styles.profile}>
-          {post.profileImage ? (
-            <img src={post.profileImage} alt="프로필" />
+          {post.profileImageUrl ? (
+            <img src={post.profileImageUrl} alt="프로필" className={styles.profileImage} />
           ) : (
-            <div className={styles.placeholder}>{post.nickname?.[0] || '?'}</div>
+            <div>{post.creatorName?.[0] || '?'}</div>
           )}
         </div>
-        <div>
+        <div className={styles.content}>
           <div className={styles.meta}>
-            <span className={styles.nickname}>{post.nickname}</span>
+            <span className={styles.nickname}>{post.creatorName}</span>
             <span className={styles.job}>{post.job}</span>
             <span className={styles.date}>{formattedDate}</span>
           </div>
@@ -27,11 +31,19 @@ const FavoriteContentItem = ({ post, onUnlike }) => {
           </div>
         </div>
       </div>
-      <button className={styles.heart} onClick={() => onUnlike(post.id)} title="좋아요 취소">
+
+      {/* 좋아요 취소 버튼만 상세 페이지 이동  방지 처리 */}
+      <button
+        className={styles.heart}
+        onClick={e => {
+          e.stopPropagation();
+          onUnlike(post.contentId, userId);
+        }}
+        title="좋아요 취소">
         ❤️
       </button>
     </div>
   );
 };
 
-export default FavoriteContentItem;
+export default LikeContentItem;

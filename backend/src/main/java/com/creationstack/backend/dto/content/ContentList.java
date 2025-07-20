@@ -26,26 +26,42 @@ public class ContentList  {
     private LocalDateTime createdAt;
     
     public static ContentList from(Content content) {
-        String jobName = content.getCreator().getUserDetail().getJob() != null
-            ? content.getCreator().getUserDetail().getJob().getName()
-            : null;
+        if (content == null) {
+            System.out.println("❌ content is null");
+            return null;
+        }
 
-        String categoryName = content.getCategoryMappings().isEmpty()
-            ? null
-            : content.getCategoryMappings().iterator().next().getCategory().getName();
+        String creatorNickname = null;
+        String jobName = null;
+
+        if (content.getCreator() != null) {
+            if (content.getCreator().getUserDetail() != null) {
+                creatorNickname = content.getCreator().getUserDetail().getNickname();
+            }
+
+            if (content.getCreator().getJob() != null) {
+                jobName = content.getCreator().getJob().getName();
+            }
+        }
+
+        String categoryName = null;
+        if (!content.getCategoryMappings().isEmpty()) {
+            categoryName = content.getCategoryMappings().iterator().next().getCategory().getName();
+        }
 
         return new ContentList(
             content.getContentId(),
             content.getTitle(),
-            content.getCreator().getUserDetail().getNickname(),
+            creatorNickname,
             jobName,
             categoryName,
             content.getThumbnailUrl(),
-            content.getAccessType() == AccessType.SUBSCRIBER, 
+            content.getAccessType() == AccessType.SUBSCRIBER,
             content.getViewCount(),
             content.getCreatedAt()
         );
     }
+
 
 
 }

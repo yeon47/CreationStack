@@ -1,7 +1,5 @@
 .selectTrigger {
   display: flex;
-  height: 2.25rem;
-  width: 100%;
   align-items: center;
   justify-content: space-between;
   white-space: nowrap;
