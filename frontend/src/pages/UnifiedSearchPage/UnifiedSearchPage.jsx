@@ -138,7 +138,7 @@ export const UnifiedSearchPage = () => {
             };
 
             const mappedSort = selected.sort === '좋아요순' ? 'like' : 'createdAt';
-            const mappedAccess = selected.accessType === '구독자 전용' ? 'SUBSCRIBER_ONLY' : null;
+            const mappedAccess = selected.accessType === '구독자 전용' ? 'SUBSCRIBER' : null;
             const mappedCategories = categoryMap[selected.category] || [];
 
             setFilter({
