@@ -6,6 +6,7 @@
   align-items: center;
   flex: 1;
   gap: 20px;
+  cursor: pointer;
 }
 
 .profileImage {
