@@ -24,14 +24,17 @@ export const ContentSearchPage = () => {
           setTotalPages(0);
           return;
         }
+        console.log(result.contents);
 
         const mapped = result.contents.map((item) => ({
-          id: item.contentId,
-          creator: item.creator.nickname,
+          // contentId, thumbnailUrl, creatorNickname, title, likes, isPaid, categoryNames
+          // isPaid={content.accessType === 'SUBSCRIBER'}
+          contentId: item.contentId,
+          creatorNickname: item.creator.nickname,
           thumbnailUrl: item.thumbnailUrl,
           title: item.title,
           likes: item.likeCount,
-          isSubscriber: item.isSubscriber, // 이 값은 API 응답에 따라 달라질 수 있습니다.
+          accessType: item.accessType, 
           categoryNames: item.categoryNames,
         }));
         setCreators(mapped);
