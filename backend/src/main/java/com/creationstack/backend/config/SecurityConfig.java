@@ -1,6 +1,5 @@
 package com.creationstack.backend.config;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
@@ -59,11 +58,13 @@ public class SecurityConfig {
                                     "/api/search/**",
                                     "/api/billings/**",
                                     "/api/payments/**",
+                                    "/api/user/public/**",
                                     "/api/contents/*/comments",  // 댓글 목록 조회
                                     "/api/contents/*/comments/*", // 댓글 수정,삭제,대댓글
                                     "/api/contents/*/comments/*/like", // 댓글 좋아요
-                                    "/api/subscriptions/**")
-
+                                    "/api/subscriptions/**",
+                                    "/api/users/*/subscriptions"
+                            )
                             .permitAll()
                             
                             // /api/user/** 경로는 인증 필요 (기존 설정 유지)

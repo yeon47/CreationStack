@@ -1,15 +1,50 @@
-import React, { useState, useEffect } from 'react'; // useEffect, useState 임포트 추가
-import {DashBoardSection}  from './component/DashBoardSection'
-import {PopularContent} from './component/PopularContent';
-import {MyContent} from './component/MyContent';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+import { DashBoardSection } from './component/DashBoardSection';
+import { PopularContent } from './component/PopularContent';
+import { MyContent } from './component/MyContent';
 import styles from './CreatorManagementPage.module.css'; // 페이지 전체 스타일
 
 const CreatorManagementPage = () => {
+  // 테스트용 하드 코딩
+  const creatorId = 2; // 예시 ID
+
+  const token = localStorage.getItem('accessToken');
+  const [creator, setCreator] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // 1. 크리에이터 정보 불러오기
+    axios
+      .get(`/api/user/public/creator-manage`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then(res => {
+        const data = res.data;
+        setCreator(data);
+        console.log('사용자 정보 응답:', data);
+      })
+      .catch(err => {
+        console.error('크리에이터 정보 불러오기 실패', err);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading || !creator) return <div>로딩 중...</div>;
+
   return (
     <div className={styles.creatorManagementPageContainer}>
-      <DashBoardSection />
-      <PopularContent /> 
-      <MyContent/>
+      <DashBoardSection
+        creator={{
+          subscriberCount: creator.subsCount ?? 0,
+          newsubscriberCount: creator.newSubsCount ?? 0,
+        }} 
+        />
+      <PopularContent creatorId={creatorId} />
+      <MyContent creatorId={creatorId} />
     </div>
   );
 };

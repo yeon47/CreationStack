@@ -42,7 +42,7 @@ export default function AppRoutes() {
         <Route path="/content-form" element={<ContentFormPage />} />
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/subscription-manage" element={<SubscriptionManage />} />
-        <Route path="/user-main" element={<UserMainPage />} />
+        <Route path="/user-main/:nickname" element={<UserMainPage />} />
         <Route path="/creator-main/:creatorNickname" element={<CreatorMainPage />} />
         <Route path="/creators" element={<CreatorSearchPage />} />
         <Route path="/contents" element={<ContentSearchPage />} />

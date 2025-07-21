@@ -1,30 +1,44 @@
 package com.creationstack.backend.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.creationstack.backend.domain.subscription.SubscriptionStatus;
+import com.creationstack.backend.domain.subscription.SubscriptionStatusName;
 import com.creationstack.backend.domain.user.Job;
 import com.creationstack.backend.domain.user.User;
 import com.creationstack.backend.domain.user.UserDetail;
+import com.creationstack.backend.dto.Subscription.SubscriptionCountResponseDto;
 import com.creationstack.backend.dto.member.PublicProfileResponse;
 import com.creationstack.backend.dto.member.UpdateProfileRequest;
 import com.creationstack.backend.dto.member.UserProfileResponse;
+import com.creationstack.backend.etc.Role;
 import com.creationstack.backend.exception.CustomException;
 import com.creationstack.backend.repository.JobRepository;
+import com.creationstack.backend.repository.SubscriptionRepository;
+import com.creationstack.backend.repository.SubscriptionStatusRepository;
 import com.creationstack.backend.repository.UserRepository;
+import com.creationstack.backend.domain.subscription.SubscriptionStatusName;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class UserService {
 
         private final UserRepository userRepository;
         private final JobRepository jobRepository;
         private final PasswordEncoder passwordEncoder;
+        private final SubscriptionRepository subscriptionRepository;
+        private final SubscriptionStatusRepository statusRepository;
 
         public UserProfileResponse getUserProfile(Long userId) {
                 User user = userRepository.findByUserIdAndIsActiveTrue(userId)
@@ -51,10 +65,26 @@ public class UserService {
                                 .build();
         }
 
-        public PublicProfileResponse getPublicProfile(String nickname) {
+        @Transactional(readOnly = true)
+        public PublicProfileResponse getPublicProfile(String nickname, Long viewerId) {
                 User user = userRepository.findByUserDetailNickname(nickname)
                                 .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND,
                                                 "해당 닉네임의 사용자를 찾을 수 없습니다."));
+
+                boolean isSubscribed = false;
+                SubscriptionStatus status = statusRepository.findByName("ACTIVE")
+                                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND,
+                                                "ACTIVE 상태를 찾을 수 없습니다."));
+
+                if (viewerId != null && user.getRole() == User.UserRole.CREATOR) {
+                        isSubscribed = subscriptionRepository.existsByCreatorIdAndSubscriberIdAndStatus(user.getUserId(), viewerId, status);
+                }
+
+                log.info("viewerId: {}", viewerId);
+                log.info("isSubscribed: {}", isSubscribed);
+
+                long subsCount = subscriptionRepository.countByCreatorIdAndStatusName(user.getUserId(), SubscriptionStatusName.ACTIVE);
+                log.info("subsCount: {}", subsCount);
 
                 return PublicProfileResponse.builder()
                                 .userId(user.getUserId())
@@ -64,6 +94,28 @@ public class UserService {
                                 .bio(user.getUserDetail().getBio())
                                 .profileImageUrl(user.getUserDetail().getProfileImageUrl())
                                 .isActive(user.getIsActive())
+                                .isSubscribed(isSubscribed)
+                                .subsCount(subsCount)
+                                .build();
+        }
+
+        @Transactional(readOnly = true)
+        public SubscriptionCountResponseDto getCreatorInfo(Long userId) {
+                User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND,
+                                "해당 사용자를 찾을 수 없습니다."));
+
+                long subsCount = subscriptionRepository.countByCreatorIdAndStatusName(user.getUserId(), SubscriptionStatusName.ACTIVE);
+                log.info("subsCount: {}", subsCount);
+
+                LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+                long newSubsCount = subscriptionRepository.countNewActiveSubscriptionsThisMonth(startOfMonth);
+
+
+                return SubscriptionCountResponseDto.builder()
+                                .userId(user.getUserId())
+                                .subsCount(subsCount)
+                                .newSubsCount(newSubsCount)
                                 .build();
         }
 

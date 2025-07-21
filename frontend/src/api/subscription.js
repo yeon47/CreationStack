@@ -20,3 +20,16 @@ export const getMySubscriptions = async () => {
     throw err;
   }
 };
+
+// 현재 로그인한 사용자의 구독한 크리에이터 목록 조회
+export const getSubscribedCreators = async () => {
+  try {
+
+    const response = await axios.get('/api/users/me/subscriptions');
+
+    return response.data.subscriptions;
+  } catch (err) {
+    console.log('크리에이터 목록 조회 실패: '. err);
+    throw err;
+  }
+};

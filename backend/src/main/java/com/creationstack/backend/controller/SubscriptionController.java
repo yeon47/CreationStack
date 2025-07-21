@@ -3,8 +3,10 @@ package com.creationstack.backend.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,10 +14,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.creationstack.backend.domain.user.UserDetail;
 import com.creationstack.backend.dto.Subscription.ActivateSubscriptionRequestDto;
 import com.creationstack.backend.dto.Subscription.SubscriptionRequestDto;
 import com.creationstack.backend.dto.Subscription.SubscriptionResponseDto;
 import com.creationstack.backend.dto.Subscription.UserSubscriptionDto;
+import com.creationstack.backend.dto.member.PublicProfileResponse;
+import com.creationstack.backend.exception.CustomException;
+import com.creationstack.backend.repository.UserDetailRepository;
 import com.creationstack.backend.service.SubscriptionService;
 
 import lombok.RequiredArgsConstructor;
@@ -68,5 +74,15 @@ public class SubscriptionController {
         List<UserSubscriptionDto> subscriptions = subscriptionService.getMySubscriptions(userId);
         return ResponseEntity.ok(Map.of("subscriptions", subscriptions));
     }
+
+    // 사용자가 구독한 크리에이터 목록 조회
+    @GetMapping("/users/{nickname}/subscriptions")
+    public ResponseEntity<Map<String, Object>> getSubscribedCreators(@PathVariable String nickname) {
+        log.info("크리에이터 목록 조회 시작");
+        List<PublicProfileResponse> subscriptions = subscriptionService.getSubscribedCreators(nickname);
+        log.info("creators: {}", subscriptions);
+        return ResponseEntity.ok(Map.of("subscriptions", subscriptions));
+    }
+
 
 }

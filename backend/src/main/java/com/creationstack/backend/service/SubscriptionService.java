@@ -13,15 +13,18 @@ import com.creationstack.backend.domain.subscription.Subscription;
 import com.creationstack.backend.domain.subscription.SubscriptionStatus;
 import com.creationstack.backend.domain.subscription.SubscriptionStatusName;
 import com.creationstack.backend.domain.user.User;
+import com.creationstack.backend.domain.user.UserDetail;
 import com.creationstack.backend.dto.Subscription.SubscriptionRequestDto;
 import com.creationstack.backend.dto.Subscription.SubscriptionResponseDto;
 import com.creationstack.backend.dto.Subscription.UserSubscriptionDto;
+import com.creationstack.backend.dto.member.PublicProfileResponse;
 import com.creationstack.backend.etc.Role;
 import com.creationstack.backend.exception.CustomException;
 import com.creationstack.backend.repository.PaymentMethodRepository;
 import com.creationstack.backend.repository.PaymentRepository;
 import com.creationstack.backend.repository.SubscriptionRepository;
 import com.creationstack.backend.repository.SubscriptionStatusRepository;
+import com.creationstack.backend.repository.UserDetailRepository;
 import com.creationstack.backend.repository.UserRepository;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +42,7 @@ public class SubscriptionService {
         private final PaymentMethodRepository paymentMethodRepository;
         private final PaymentRepository paymentRepository;
         private final UserRepository userRepository;
+        private final UserDetailRepository userDetailRepository;
 
         // 구독 생성 (PENDING 상태)
         @Transactional
@@ -129,11 +133,8 @@ public class SubscriptionService {
 
                 // 기존 nextPaymentAt이 없을 수도 있으니 null check
                 subscription.setNextPaymentAt(
-                    subscription.getNextPaymentAt() == null ?
-                        subscription.getStartedAt().plusMonths(1)
-                        : subscription.getNextPaymentAt()
-                );
-
+                                subscription.getNextPaymentAt() == null ? subscription.getStartedAt().plusMonths(1)
+                                                : subscription.getNextPaymentAt());
 
                 subscriptionRepository.save(subscription);
         }
@@ -192,6 +193,21 @@ public class SubscriptionService {
 
         private String format(LocalDateTime dt) {
                 return dt != null ? dt.toLocalDate().toString() : "";
+        }
+
+        // 사용자가 구독한 크리에이터 목록 조회
+        @Transactional(readOnly = true)
+        public List<PublicProfileResponse> getSubscribedCreators(String nickname) {
+                try {
+                        log.info("닉네임으로 구독 조회 시작: {}", nickname);
+                        List<PublicProfileResponse> list = subscriptionRepository
+                                        .findSubscribedCreatorsByNickname(nickname);
+                        log.info("쿼리 결과 크기: {}", list.size());
+                        return list;
+                } catch (Exception e) {
+                        log.error("구독 조회 실패", e); // 여기서 반드시 스택트레이스 확인
+                        throw e;
+                }
         }
 
 }
