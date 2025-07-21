@@ -36,50 +36,70 @@ public class ContentController {
     private final ContentService contentService;
 
     // 콘텐츠 생성 요청
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // 파일 업로드를 위해 multipart/form-data 소비
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ContentResponse> createContent(
-            @Valid @ModelAttribute ContentCreateRequest request, // @ModelAttribute로 폼 데이터 바인딩
-            @RequestParam("creatorId") Long creatorId // 임시: 테스트를 위해 creatorId를 요청 파라미터로 받음
+            @Valid @ModelAttribute ContentCreateRequest request,
+            Authentication authentication
     ) {
-        log.info("콘텐츠 생성 요청 수신: 제목={}, 크리에이터 ID={}", request.getTitle(), creatorId);
-        ContentResponse response = contentService.createContent(request, creatorId);
+        Long userId = (Long) authentication.getPrincipal();
+        ContentResponse response = contentService.createContent(request, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // 내 콘텐츠 목록 조회 (로그인 사용자 기준)
+    @GetMapping("/my")
+    public ResponseEntity<List<ContentResponse>> getMyContents(Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();  // JWT 필터에서 설정된 userId
+        List<ContentResponse> contents = contentService.getContentsByCreator(userId);
+        return ResponseEntity.ok(contents);
+    }
+    // 내 조회수 top3 콘텐츠 조회
+    @GetMapping("/my/top-viewed")
+    public ResponseEntity<List<ContentResponse>> getMyTopViewedContents(Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
+        log.info("조회수 TOP 3 콘텐츠 조회 요청 수신");
+        List<ContentResponse> topContents = contentService.getTopViewedContents(userId,3);
+        return ResponseEntity.ok(topContents);
     }
 
     // 특정 콘텐츠 조회
     @GetMapping("/{contentId}")
-    public ResponseEntity<ContentResponse> getContentById(@PathVariable Long contentId,
-            @Nullable Authentication authentication) {
+    public ResponseEntity<ContentResponse> getContentById(
+            @PathVariable Long contentId,
+            @Nullable Authentication authentication
+    ) {
         log.info("콘텐츠 조회 요청 수신: Content ID={}", contentId);
 
         Long userId = null;
-        if (authentication != null && authentication.isAuthenticated() &&
-                !"anonymousUser".equals(authentication.getPrincipal())) {
-            userId = Long.parseLong(authentication.getName());
+        if (authentication != null && authentication.isAuthenticated()
+                && !"anonymousUser".equals(authentication.getPrincipal())) {
+            userId = (Long) authentication.getPrincipal();
         }
-        log.info("authentication:{}", authentication);
-        log.info("userid:{}", userId);
+
         ContentResponse response = contentService.getContentById(contentId, userId);
         return ResponseEntity.ok(response);
     }
 
     // 특정 크리에이터의 콘텐츠 목록 조회
     @GetMapping("/creator/{creatorId}")
-    public ResponseEntity<List<ContentResponse>> getContentsByCreator(@PathVariable Long creatorId) {
+    public ResponseEntity<List<ContentResponse>> getContentsByCreator(
+            @PathVariable Long creatorId
+    ) {
         log.info("크리에이터 ID {} 의 콘텐츠 목록 조회 요청 수신", creatorId);
         List<ContentResponse> responses = contentService.getContentsByCreator(creatorId);
         return ResponseEntity.ok(responses);
     }
 
     // 특정 콘텐츠 수정
-    @PutMapping(value = "/{contentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // 파일 업로드를 위해
-                                                                                        // multipart/form-data 소비
+    @PutMapping(value = "/{contentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ContentResponse> updateContent(
             @PathVariable Long contentId,
-            @Valid @ModelAttribute ContentUpdateRequest request, // @ModelAttribute로 폼 데이터 바인딩
-            @RequestParam("creatorId") Long creatorId // 임시: 테스트를 위해 creatorId를 요청 파라미터로 받음
+            @Valid @ModelAttribute ContentUpdateRequest request,
+            Authentication authentication
     ) {
+        Long creatorId = (Long) authentication.getPrincipal(); // JWT에서 추출된 userId
         log.info("콘텐츠 수정 요청 수신: Content ID={}, 크리에이터 ID={}", contentId, creatorId);
+
         ContentResponse response = contentService.updateContent(contentId, request, creatorId);
         return ResponseEntity.ok(response);
     }
@@ -88,11 +108,13 @@ public class ContentController {
     @DeleteMapping("/{contentId}")
     public ResponseEntity<Void> deleteContent(
             @PathVariable Long contentId,
-            @RequestParam("creatorId") Long creatorId // 임시: 테스트를 위해 creatorId를 요청 파라미터로 받음
+            Authentication authentication
     ) {
+        Long creatorId = (Long) authentication.getPrincipal(); // JWT에서 추출된 userId
         log.info("콘텐츠 삭제 요청 수신: Content ID={}, 크리에이터 ID={}", contentId, creatorId);
+
         contentService.deleteContent(contentId, creatorId);
-        return ResponseEntity.noContent().build(); // 204 No Content 반환
+        return ResponseEntity.noContent().build();
     }
 
     // 콘텐츠 좋아요
@@ -116,12 +138,6 @@ public class ContentController {
         return ResponseEntity.ok(likedContents);
     }
 
-    @GetMapping("/creator/{creatorId}/top-viewed")
-    public ResponseEntity<List<ContentResponse>> getTopViewedContentsByCreator(@PathVariable Long creatorId) {
-        log.info("크리에이터 ID {} 의 조회수 TOP 3 콘텐츠 조회 요청 수신", creatorId);
-        List<ContentResponse> responses = contentService.getTopViewedContents(creatorId, 3); // 상위 3개
-        return ResponseEntity.ok(responses);
-    }
 
     // @PostMapping("/categories/initialize")
     // public ResponseEntity<String> initializeCategories(@RequestBody Set<String>
