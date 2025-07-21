@@ -1,4 +1,5 @@
 // src/api/contentApi.js
+import axios from 'axios';
 
 // 콘텐츠 생성 요청 api 함수
 export async function createContent(formData, creatorId) {
@@ -21,7 +22,6 @@ export async function createContent(formData, creatorId) {
   }
 }
 
-
 // 특정 크리에이터의 콘텐츠 목록을 조회하는 API 호출 함수
 export async function getContentsByCreator(creatorId) {
   try {
@@ -43,3 +43,13 @@ export async function getContentsByCreator(creatorId) {
     throw error;
   }
 }
+
+export const checkContentAccess = async (contentId) => {
+  const token = localStorage.getItem('accessToken');
+  return axios.get(`/api/content/${contentId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
