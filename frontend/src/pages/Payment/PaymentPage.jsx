@@ -41,11 +41,6 @@ function PaymentPage() {
     };
     fetchCards();
   }, []); // 빈 배열 → 최초 한 번만 실행됨
-  // 예시용 데이터
-  // const creator = {
-  //   name: '크리에이터 닉네임',
-  //   image: 'https://c.animaapp.com/md94mkfi7RFWrF/img/creatorimage.png',
-  // };
 
   const { creatorNickname } = useParams();
   const [creator, setCreator] = useState(null);
@@ -71,7 +66,7 @@ function PaymentPage() {
 
 
   const subscriptionDetails = [
-    { label: '구독 상품', value: '프리미엄 멤버십' },
+    { label: '구독 상품', value: creator.nickname}+'정기 구독권',
     { label: '가격', value: '₩4,900/월', highlight: true },
     { label: '총 결제 금액', value: '₩4,900', bold: true },
   ];
@@ -122,7 +117,9 @@ function PaymentPage() {
 
   // 결제 성공 시 결제완료 페이지 이동
   const handlePaymentSuccess = () => {
-    navigate('/payments/success');
+navigate('/payments/success', {
+  state: { creator },
+});
   };
 
   // 결제 실패 시 결제 실패 모달창 호출
