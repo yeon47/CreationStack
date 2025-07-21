@@ -5,6 +5,7 @@ import { Button } from '../../components/Member/Button';
 import { Card, CardContent } from '../../components/Member/Card';
 import { Input } from '../../components/Member/Input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/Member/Select';
+import { validateField } from '../../utils/validationUtils';
 import styles from './KakaoCreator.module.css';
 
 export const KakaoCreator = ({ onBack, kakaoInfo }) => {
@@ -16,13 +17,14 @@ export const KakaoCreator = ({ onBack, kakaoInfo }) => {
 
   const [formData, setFormData] = useState({
     email: initialInfo.email || '',
-    name: '',
+    name: '', // 이름은 직접 입력받음
     nickname: initialInfo.nickname || '',
     jobId: '',
   });
 
   const [jobs, setJobs] = useState([]);
   const [nicknameStatus, setNicknameStatus] = useState({ message: '', isAvailable: null });
+  const [validationErrors, setValidationErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 직업 목록 불러오기
@@ -63,6 +65,15 @@ export const KakaoCreator = ({ onBack, kakaoInfo }) => {
   const handleInputChange = e => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
+
+    // 실시간 유효성 검사
+    if (id !== 'email') {
+      const validation = validateField(id, value);
+      setValidationErrors(prev => ({
+        ...prev,
+        [id]: validation.isValid ? '' : validation.message,
+      }));
+    }
   };
 
   const handleJobChange = value => {
@@ -82,23 +93,20 @@ export const KakaoCreator = ({ onBack, kakaoInfo }) => {
 
     setIsSubmitting(true);
     try {
-      // 카카오 사용자 회원가입 - 비밀번호 없이 요청
-      const requestBody = {
-        email: formData.email,
-        username: formData.name,
-        nickname: formData.nickname,
-        role: 'CREATOR',
-        jobId: parseInt(formData.jobId),
-        platform: 'KAKAO',
-        platformId: initialInfo.platformId,
-      };
-
-      console.log('카카오 회원가입 요청:', requestBody);
-
+      // 백엔드에 회원가입 요청 (일반 회원가입 API 사용)
       const response = await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          email: formData.email,
+          username: formData.name,
+          nickname: formData.nickname,
+          password: 'KAKAO_USER', // 카카오 사용자는 임시 비밀번호
+          role: 'CREATOR',
+          jobId: parseInt(formData.jobId),
+          platform: 'KAKAO',
+          platformId: initialInfo.platformId,
+        }),
       });
 
       const result = await response.json();
@@ -138,7 +146,7 @@ export const KakaoCreator = ({ onBack, kakaoInfo }) => {
             </div>
 
             <div className={styles.formContainer}>
-              {/* Email Field - 카카오에서 가져온 이메일 표시 */}
+              {/* Email Field */}
               <div className={styles.fieldContainer}>
                 <label className={styles.fieldLabel}>이메일 주소</label>
                 <div className={styles.emailDisplay}>{formData.email}</div>
@@ -158,6 +166,9 @@ export const KakaoCreator = ({ onBack, kakaoInfo }) => {
                   placeholder="이름을 입력해주세요"
                   required
                 />
+                {validationErrors.name && (
+                  <span className={`${styles.statusMessage} ${styles.unavailable}`}>{validationErrors.name}</span>
+                )}
               </div>
 
               {/* Nickname Field */}
@@ -174,7 +185,10 @@ export const KakaoCreator = ({ onBack, kakaoInfo }) => {
                   placeholder="닉네임을 입력해주세요"
                   required
                 />
-                {nicknameStatus.message && (
+                {validationErrors.nickname && (
+                  <span className={`${styles.statusMessage} ${styles.unavailable}`}>{validationErrors.nickname}</span>
+                )}
+                {nicknameStatus.message && !validationErrors.nickname && (
                   <span
                     className={`${styles.statusMessage} ${
                       nicknameStatus.isAvailable ? styles.available : styles.unavailable
@@ -202,6 +216,9 @@ export const KakaoCreator = ({ onBack, kakaoInfo }) => {
                     ))}
                   </SelectContent>
                 </Select>
+                {validationErrors.jobId && (
+                  <span className={`${styles.statusMessage} ${styles.unavailable}`}>{validationErrors.jobId}</span>
+                )}
               </div>
             </div>
 
