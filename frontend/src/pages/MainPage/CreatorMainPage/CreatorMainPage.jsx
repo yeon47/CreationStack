@@ -5,7 +5,7 @@ import axios from 'axios';
 import styles from './CreatorMainPage.module.css';
 import { UserInfo } from '../../../components/MainPage/UserInfo/UserInfo';
 import { ContentCardList } from '../../../components/ContentCard/ContentCardList';
-import { UnauthorizedModal } from '../../../components/UnauthorizedModal';
+
 
 
 // 샘플 콘텐츠

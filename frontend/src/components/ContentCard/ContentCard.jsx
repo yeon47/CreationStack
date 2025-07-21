@@ -1,7 +1,6 @@
 import styles from './ContentCard.module.css';
 import { Link } from 'react-router-dom';
 import SubsIcon from '../../assets/img/subs_icon.svg';
-import { UnauthorizedModal } from '../UnauthorizedModal';
 
 export const ContentCard = ({ contentId, thumbnailUrl, creatorNickname, title, likes, isPaid, categoryNames = [] }) => {
 
