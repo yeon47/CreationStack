@@ -41,7 +41,39 @@ function getCardCompanyLogo(company) {
 function PaymentMethodList({ cards, onDeleteCard }) {
   return (
     <div className={styles.card_container}>
-      {cards.length === 0 && <p>등록된 카드가 없습니다.</p>}
+      {cards.length === 0 ? (
+        <div className={styles.card_list_wrapper}>
+          <div className={styles.card_box}>
+            <p className={`${styles.card_box_text} ${styles.empty_message}`}>
+              아래 카드 등록 버튼을 클릭해 결제 수단을 등록해주세요.
+            </p>
+          </div>
+        </div>
+      ) : (
+        cards.map((card, idx) => (
+          <div key={idx} className={styles.card_list_wrapper}>
+            <div className={styles.card_box}>
+              <div className={styles.card_logo}>
+                <img src={getCardCompanyLogo(card.cardName)} alt={card.cardName} />
+              </div>
+              <p className={styles.card_box_text}>
+                <strong>{card.cardName}</strong>
+              </p>
+              <p className={styles.card_box_text}>{formatCardNumber(card.cardNumber)}</p>
+
+              <div className={styles.card_brand}>
+                {card.cardBrand === 'MASTER' && <img src="/img/card_logo/mastercard_logo.png" alt="MasterCard" />}
+                {card.cardBrand === 'VISA' && <img src="/img/card_logo/visa_logo.png" alt="Visa" />}
+              </div>
+            </div>
+            <button className={styles.card_delete_button} onClick={() => onDeleteCard(card)}>
+              삭제
+            </button>
+          </div>
+        ))
+      )}
+
+      {/* {cards.length === 0 && <p>등록된 카드가 없습니다.</p>}
       {cards.map((card, idx) => (
         <div key={idx} className={styles.card_list_wrapper}>
           <div className={styles.card_box}>
@@ -62,7 +94,7 @@ function PaymentMethodList({ cards, onDeleteCard }) {
             삭제
           </button>
         </div>
-      ))}
+      ))} */}
     </div>
   );
 }

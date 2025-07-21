@@ -11,7 +11,7 @@ const WarningModal = ({ isOpen, onClose, isVisible = true, cardData, type, onCon
   let showConfirm = true;
 
   switch (type) {
-    case 'confirm-delete':
+    case 'confirm-delete': // 결제수단 삭제 재확인
       title = '정말로 결제수단을 삭제하시겠습니까?';
       message = (
         <>
@@ -23,7 +23,7 @@ const WarningModal = ({ isOpen, onClose, isVisible = true, cardData, type, onCon
       confirmText = '삭제';
       showCancel = true;
       break;
-    case 'delete-success':
+    case 'delete-success': // 결제수단 삭제 완료
       title = '삭제가 완료되었습니다.';
       message = '선택하신 결제수단이 정상적으로 삭제되었습니다.';
       showCancel = false;
@@ -39,7 +39,7 @@ const WarningModal = ({ isOpen, onClose, isVisible = true, cardData, type, onCon
       );
       showCancel = false;
       break;
-    case 'method-fail':
+    case 'method-fail': // 결제수단 삭제 실패
       title = '결제수단이 등록되지 않았습니다.';
       message = (
         <>
@@ -49,7 +49,7 @@ const WarningModal = ({ isOpen, onClose, isVisible = true, cardData, type, onCon
       );
       showCancel = false;
       break;
-    case 'register-success':
+    case 'register-success': // 결제수단 등록 완료
       title = '결제수단이 등록되었습니다.';
       message = (
         <>
@@ -61,13 +61,24 @@ const WarningModal = ({ isOpen, onClose, isVisible = true, cardData, type, onCon
       showCancel = false;
       showConfirm = true;
       break;
-    case 'register-fail':
+    case 'register-fail': // 결제수단 등록 실패
       title = '결제수단 등록에 실패했습니다.';
       message = (
         <>
           결제수단 등록에 실패했습니다.
           <br />
           다시 시도해주세요.
+        </>
+      );
+      showCancel = false;
+      break;
+    case 'payment-fail': // 결제 실패
+      title = '결제 실패했습니다.';
+      message = (
+        <>
+          결제 실패했습니다.
+          <br />
+          다른 결제수단으로 재결제 바랍니다.
         </>
       );
       showCancel = false;
@@ -82,9 +93,6 @@ const WarningModal = ({ isOpen, onClose, isVisible = true, cardData, type, onCon
         <div className={styles.modal}>
           <div className={styles.popupHeader}>
             <h2 className={styles.titleText}>{title}</h2>
-            <span className={styles.cancelButton} onClick={onClose}>
-              ×
-            </span>
           </div>
           <p className={styles.subText}>{message}</p>
           <div className={styles.separator} />
@@ -99,12 +107,12 @@ const WarningModal = ({ isOpen, onClose, isVisible = true, cardData, type, onCon
                 className={styles.button}
                 onClick={() => {
                   if (type === 'confirm-delete') {
-                    console.log('📦 WarningModal 전달할 cardData:', cardData);
-
                     onConfirm?.(cardData); // optional chaining 사용
                   } else if (type === 'register-success' || type === 'register-fail') {
                     onClose();
                   } else if (type === 'delete-success' || type === 'delete-fail') {
+                    onClose();
+                  } else if (type === 'payment-fail' || type === 'method-fail') {
                     onClose();
                   } else {
                     onConfirm?.();
