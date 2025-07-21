@@ -32,8 +32,24 @@ export async function getContentsByCreator(creatorId) {
   }
 }
 
+// 특정 크리에이터의 조회수 TOP 3 콘텐츠를 조회하는 API 호출 함수 (새로 추가)
+export async function getTopViewedContentsByCreator(creatorId) {
+  try {
+    // 백엔드에 이 엔드포인트가 구현되어 있어야 합니다. (예: @GetMapping("/creator/{creatorId}/top-viewed"))
+    const response = await axios.get(`/api/content/creator/${creatorId}/top-viewed`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`크리에이터 ID ${creatorId}의 조회수 TOP 3 콘텐츠 조회 실패:`, error);
+    throw error.response?.data || error;
+  }
+}
+
 // 콘텐츠 접근 권한 확인
-export const checkContentAccess = async (contentId) => {
+export const checkContentAccess = async contentId => {
   const token = localStorage.getItem('accessToken');
   return axios.get(`/api/content/${contentId}`, {
     headers: {

@@ -3,13 +3,10 @@ import { ContentCardList } from '../../../components/ContentCard/ContentCardList
 import { getContentsByCreator } from '../../../api/contentAPI'; 
 import styles from '../../../pages/CreatorManagement/CreatorManagementPage.module.css'; // 페이지 CSS 임포트
 
-export const MyContent = () => {
+export const MyContent = ({ creatorId }) =>{
   const [myContents, setMyContents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // 임시 creatorId (실제로는 로그인된 사용자 정보에서 가져와야 함)
-  const creatorId = 2; // 예시 ID
 
   useEffect(() => {
     const fetchMyContents = async () => {
