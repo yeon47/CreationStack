@@ -59,32 +59,25 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     List<UserSubscriptionDto> findAllBySubscriberId(@Param("subscriberId") Long subscriberId);
 
     @Query("""
-    SELECT new com.creationstack.backend.dto.member.PublicProfileResponse(
-            u.userId,
-            ud.nickname,
-            u.role,
-            j.name,
-            ud.bio,
-            ud.profileImageUrl,
-            u.isActive,
-            (
-                SELECT COUNT(s2)
-                FROM Subscription s2
-                WHERE s2.creatorId = u.userId AND s2.status.name = 'ACTIVE'
-            )
-        )
-        FROM Subscription s
-        JOIN User u ON s.creatorId = u.userId
-        JOIN UserDetail ud ON u.userId = ud.userId
-        LEFT JOIN Job j ON u.job.jobId = j.jobId
-        WHERE s.subscriberId = (
-            SELECT ud2.userId
-            FROM UserDetail ud2
-            WHERE ud2.nickname = :nickname
-        )
-        AND u.isActive = true    
-    """)
+                SELECT new com.creationstack.backend.dto.member.PublicProfileResponse(
+                    u.userId, ud.nickname, u.role, j.name,
+                    ud.bio, ud.profileImageUrl, u.isActive,
+                    (
+                        SELECT COUNT(s2)
+                        FROM Subscription s2
+                        JOIN s2.status s2status
+                        WHERE s2.creatorId = u.userId AND s2status.name = 'ACTIVE'
+                    )
+                )
+                FROM Subscription s
+                JOIN User u ON s.creatorId = u.userId
+                JOIN UserDetail ud ON u.userId = ud.userId
+                LEFT JOIN Job j ON u.job.jobId = j.jobId
+                WHERE s.subscriberId = (
+                    SELECT ud2.userId FROM UserDetail ud2 WHERE ud2.nickname = :nickname
+                )
+                AND u.isActive = true
+            """)
     List<PublicProfileResponse> findSubscribedCreatorsByNickname(@Param("nickname") String nickname);
-
 
 }

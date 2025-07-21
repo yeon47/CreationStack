@@ -133,11 +133,8 @@ public class SubscriptionService {
 
                 // 기존 nextPaymentAt이 없을 수도 있으니 null check
                 subscription.setNextPaymentAt(
-                    subscription.getNextPaymentAt() == null ?
-                        subscription.getStartedAt().plusMonths(1)
-                        : subscription.getNextPaymentAt()
-                );
-
+                                subscription.getNextPaymentAt() == null ? subscription.getStartedAt().plusMonths(1)
+                                                : subscription.getNextPaymentAt());
 
                 subscriptionRepository.save(subscription);
         }
@@ -199,9 +196,18 @@ public class SubscriptionService {
         }
 
         // 사용자가 구독한 크리에이터 목록 조회
-        @Transactional
+        @Transactional(readOnly = true)
         public List<PublicProfileResponse> getSubscribedCreators(String nickname) {
-                return subscriptionRepository.findSubscribedCreatorsByNickname(nickname);
+                try {
+                        log.info("닉네임으로 구독 조회 시작: {}", nickname);
+                        List<PublicProfileResponse> list = subscriptionRepository
+                                        .findSubscribedCreatorsByNickname(nickname);
+                        log.info("쿼리 결과 크기: {}", list.size());
+                        return list;
+                } catch (Exception e) {
+                        log.error("구독 조회 실패", e); // 여기서 반드시 스택트레이스 확인
+                        throw e;
+                }
         }
 
 }

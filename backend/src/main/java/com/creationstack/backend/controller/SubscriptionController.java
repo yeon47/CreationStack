@@ -78,8 +78,9 @@ public class SubscriptionController {
     // 사용자가 구독한 크리에이터 목록 조회
     @GetMapping("/users/{nickname}/subscriptions")
     public ResponseEntity<Map<String, Object>> getSubscribedCreators(@PathVariable String nickname) {
-        
+        log.info("크리에이터 목록 조회 시작");
         List<PublicProfileResponse> subscriptions = subscriptionService.getSubscribedCreators(nickname);
+        log.info("creators: {}", subscriptions);
         return ResponseEntity.ok(Map.of("subscriptions", subscriptions));
     }
 
