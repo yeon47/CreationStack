@@ -38,6 +38,8 @@ import com.creationstack.backend.repository.content.ContentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import com.creationstack.backend.dto.content.ContentDetailResponse;
+import com.creationstack.backend.repository.content.ContentRepository;
 
 /**
  * 콘텐츠 관련 비즈니스 로직을 처리하는 서비스 클래스입니다.
@@ -157,15 +159,15 @@ public class ContentService {
             if (!isSubscribed && !creatorId.equals(userId)) {
                 log.info("구독자 아님 X => 접근 불가");
                 throw new CustomException(HttpStatus.FORBIDDEN, "구독자가 아니므로 콘텐츠 접근 불가.");
-            } 
+            }
         }
 
         log.info("조회 성공");
-                content.incrementViewCount(); // 조회수 증가
-                // contentRepository.save(content); // @Transactional 어노테이션이 있으면 변경 감지(Dirty
-                // Checking)로 자동 저장됨
+        content.incrementViewCount(); // 조회수 증가
+        // contentRepository.save(content); // @Transactional 어노테이션이 있으면 변경 감지(Dirty
+        // Checking)로 자동 저장됨
 
-                log.info("콘텐츠 조회 및 조회수 증가: Content ID = {}", contentId);
+        log.info("콘텐츠 조회 및 조회수 증가: Content ID = {}", contentId);
 
         return ContentResponse.from(content);
     }
@@ -394,6 +396,25 @@ public class ContentService {
         }
 
         return likes.map(like -> ContentList.from(like.getContent()));
+    }
+
+    @Transactional(readOnly = true)
+    public ContentDetailResponse getContentDetail(Long contentId) {
+        Content content = contentRepository.findById(contentId)
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "콘텐츠를 찾을 수 없습니다. ID: " + contentId));
+
+        String nickname = content.getCreator().getUserDetail() != null
+                ? content.getCreator().getUserDetail().getNickname()
+                : "알 수 없음";
+
+        return ContentDetailResponse.builder()
+                .contentId(content.getContentId())
+                .title(content.getTitle())
+                .content(content.getContent())
+                .authorName(nickname)
+                .createdAt(content.getCreatedAt())
+                .updatedAt(content.getUpdatedAt())
+                .build();
     }
 
 }

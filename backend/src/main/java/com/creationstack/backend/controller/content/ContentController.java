@@ -5,6 +5,7 @@ import com.creationstack.backend.dto.content.ContentList;
 import com.creationstack.backend.dto.content.ContentResponse;
 import com.creationstack.backend.dto.content.ContentUpdateRequest;
 import com.creationstack.backend.service.ContentService;
+import com.creationstack.backend.dto.content.ContentDetailResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -123,4 +124,10 @@ public class ContentController {
     // contentService.initializeCategories(categoryNames);
     // return ResponseEntity.ok("카테고리 초기화가 완료되었습니다.");
     // }
+
+    // 콘텐츠 상세보기
+    @GetMapping("/{id}") // 상세 조회
+    public ContentDetailResponse getContentDetail(@PathVariable Long id) {
+        return contentService.getContentDetail(id);
+    }
 }
