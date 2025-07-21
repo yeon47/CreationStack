@@ -1,10 +1,13 @@
 package com.creationstack.backend.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.creationstack.backend.domain.user.User;
+import com.creationstack.backend.dto.member.PublicProfileResponse;
 import com.creationstack.backend.dto.member.UserProfileResponse;
+import com.creationstack.backend.exception.CustomException;
 import com.creationstack.backend.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -38,6 +41,21 @@ public class UserService {
                 return UserProfileResponse.builder()
                                 .success(true)
                                 .data(profileData)
+                                .build();
+        }
+
+        public PublicProfileResponse getPublicProfile(String nickname) {
+                User user = userRepository.findByUserDetailNickname(nickname)
+                        .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "해당 닉네임의 사용자를 찾을 수 없습니다."));
+   
+                return PublicProfileResponse.builder()
+                                .userId(user.getUserId())
+                                .nickname(nickname)
+                                .role(user.getRole())
+                                .jobName(user.getJob() != null ? user.getJob().getName() : null)
+                                .bio(user.getUserDetail().getBio())
+                                .profileImageUrl(user.getUserDetail().getProfileImageUrl())
+                                .isActive(user.getIsActive())
                                 .build();
         }
 }
