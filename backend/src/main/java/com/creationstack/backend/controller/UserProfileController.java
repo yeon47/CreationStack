@@ -3,9 +3,11 @@ package com.creationstack.backend.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.creationstack.backend.dto.member.PublicProfileResponse;
 import com.creationstack.backend.dto.member.UserProfileResponse;
 import com.creationstack.backend.service.UserService;
 
@@ -41,5 +43,12 @@ public class UserProfileController {
                     .build();
             return ResponseEntity.internalServerError().body(response);
         }
+    }
+
+    // 사용자 공개 프로필 조회
+    @GetMapping("/public/{nickname}")
+    public ResponseEntity<PublicProfileResponse> getPublicProfile(@PathVariable String nickname) {
+        PublicProfileResponse response = userService.getPublicProfile(nickname);
+        return ResponseEntity.ok(response);
     }
 }

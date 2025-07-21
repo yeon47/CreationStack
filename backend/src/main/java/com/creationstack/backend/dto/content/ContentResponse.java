@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class ContentResponse {
     private Long contentId;
     private Long creatorId;
-    private String creatorUsername; // 크리에이터 사용자 이름
+    private String creatorNickname; // 크리에이터 닉네임
     private String title;
     private String content;
     private String thumbnailUrl;
@@ -56,7 +56,7 @@ public class ContentResponse {
         return ContentResponse.builder()
                 .contentId(content.getContentId())
                 .creatorId(content.getCreator().getUserId())
-                .creatorUsername(content.getCreator().getUserDetail() != null ? content.getCreator().getUserDetail().getUsername() : null)
+                .creatorNickname(content.getCreator().getUserDetail() != null ? content.getCreator().getUserDetail().getNickname() : null)
                 .title(content.getTitle())
                 .content(content.getContent())
                 .thumbnailUrl(content.getThumbnailUrl())
