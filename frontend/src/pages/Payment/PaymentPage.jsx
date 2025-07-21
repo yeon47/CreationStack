@@ -55,6 +55,7 @@ function PaymentPage() {
       try {
         const res = await getPublicCreatorProfile(creatorNickname);
         setCreator({
+          id: res.data.userId,
           name: res.data.nickname,
           image: res.data.profileImageUrl || logo, // 기본값 일단 로고로 설정
         });
@@ -71,8 +72,8 @@ function PaymentPage() {
 
   const subscriptionDetails = [
     { label: '구독 상품', value: '프리미엄 멤버십' },
-    { label: '가격', value: '₩15,000/월', highlight: true },
-    { label: '총 결제 금액', value: '₩15,000', bold: true },
+    { label: '가격', value: '₩4,900/월', highlight: true },
+    { label: '총 결제 금액', value: '₩4,900', bold: true },
   ];
 
   const benefits = ['독점 콘텐츠 제공', '광고 제거', '라이브 방송 참여'];
@@ -97,8 +98,8 @@ function PaymentPage() {
       const issueResponse = await registerBillingKey(
         storeId,
         channelKey,
-        userInfoResponse.username,
-        userInfoResponse.email
+        userInfoResponse.data.username,
+        userInfoResponse.data.email
       );
       const saveResponse = await savePaymentMethod(issueResponse.billingKey);
 
@@ -180,6 +181,7 @@ function PaymentPage() {
         isOpen={isPayModalOpen}
         onClose={closePayModal}
         cardData={cardData}
+        creator={creator}
         onSuccess={handlePaymentSuccess}
         onFailure={handlePaymentFailure}
       />

@@ -62,7 +62,7 @@ public class PaymentService {
     Subscription subscription = subscriptionRepository.findById(req.getSubscriptionId()).orElse(null);
 
     assert subscription != null;
-    if(!subscription.getStatus().equals(SubscriptionStatusName.PENDING)){
+    if(!subscription.getStatus().getName().equals(SubscriptionStatusName.PENDING)){
       throw new CustomException(HttpStatus.NOT_FOUND,"구독 내역이 생성되지 않았습니다.");
     }
 

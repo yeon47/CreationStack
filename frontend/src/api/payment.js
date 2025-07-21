@@ -145,7 +145,7 @@ export const requestPayment = async (paymentInfo, accessToken) => {
         subscriptionId: saveSubscription.data.subscriptionId,
         amount: paymentInfo.amount,
         creatorId: saveSubscription.data.creatorId,
-        orderName: '개발퀸 정기구독권',
+        orderName: paymentInfo.creatorNickname +'정기구독권',
       },
       {
         headers: {

@@ -77,13 +77,13 @@ function PaymentMethodManagementPage() {
       const accessToken = localStorage.getItem('accessToken');
       // 빌링키 발급 위한 현재 로그인한 사용자의 정보 조회
       const userInfoResponse = await getUserInfo(accessToken);
-      alert(userInfoResponse.username);
+      alert(userInfoResponse.data.username);
       // 빌링키 발급
       const issueResponse = await registerBillingKey(
         storeId,
         channelKey,
-        userInfoResponse.username,
-        userInfoResponse.email
+        userInfoResponse.data.username,
+        userInfoResponse.data.email
       );
 
       // 포트원에서 실패 응답을 반환한 경우 (성공했더라도 내부적으로 실패 코드 전달 가능)
