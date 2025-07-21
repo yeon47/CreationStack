@@ -178,6 +178,7 @@ public class SubscriptionService {
         public List<UserSubscriptionDto> getMySubscriptions(Long userId) {
                 List<UserSubscriptionDto> list = subscriptionRepository.findAllBySubscriberId(userId);
 
+                log.info("구독 전체 수: {}", list.size());
                 for (UserSubscriptionDto dto : list) {
                         dto.setMessage(switch (dto.getStatusName()) {
                                 case "ACTIVE" -> "다음 결제 예정일: " + format(dto.getNextPaymentAt());
@@ -186,6 +187,7 @@ public class SubscriptionService {
                                 case "PENDING" -> "결제 대기 중입니다.";
                                 default -> "";
                         });
+                        log.info("구독 ID: {}, 상태: {}, 크리에이터 ID: {}", dto.getSubscriptionId(), dto.getStatusName(), dto.getCreatorId());
                 }
 
                 return list;
@@ -199,15 +201,29 @@ public class SubscriptionService {
         @Transactional(readOnly = true)
         public List<PublicProfileResponse> getSubscribedCreators(String nickname) {
                 try {
-                        log.info("닉네임으로 구독 조회 시작: {}", nickname);
                         List<PublicProfileResponse> list = subscriptionRepository
                                         .findSubscribedCreatorsByNickname(nickname);
-                        log.info("쿼리 결과 크기: {}", list.size());
                         return list;
                 } catch (Exception e) {
                         log.error("구독 조회 실패", e); // 여기서 반드시 스택트레이스 확인
                         throw e;
                 }
+        }
+
+        @Transactional
+        public void cancelSubscription(Long subscriptionId, Long userId) {
+                Subscription subscription = subscriptionRepository.findById(subscriptionId)
+                                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "구독 정보를 찾을 수 없습니다."));
+
+                if (!subscription.getSubscriberId().equals(userId)) {
+                        throw new CustomException(HttpStatus.FORBIDDEN, "해당 구독을 해지할 권한이 없습니다.");
+                }
+
+                SubscriptionStatus cancelledStatus = statusRepository.findByName("CANCELLED")
+                                .orElseThrow(() -> new CustomException(HttpStatus.INTERNAL_SERVER_ERROR,
+                                                "CANCELLED 상태 정보를 찾을 수 없습니다."));
+
+                subscription.setStatus(cancelledStatus);
         }
 
 }

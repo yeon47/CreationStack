@@ -46,6 +46,7 @@ export const SubscribedCardsSection = () => {
       renderItem={(c) => (
         <CreatorInfo
           key={c.subscriptionId}
+          subscriptionId={c.subscriptionId}
           className="profile-image"
           creatorNickname={c.creatorNickname}
           subsCount={c.subsCount}

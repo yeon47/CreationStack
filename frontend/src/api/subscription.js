@@ -33,3 +33,13 @@ export const getSubscribedCreators = async () => {
     throw err;
   }
 };
+
+// 구독 해지
+export const cancelSubscription = async (subscriptionId, accessToken) => {
+  const res = await axios.patch(`/api/subscriptions/${subscriptionId}`, null, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return res.data;
+};

@@ -79,6 +79,7 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
                     )
                 )
                 FROM Subscription s
+                JOIN s.status st
                 JOIN User u ON s.creatorId = u.userId
                 JOIN UserDetail ud ON u.userId = ud.userId
                 LEFT JOIN Job j ON u.job.jobId = j.jobId
@@ -86,6 +87,7 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
                     SELECT ud2.userId FROM UserDetail ud2 WHERE ud2.nickname = :nickname
                 )
                 AND u.isActive = true
+                AND st.name = 'ACTIVE'
             """)
     List<PublicProfileResponse> findSubscribedCreatorsByNickname(@Param("nickname") String nickname);
 

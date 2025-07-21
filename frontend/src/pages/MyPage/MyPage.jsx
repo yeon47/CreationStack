@@ -75,7 +75,7 @@ export const MyPage = () => {
                   <div className={`${styles.baseTextStyles} ${styles.label2}`}>내 프로필 보기</div>
                 </Link>
               ) : (
-                <Link to="/user-main" className={styles.labelWrapper}>
+                <Link to={`/user-main/${user.nickname}`} className={styles.labelWrapper}>
                   <div className={`${styles.baseTextStyles} ${styles.label2}`}>내 프로필 보기</div>
                 </Link>
               )}
