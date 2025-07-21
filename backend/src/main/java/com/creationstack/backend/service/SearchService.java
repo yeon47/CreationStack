@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -96,6 +97,7 @@ public class SearchService { // 검색 서비스
                     case CREATOR_ONLY -> { // 크리에이터 검색
                         keywordPredicates.add(cb.like(userDetailJoin.get("nickname"), keyword)); // 크리에이터 닉네임으로 검색
                         keywordPredicates.add(cb.like(jobJoin.get("name"), keyword)); // 크리에이터 직업으로 검색
+                        query.distinct(true);
                     }
                     case ALL -> { // 통합 검색
                         keywordPredicates.add(cb.like(root.get("title"), keyword)); // 제목으로 검색
@@ -171,12 +173,46 @@ public class SearchService { // 검색 서비스
                 });
 
         // Page 객체에서 페이지 정보와 콘텐츠 리스트를 추출하여 SearchResponse로 변환
-        return new SearchResponse<>(
-                page.getNumber(), // 페이지 번호
-                page.getSize(), // 한 페이지에 표시할 콘텐츠 수
-                page.getTotalPages(), // 전체 페이지 수
-                page.getTotalElements(), // 전체 검색 결과 수
-                page.getContent() // 현재 페이지의 콘텐츠 리스트(List<T>)
-        );
+        if (dto.getSearchMode() == SearchMode.CREATOR_ONLY) {
+            // userId 기준 중복 제거
+            List<SearchResultDto> distinctList = page.getContent().stream()
+                    .collect(Collectors.toMap(
+                            dtoItem -> dtoItem.getCreator().getUserId(),
+                            dtoItem -> dtoItem,
+                            (existing, replacement) -> existing
+                    ))
+                    .values()
+                    .stream()
+                    .toList();
+
+            int pageNum = pageable.getPageNumber();
+            int pageSize = pageable.getPageSize();
+            int total = distinctList.size();
+
+            int fromIndex = pageNum * pageSize;
+            int toIndex = Math.min(fromIndex + pageSize, total);
+
+            List<SearchResultDto> pagedList = fromIndex < total
+                    ? distinctList.subList(fromIndex, toIndex)
+                    : List.of();
+
+            int totalPages = (int) Math.ceil((double) total / pageSize);
+
+            return new SearchResponse<>(
+                    pageNum,
+                    pageSize,
+                    totalPages,
+                    total,
+                    pagedList
+            );
+        } else {
+            return new SearchResponse<>(
+                    page.getNumber(), // 페이지 번호
+                    page.getSize(), // 한 페이지에 표시할 콘텐츠 수
+                    page.getTotalPages(), // 전체 페이지 수
+                    page.getTotalElements(), // 전체 검색 결과 수
+                    page.getContent() // 현재 페이지의 콘텐츠 리스트(List<T>)
+            );
+        }
     }
 }
