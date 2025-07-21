@@ -17,8 +17,9 @@ export const SubscribedCardsSection = () => {
         const subs = await getMySubscriptions();
         console.log("subs: ",subs);
 
-        // subs 배열을 CreatorInfo용으로 매핑
-        const mapped = subs.map(sub => ({
+        const mapped = subs
+        .filter(sub => sub.statusName !== 'PENDING')
+        .map(sub => ({
           subscriptionId: sub.subscriptionId,
           creatorNickname: sub.creatorNickname,
           profileImage: sub.creatorProfileUrl || logo,

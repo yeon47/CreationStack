@@ -3,22 +3,27 @@ import CreatorCard from './CreatorCard';
 import { PaginatedGrid } from '../UsePagination/PaginatedGrid';
 
 const CreatorCardList = ({ creators }) => {
+  console.log('creators:', creators);
+  console.log(typeof creators, Array.isArray(creators), creators)
+
   return (
     <PaginatedGrid
-      items={creators}
-      itemsPerPage={5} 
-      renderItem={(creator) => (
-        <CreatorCard key={creator.creatorId}
-          nickname={creator.creatorNickname}
-          job={creator.job}
-          profileImage={creator.profileImageUrl}
-
-          bio={creator.bio} />
+      items={creators.subscriptions || []}
+      itemsPerPage={5}
+      renderItem={creator => (
+        <CreatorCard
+          key={creator.nickname}
+          creator={{
+            name: creator.nickname,
+            profileImageUrl: creator.profileImageUrl,
+            job: creator.jobName,
+            subscriberCount: creator.subsCount,
+            description: creator.bio,
+          }}
+        />
       )}
     />
   );
 };
 
 export default CreatorCardList;
-
-

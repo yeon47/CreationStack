@@ -25,7 +25,17 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
 
     boolean existsByCreatorIdAndSubscriberIdAndStatus(Long creatorId, Long subscriberId, SubscriptionStatus status);
 
-    int countByCreatorIdAndStatus_Name(Long creatorId, SubscriptionStatusName statusName);
+    @Query("SELECT COUNT(s) FROM Subscription s WHERE s.creatorId = :creatorId AND s.status.name = :statusName")
+    long countByCreatorIdAndStatusName(@Param("creatorId") Long creatorId, @Param("statusName") String statusName);
+
+    @Query("""
+                SELECT COUNT(s)
+                FROM Subscription s
+                JOIN s.status st
+                WHERE st.name = 'ACTIVE'
+                  AND s.startedAt >= :startOfMonth
+            """)
+    long countNewActiveSubscriptionsThisMonth(@Param("startOfMonth") LocalDateTime startOfMonth);
 
     @Modifying
     @Query("DELETE FROM Subscription s WHERE s.status.name IN ('EXPIRED') AND s.nextPaymentAt <= :threshold")
@@ -55,7 +65,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
                 JOIN SubscriptionStatus ss ON s.status.statusId = ss.statusId
                 WHERE s.subscriberId = :subscriberId
             """)
-
     List<UserSubscriptionDto> findAllBySubscriberId(@Param("subscriberId") Long subscriberId);
 
     @Query("""

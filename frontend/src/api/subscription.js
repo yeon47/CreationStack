@@ -21,6 +21,7 @@ export const getMySubscriptions = async () => {
   }
 };
 
+// 현재 로그인한 사용자의 구독한 크리에이터 목록 조회
 export const getSubscribedCreators = async () => {
   try {
 
@@ -28,7 +29,7 @@ export const getSubscribedCreators = async () => {
 
     return response.data.subscriptions;
   } catch (err) {
-    console.log('구독 목록 조회 실패: '. err);
+    console.log('크리에이터 목록 조회 실패: '. err);
     throw err;
   }
 };

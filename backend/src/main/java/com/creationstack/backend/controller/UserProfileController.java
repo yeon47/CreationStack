@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.creationstack.backend.dto.Subscription.SubscriptionCountResponseDto;
 import com.creationstack.backend.dto.member.PublicProfileResponse;
 import com.creationstack.backend.dto.member.UpdateProfileRequest;
 import com.creationstack.backend.dto.member.UserProfileResponse;
@@ -66,8 +66,38 @@ public class UserProfileController {
     }
 
     @GetMapping("/public/{nickname}")
-    public ResponseEntity<PublicProfileResponse> getPublicProfile(@PathVariable String nickname) {
-        PublicProfileResponse response = userService.getPublicProfile(nickname);
+    public ResponseEntity<PublicProfileResponse> getPublicProfile(@PathVariable String nickname, Authentication authentication) {
+        Long viewerId = null;
+
+        if(authentication != null) {
+            try {
+                viewerId = (Long) authentication.getPrincipal();
+            } catch (NumberFormatException e) {
+                log.error("유효하지 않은 사용자 ID: {}", authentication.getName());
+            }
+        }
+
+        log.info("viewerId: {}", viewerId);
+        
+        PublicProfileResponse response = userService.getPublicProfile(nickname, viewerId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/public/creator-manage")
+    public ResponseEntity<SubscriptionCountResponseDto> getCreatorInfo(Authentication authentication) {
+        Long userId = null;
+
+        if(authentication != null) {
+            try {
+                userId = (Long) authentication.getPrincipal();
+            } catch (NumberFormatException e) {
+                log.error("유효하지 않은 사용자 ID: {}", authentication.getName());
+            }
+        }
+
+        log.info("userId: {}", userId);
+        
+        SubscriptionCountResponseDto response = userService.getCreatorInfo(userId);
         return ResponseEntity.ok(response);
     }
 }

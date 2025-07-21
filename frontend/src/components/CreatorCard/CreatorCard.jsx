@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CreatorCard.module.css';
+import logo from '../../assets/img/logo.svg';
+
 
 // 사용자 메인페이지에서 사용자가 구독한 크리에이터 정보
 const CreatorCard = ({ creator }) => {
