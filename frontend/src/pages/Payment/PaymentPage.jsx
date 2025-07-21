@@ -83,6 +83,7 @@ function PaymentPage() {
     if (cardData.length === 0) {
       // 카드가 없으면 경고 모달 띄움
       setIsWarningModalOpen(true);
+      setModalType('method-fail');
     } else {
       // 카드 있으면 결제 모달 열기
       setIsPayModalOpen(true);
@@ -101,7 +102,7 @@ function PaymentPage() {
         userInfoResponse.data.username,
         userInfoResponse.data.email
       );
-      const saveResponse = await savePaymentMethod(issueResponse.billingKey);
+      const saveResponse = await savePaymentMethod(issueResponse.billingKey,accessToken);
 
       // 카드 객체에서 username 제외
       const { username, ...cardWithoutUsername } = saveResponse;
@@ -114,6 +115,7 @@ function PaymentPage() {
       setIsWarningModalOpen(true);
     } catch (error) {
       setModalType('register-fail');
+      setSelectedCard(null);
       setIsWarningModalOpen(true);
     }
   };
@@ -129,6 +131,10 @@ function PaymentPage() {
     setModalType('payment-fail'); // WarningModal 메시지 타입 지정
     setIsWarningModalOpen(true); // WarningModal 열기
   };
+
+  const handlePaymentMethod = () => {
+    navigate("/payments");
+  }
 
   return (
     <div className={styles.summary_container}>
@@ -164,6 +170,11 @@ function PaymentPage() {
           </div>
 
           {/* Action Buttons */}
+          <button className={styles.registerPayMethodButton} onClick={handlePaymentMethod}>
+            <span className={styles.icon}>→</span>
+            <span>결제 수단 등록</span>
+          </button>
+
           <button className={styles.payButton} onClick={handlePayClick}>
             <span className={styles.icon}>→</span>
             <span>결제 진행</span>
