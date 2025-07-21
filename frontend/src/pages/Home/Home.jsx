@@ -30,12 +30,14 @@ export const Home = () => {
           
           if (result.contents) {
             const mappedContents = result.contents.map(item => ({
-              id: item.contentId,
-              creator: item.creator.nickname,
+              // contentId, thumbnailUrl, creatorNickname, title, likes, isPaid, categoryNames
+              // isPaid={content.accessType === 'SUBSCRIBER'}
+              contentId: item.contentId,
+              creatorNickname: item.creator.nickname,
               thumbnailUrl: item.thumbnailUrl,
               title: item.title,
               likes: item.likeCount,
-              isSubscriber: item.isSubscriber,
+              accessType: item.accessType,
               categoryNames: item.categoryNames,
             }));
             setContents(mappedContents.slice(0, 6)); // 6개만 표시
