@@ -61,7 +61,9 @@ public class SecurityConfig {
                                     "/api/user/public/**",
                                     "/api/contents/*/comments",
                                     "/api/contents/*/comments/*/like",
-                                    "/api/subscriptions/**")
+                                    "/api/subscriptions/**",
+                                    "/api/users/*/subscriptions"
+                                    )
 
                             .permitAll()
                             // /api/user/** 경로는 인증 필요 (기존 설정 유지)

@@ -20,3 +20,15 @@ export const getMySubscriptions = async () => {
     throw err;
   }
 };
+
+export const getSubscribedCreators = async () => {
+  try {
+
+    const response = await axios.get('/api/users/me/subscriptions');
+
+    return response.data.subscriptions;
+  } catch (err) {
+    console.log('구독 목록 조회 실패: '. err);
+    throw err;
+  }
+};

@@ -14,12 +14,17 @@ import com.creationstack.backend.domain.subscription.Subscription;
 import com.creationstack.backend.domain.subscription.SubscriptionStatus;
 import com.creationstack.backend.domain.subscription.SubscriptionStatusName;
 import com.creationstack.backend.dto.Subscription.UserSubscriptionDto;
+import com.creationstack.backend.dto.member.PublicProfileResponse;
 
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
     Optional<Subscription> findBySubscriberIdAndCreatorId(Long subscriberId, Long creatorId);
+
     List<Subscription> findByPaymentMethod(PaymentMethod paymentMethod);
+
     List<Subscription> findAllByNextPaymentAtBefore(LocalDateTime time);
+
     boolean existsByCreatorIdAndSubscriberIdAndStatus(Long creatorId, Long subscriberId, SubscriptionStatus status);
+
     int countByCreatorIdAndStatus_Name(Long creatorId, SubscriptionStatusName statusName);
 
     @Modifying
@@ -50,5 +55,36 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
                 JOIN SubscriptionStatus ss ON s.status.statusId = ss.statusId
                 WHERE s.subscriberId = :subscriberId
             """)
+
     List<UserSubscriptionDto> findAllBySubscriberId(@Param("subscriberId") Long subscriberId);
+
+    @Query("""
+    SELECT new com.creationstack.backend.dto.member.PublicProfileResponse(
+            u.userId,
+            ud.nickname,
+            u.role,
+            j.name,
+            ud.bio,
+            ud.profileImageUrl,
+            u.isActive,
+            (
+                SELECT COUNT(s2)
+                FROM Subscription s2
+                WHERE s2.creatorId = u.userId AND s2.status.name = 'ACTIVE'
+            )
+        )
+        FROM Subscription s
+        JOIN User u ON s.creatorId = u.userId
+        JOIN UserDetail ud ON u.userId = ud.userId
+        LEFT JOIN Job j ON u.job.jobId = j.jobId
+        WHERE s.subscriberId = (
+            SELECT ud2.userId
+            FROM UserDetail ud2
+            WHERE ud2.nickname = :nickname
+        )
+        AND u.isActive = true    
+    """)
+    List<PublicProfileResponse> findSubscribedCreatorsByNickname(@Param("nickname") String nickname);
+
+
 }

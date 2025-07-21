@@ -13,15 +13,18 @@ import com.creationstack.backend.domain.subscription.Subscription;
 import com.creationstack.backend.domain.subscription.SubscriptionStatus;
 import com.creationstack.backend.domain.subscription.SubscriptionStatusName;
 import com.creationstack.backend.domain.user.User;
+import com.creationstack.backend.domain.user.UserDetail;
 import com.creationstack.backend.dto.Subscription.SubscriptionRequestDto;
 import com.creationstack.backend.dto.Subscription.SubscriptionResponseDto;
 import com.creationstack.backend.dto.Subscription.UserSubscriptionDto;
+import com.creationstack.backend.dto.member.PublicProfileResponse;
 import com.creationstack.backend.etc.Role;
 import com.creationstack.backend.exception.CustomException;
 import com.creationstack.backend.repository.PaymentMethodRepository;
 import com.creationstack.backend.repository.PaymentRepository;
 import com.creationstack.backend.repository.SubscriptionRepository;
 import com.creationstack.backend.repository.SubscriptionStatusRepository;
+import com.creationstack.backend.repository.UserDetailRepository;
 import com.creationstack.backend.repository.UserRepository;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +42,7 @@ public class SubscriptionService {
         private final PaymentMethodRepository paymentMethodRepository;
         private final PaymentRepository paymentRepository;
         private final UserRepository userRepository;
+        private final UserDetailRepository userDetailRepository;
 
         // 구독 생성 (PENDING 상태)
         @Transactional
@@ -190,6 +194,12 @@ public class SubscriptionService {
 
         private String format(LocalDateTime dt) {
                 return dt != null ? dt.toLocalDate().toString() : "";
+        }
+
+        // 사용자가 구독한 크리에이터 목록 조회
+        @Transactional
+        public List<PublicProfileResponse> getSubscribedCreators(String nickname) {
+                return subscriptionRepository.findSubscribedCreatorsByNickname(nickname);
         }
 
 }
