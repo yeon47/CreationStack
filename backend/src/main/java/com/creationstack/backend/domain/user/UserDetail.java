@@ -40,13 +40,13 @@ public class UserDetail {
     @NotBlank(message = "실명은 필수 입력값입니다.")
     @Size(min = 2, max = 20, message = "실명은 2-20자 사이여야 합니다.")
     @Pattern(regexp = "^[가-힣a-zA-Z\\s]+$", message = "실명은 한글, 영문, 공백만 포함할 수 있습니다.")
-    @Column(name = "username", nullable = false, length = 20) // 50 -> 20으로 변경
+    @Column(name = "username", nullable = false, length = 20)
     private String username;
 
     @NotBlank(message = "닉네임은 필수 입력값입니다.")
     @Size(min = 2, max = 10, message = "닉네임은 2-10자 사이여야 합니다.")
     @Pattern(regexp = "^[가-힣a-zA-Z0-9_-]+$", message = "닉네임은 한글, 영문, 숫자, _, - 만 포함할 수 있습니다.")
-    @Column(name = "nickname", nullable = false, unique = true, length = 10) // 50 -> 10으로 변경
+    @Column(name = "nickname", nullable = false, unique = true, length = 10)
     private String nickname;
 
     @Size(max = 500, message = "소개글은 500자 이하여야 합니다.")
@@ -70,9 +70,7 @@ public class UserDetail {
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
-    // 비밀번호는 LOCAL 사용자만 필수, 카카오 사용자는 null 가능
-    @Size(min = 8, max = 20, message = "비밀번호는 8-20자 사이여야 합니다.")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", message = "비밀번호는 대소문자, 숫자, 특수문자를 모두 포함해야 합니다.")
+    @Size(max = 512, message = "비밀번호가 너무 깁니다.")
     @Column(name = "password", length = 512)
     private String password;
 
