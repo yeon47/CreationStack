@@ -2,12 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { CreatorListSection } from '../../components/Search/SearchCreator/CreatorListSection/CreatorListSection';
 import { CreatorSearching } from '../../components/Search/SearchCreator/CreatorSearching/CreatorSearching';
 import { searchCreator } from '../../api/search';
+import { useLocation } from 'react-router-dom';
 import './CreatorSearchPage.css';
 
 export const CreatorSearchPage = () => {
   const [creators, setCreators] = useState([]);
   const [keyword, setKeyword] = useState('');
   const [inputValue, setInputValue] = useState('');
+  const location = useLocation();
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const urlKeyword = queryParams.get('keyword') || '';
+    setKeyword(urlKeyword);
+    setInputValue(urlKeyword); // 검색창에도 초기값 반영
+  }, [location.search]);
 
   useEffect(() => {
     const fetchCreators = async () => {
@@ -32,7 +41,7 @@ export const CreatorSearchPage = () => {
       }
     };
 
-    fetchCreators();
+    if (keyword) fetchCreators();
   }, [keyword]);
 
   return (

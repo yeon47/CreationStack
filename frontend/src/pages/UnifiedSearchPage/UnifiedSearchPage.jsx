@@ -98,7 +98,10 @@ export const UnifiedSearchPage = () => {
           </div>
           {creators.length > 0 ? (
             <div className="creator-search">
-              <SearchResultHeader className="search-result-header-instance" onMoreClick={() => navigate('/creators')} />
+              <SearchResultHeader
+                className="search-result-header-instance"
+                onMoreClick={() => navigate(`/creators?keyword=${encodeURIComponent(keyword)}`)}
+              />
               <div className="unified-creator-card-list">
                 {creators.slice(0, 3).map((creator, index) => (
                   <UnifiedCreatorCard key={index} creator={creator} />
@@ -113,7 +116,13 @@ export const UnifiedSearchPage = () => {
               <SearchResultHeader
                 className="design-component-instance-node"
                 text="컨텐츠 검색 결과"
-                onMoreClick={() => navigate('/contents')}
+                onMoreClick={() =>
+                  navigate(
+                    `/contents?keyword=${encodeURIComponent(keyword)}&sort=${filter.sort}` +
+                      (filter.accessType ? `&accessType=${filter.accessType}` : '') +
+                      filter.categories.map(id => `&categories=${id}`).join('')
+                  )
+                }
               />
               <div className="heading-and-content">
                 <ContentSearchWrapper contents={contents} />
@@ -138,7 +147,7 @@ export const UnifiedSearchPage = () => {
             };
 
             const mappedSort = selected.sort === '좋아요순' ? 'like' : 'createdAt';
-            const mappedAccess = selected.accessType === '구독자 전용' ? 'SUBSCRIBER_ONLY' : null;
+            const mappedAccess = selected.accessType === '구독자 전용' ? 'SUBSCRIBER' : null;
             const mappedCategories = categoryMap[selected.category] || [];
 
             setFilter({
