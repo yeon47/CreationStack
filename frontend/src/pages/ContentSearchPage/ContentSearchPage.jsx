@@ -4,6 +4,7 @@ import { Searching } from '../../components/Search/SearchContent/Searching/Searc
 import { Pagination } from '../../components/Search/Pagination/Pagination';
 import { ContentFilterModal } from '../../components/Search/Filter/ContentFilterModal';
 import { searchContent } from '../../api/search';
+import { useLocation } from 'react-router-dom';
 import './ContentSearchPage.css';
 
 export const ContentSearchPage = () => {
@@ -14,11 +15,29 @@ export const ContentSearchPage = () => {
   const [creators, setCreators] = useState([]);
   const [keyword, setKeyword] = useState('');
   const [inputValue, setInputValue] = useState('');
+  const location = useLocation();
   const [filter, setFilter] = useState({
     sort: 'createdAt',
     accessType: null,
     categories: [],
   });
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const keywordParam = queryParams.get('keyword') || '';
+    const sortParam = queryParams.get('sort') || 'createdAt';
+    const accessTypeParam = queryParams.get('accessType');
+    const categoriesParam = queryParams.getAll('categories').map(Number);
+
+    setKeyword(keywordParam);
+    setInputValue(keywordParam); // input 박스에도 반영
+    setFilter({
+      sort: sortParam,
+      accessType: accessTypeParam || null,
+      categories: categoriesParam || [],
+    });
+    setPage(0);
+  }, [location.search]);
 
   useEffect(() => {
     const fetchCreators = async () => {
