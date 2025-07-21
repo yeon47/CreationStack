@@ -22,7 +22,28 @@ export async function createContent(formData, creatorId) {
   }
 }
 
-// 콘텐츠 접근 권한 확인
+// 특정 크리에이터의 콘텐츠 목록을 조회하는 API 호출 함수
+export async function getContentsByCreator(creatorId) {
+  try {
+    const response = await fetch(`/api/content/creator/${creatorId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`크리에이터 ID ${creatorId}의 콘텐츠 목록 조회 실패:`, error);
+    throw error;
+  }
+}
+
 export const checkContentAccess = async (contentId) => {
   const token = localStorage.getItem('accessToken');
   return axios.get(`/api/content/${contentId}`, {
@@ -31,3 +52,4 @@ export const checkContentAccess = async (contentId) => {
     },
   });
 };
+
