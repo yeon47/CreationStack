@@ -1,7 +1,9 @@
 package com.creationstack.backend.controller.content;
-import com.creationstack.backend.service.FileStorageService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,9 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import com.creationstack.backend.service.FileStorageService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Toast UI Editor에서 이미지 업로드를 처리하는 REST 컨트롤러입니다.
@@ -53,5 +56,19 @@ public class ImageUploadController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-}
 
+    // 프로필 수정할때 사용할 메서드
+    @PostMapping("/profile-image")
+    public ResponseEntity<?> uploadProfileImage(@RequestParam("image") MultipartFile image) {
+        try {
+            String imageUrl = fileStorageService.uploadFile(image, "profile-images");
+
+            Map<String, String> response = new HashMap<>();
+            response.put("imageUrl", imageUrl);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Failed to upload profile image", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("프로필 이미지 업로드 실패");
+        }
+    }
+}

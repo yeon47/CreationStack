@@ -46,6 +46,9 @@ const ReplyList = ({ contentId }) => {
   // 댓글 등록
   const handleNewComment = async () => {
     if (!newComment.trim() || !userId) return alert('댓글 내용을 입력해주세요');
+
+    const token = localStorage.getItem('accessToken');
+
     try {
       await axios.post(
         `/api/contents/${contentId}/comments`,
@@ -53,7 +56,13 @@ const ReplyList = ({ contentId }) => {
           contentText: newComment,
           parentCommentId: null,
         },
-        getAuthHeaders()
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        }
       );
       setNewComment('');
       fetchComments();
@@ -120,20 +129,8 @@ const ReplyList = ({ contentId }) => {
           Authorization: `Bearer ${token}`,
         },
       });
-      // 로컬 상태 업데이트 (서버 응답을 기다리지 않고 즉시 UI 업데이트)
-      setComments(prevComments =>
-        prevComments.map(comment => {
-          if (comment.commentId === commentId) {
-            const isCurrentlyLiked = comment.likedByUser;
-            return {
-              ...comment,
-              likedByUser: !isCurrentlyLiked,
-              likeCount: isCurrentlyLiked ? (comment.likeCount || 1) - 1 : (comment.likeCount || 0) + 1,
-            };
-          }
-          return comment;
-        })
-      );
+
+      await fetchComments();
     } catch (error) {
       alert('좋아요 처리 실패');
       console.error(error);
@@ -194,6 +191,7 @@ const ReplyList = ({ contentId }) => {
                 onEditChange={e => setEditContent(e.target.value)}
                 onEditSubmit={handleEditSubmit}
                 onEditStart={comment => {
+                  setReplyTargetId(null);
                   setEditingTargetId(`comment-${comment.commentId}`);
                   setEditContent(comment.contentText);
                 }}
@@ -204,6 +202,7 @@ const ReplyList = ({ contentId }) => {
                 onLike={handleLike}
                 onDelete={handleDelete}
                 onReplyToggle={id => {
+                  setEditingTargetId(null);
                   setReplyTargetId(prev => (prev === `reply-${id}` ? null : `reply-${id}`));
                 }}
                 replyContent={replyContents[comment.commentId]}
@@ -232,6 +231,7 @@ const ReplyList = ({ contentId }) => {
                       onEditChange={e => setEditContent(e.target.value)}
                       onEditSubmit={handleEditSubmit}
                       onEditStart={comment => {
+                        setReplyTargetId(null);
                         setEditingTargetId(`comment-${comment.commentId}`);
                         setEditContent(comment.contentText);
                       }}
@@ -242,7 +242,10 @@ const ReplyList = ({ contentId }) => {
                       onLike={handleLike}
                       onDelete={handleDelete}
                       replyTargetId={replyTargetId}
-                      onReplyToggle={id => setReplyTargetId(prev => (prev === `reply-${id}` ? null : `reply-${id}`))}
+                      onReplyToggle={id => {
+                        setEditingTargetId(null);
+                        setReplyTargetId(prev => (prev === `reply-${id}` ? null : `reply-${id}`));
+                      }}
                       replyContent={replyContents[reply.commentId]}
                       onReplyChange={handleReplyChange}
                       onReplySubmit={handleReplySubmit}

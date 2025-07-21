@@ -32,6 +32,22 @@ export async function getContentsByCreator(creatorId) {
   }
 }
 
+// 특정 크리에이터의 조회수 TOP 3 콘텐츠를 조회하는 API 호출 함수
+export async function getTopViewedContentsByCreator(creatorId) {
+  try {
+    const response = await axios.get(`/api/content/creator/${creatorId}/top-viewed`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`크리에이터 ID ${creatorId}의 조회수 TOP 3 콘텐츠 조회 실패:`, error);
+    throw error.response?.data || error;
+  }
+}
+
+
 // 콘텐츠 접근 권한 확인
 export const checkContentAccess = async (contentId) => {
   const token = localStorage.getItem('accessToken');

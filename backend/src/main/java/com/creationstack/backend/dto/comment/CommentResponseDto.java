@@ -16,6 +16,7 @@ public class CommentResponseDto {
 	private Long parentCommentId;
 	private String contentText;
 	private LocalDateTime createdAt;
+	private Boolean isDeleted;
 	private boolean isLiked;
 	private int likeCount;
 

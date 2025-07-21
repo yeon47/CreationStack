@@ -21,7 +21,12 @@ export const CreatorSearchPage = () => {
   useEffect(() => {
     const fetchCreators = async () => {
       try {
-        const result = await searchCreator(0, keyword); // Always fetch from page 0 for new searches
+        const query = { page: 0 };
+        if (keyword) {
+          query.keyword = keyword;
+        }
+
+        const result = await searchCreator(query);
         if (!result || !result.contents) {
           setCreators([]);
           return;
@@ -41,7 +46,7 @@ export const CreatorSearchPage = () => {
       }
     };
 
-    if (keyword) fetchCreators();
+    fetchCreators();
   }, [keyword]);
 
   return (
