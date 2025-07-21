@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styles from './ProfileEdit.module.css';
 import { Button } from '../../components/Member/Button';
@@ -58,7 +59,6 @@ export const ProfileEdit = () => {
     const newFormData = { ...formData, [name]: value };
     setFormData(newFormData);
 
-    // ✅ 'newPassword' 필드는 'password' 규칙으로 검증하도록 변경
     const ruleName = name === 'newPassword' ? 'password' : name;
     const validation = validateField(ruleName, value);
 
@@ -84,12 +84,22 @@ export const ProfileEdit = () => {
     const file = e.target.files[0];
     if (!file) return;
 
+    const token = localStorage.getItem('accessToken');
+
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
     const imageFormData = new FormData();
     imageFormData.append('image', file);
 
     try {
       const response = await axios.post('http://localhost:8080/api/upload/profile-image', imageFormData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
       });
       const newImageUrl = response.data.imageUrl;
 
@@ -97,7 +107,8 @@ export const ProfileEdit = () => {
       setUser(prev => ({ ...prev, profileImageUrl: newImageUrl }));
     } catch (error) {
       console.error('Image upload failed:', error);
-      alert('이미지 업로드에 실패했습니다.');
+      const errorMessage = error.response?.data?.message || '이미지 업로드에 실패했습니다.';
+      alert(errorMessage);
     }
   };
 
@@ -142,12 +153,7 @@ export const ProfileEdit = () => {
     try {
       await updateMyProfile(formData);
       alert('프로필이 성공적으로 수정되었습니다.');
-
-      if (user.role === 'CREATOR') {
-        navigate('/mypage-creator');
-      } else {
-        navigate('/mypage-user');
-      }
+      navigate('/mypage');
     } catch (error) {
       console.error('Failed to update profile:', error);
       alert('프로필 수정에 실패했습니다.');
