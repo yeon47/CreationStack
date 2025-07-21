@@ -95,8 +95,17 @@ export const UnifiedSearchPage = () => {
           ) : (
             keyword && <div className="no-search-result">크리에이터 검색 결과가 없습니다.</div>
           )}
-          {contents.length > 0 ? (
-            <ContentSearchWrapper contents={contents} />
+      {contents.length > 0 ? (
+            <div className="content-search">
+              <SearchResultHeader
+                className="design-component-instance-node"
+                text="컨텐츠 검색 결과"
+                onMoreClick={() => navigate('/contents')}
+              />
+              <div className="heading-and-content">
+                <ContentSearchWrapper contents={contents} />
+              </div>
+            </div>
           ) : (
             keyword && <div className="no-search-result">콘텐츠 검색 결과가 없습니다.</div>
           )}

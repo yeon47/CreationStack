@@ -26,27 +26,18 @@ export const ContentSearchWrapper = ({ contents = [] }) => {
 
   return (
     <div className="content-search-wrapper">
-      <div className="content-search">
-        <SearchResultHeader
-          className="design-component-instance-node"
-          text="컨텐츠 검색 결과"
-          onMoreClick={handleMoreClick}
-        />
-        <div className="heading-and-content">
-          <div className={gridStyles.grid}>
-            {contents.slice(0, 6).map(item => (
-              <ContentCard
-                key={item.contentId}
-                id={item.contentId}
-                creator={item.creator.nickname}
-                thumbnailUrl={item.thumbnailUrl}
-                title={item.title}
-                likes={item.likeCount}
-                categoryNames={item.categoryNames}
-              />
-            ))}
-          </div>
-        </div>
+      <div className={gridStyles.grid}>
+        {contents.slice(0, 6).map(item => (
+          <ContentCard
+            key={item.contentId}
+            id={item.contentId}
+            creator={item.creator.nickname}
+            thumbnailUrl={item.thumbnailUrl}
+            title={item.title}
+            likes={item.likeCount}
+            categoryNames={item.categoryNames}
+          />
+        ))}
         {contents.length > 6 && (
           <div className="arrow-up-right" onClick={handleMoreClick}>
             더보기
