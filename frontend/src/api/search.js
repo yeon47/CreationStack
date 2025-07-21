@@ -1,7 +1,7 @@
-import axios from "axios";
+import axios from 'axios';
 axios.defaults.withCredentials = true;
 
-export const searchCreator = async (page, keyword = "") => {
+export const searchCreator = async (page, keyword = '') => {
   try {
     const response = await axios.get(`/api/creators`, {
       params: {
@@ -16,9 +16,9 @@ export const searchCreator = async (page, keyword = "") => {
   }
 };
 
-export const searchContent = async (page, keyword = "", size = 9) => {
+export const searchContent = async (page, keyword = '', size = 9) => {
   try {
-    const response = await axios.get("/api/contents", {
+    const response = await axios.get('/api/contents', {
       params: {
         keyword,
         page,
@@ -33,12 +33,12 @@ export const searchContent = async (page, keyword = "", size = 9) => {
 };
 
 export const searchUnified = async ({
-  keyword = "",
+  keyword = '',
   categories = [],
   accessType,
   searchMode,
   creatorId,
-  sort = "createdAt",
+  sort = 'createdAt',
 } = {}) => {
   try {
     const params = {
@@ -47,9 +47,6 @@ export const searchUnified = async ({
     };
 
     if (categories.length > 0) {
-      categories.forEach((id, idx) => {
-        params[`categories[${idx}]`] = id;
-      });
       // 또는 axios가 배열로 자동 변환하게 하려면 그냥 `params.categories = categories`
       params.categories = categories;
     }
@@ -58,7 +55,7 @@ export const searchUnified = async ({
     if (searchMode) params.searchMode = searchMode;
     if (creatorId) params.creatorId = creatorId;
 
-    const response = await axios.get("/api/search", {
+    const response = await axios.get('/api/search', {
       params,
     });
 
