@@ -60,8 +60,9 @@ const PaymentModal = ({ isOpen, onClose, cardData, onSuccess, onFailure }) => {
         amount: 4900, // 결제 금액 예시
         creatorId: 3,
       };
-
-      const result = await requestPayment(paymentInfo);
+      
+      const accessToken = localStorage.getItem("accessToken");
+      const result = await requestPayment(paymentInfo, accessToken);
       onSuccess();
     } catch (error) {
       onFailure();
