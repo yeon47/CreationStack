@@ -163,6 +163,10 @@ public class SearchService { // 검색 서비스
                                     content.getCategoryMappings().stream()
                                             .map(mapping -> mapping.getCategory().getName())
                                             .toList())
+                            .categoryIds(
+                                    content.getCategoryMappings().stream()
+                                            .map(mapping -> mapping.getCategory().getCategoryId())
+                                            .toList())
                             .build();
                 });
 

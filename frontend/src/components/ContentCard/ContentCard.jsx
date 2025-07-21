@@ -49,8 +49,8 @@ export const ContentCard = ({ contentId, thumbnailUrl, creatorNickname, title, l
       </div>
 
       {showModal && creatorNickname && (
-        <UnauthorizedModal 
-        open={true} creatorNickname={creatorNickname} 
+        <UnauthorizedModal
+        open={true} creatorNickname={creatorNickname}
         onClose={() => setShowModal(false)} />
       )}
     </>
