@@ -396,4 +396,17 @@ public class ContentService {
         return likes.map(like -> ContentList.from(like.getContent()));
     }
 
+    // 특정 크리에이터의 조회수 TOP N 콘텐츠를 조회합니다.
+    public List<ContentResponse> getTopViewedContents(Long creatorId, int limit) {
+        if (!userRepository.existsById(creatorId)) {
+            throw new CustomException(HttpStatus.NOT_FOUND, "크리에이터를 찾을 수 없습니다. ID: " + creatorId);
+        }
+        // 몇개 컨텐츠 조회할지 메서드 이름에 직접 명시하여 동적으로 처리가능
+        List<Content> topContents = contentRepository.findTop3ByCreator_UserIdOrderByViewCountDesc(creatorId);
+        log.info("크리에이터 ID {} 의 조회수 TOP {} 콘텐츠 {}개 조회", creatorId, limit, topContents.size());
+        return topContents.stream()
+                .map(ContentResponse::from)
+                .collect(Collectors.toList());
+    }
+
 }
