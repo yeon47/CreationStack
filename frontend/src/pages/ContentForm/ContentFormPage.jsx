@@ -19,6 +19,9 @@ const ContentFormPage = () => {
   const [isDragging, setIsDragging] = useState(false); // 드래그 중인지 여부
   const [isImageUploading, setIsImageUploading] = useState(false); // 이미지 업로드 중 상태 추가
   
+  
+    // creatorId (임시 테스트용 하드코딩, 실제로는 로그인 사용자 정보에서 가져와야 함)
+    //const creatorId = 2; // 예시: 로그인된 사용자의 ID
 
   // 드롭다운 외부 클릭 감지를 위한 ref
   const dropdownRef = useRef(null);
@@ -178,9 +181,6 @@ const ContentFormPage = () => {
         formData.append('attachmentFiles', file.file); // 실제 파일 객체 append
       });
     }
-
-    // creatorId (임시로 하드코딩, 실제로는 로그인 사용자 정보에서 가져와야 함)
-    const creatorId = 2; // 예시: 로그인된 사용자의 ID
 
     try {
       // 분리된 API 함수 호출
