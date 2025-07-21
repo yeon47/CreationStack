@@ -4,6 +4,7 @@ import { Button } from '../../components/Member/Button';
 import { Card, CardContent } from '../../components/Member/Card';
 import { Input } from '../../components/Member/Input';
 import { Label } from '../../components/Member/Label';
+import { validateField } from '../../utils/validationUtils';
 import styles from './KakaoCommon.module.css';
 
 export const KakaoCommon = ({ onBack, kakaoInfo }) => {
@@ -16,6 +17,7 @@ export const KakaoCommon = ({ onBack, kakaoInfo }) => {
   });
 
   const [nicknameStatus, setNicknameStatus] = useState({ message: '', isAvailable: null });
+  const [validationErrors, setValidationErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 닉네임 중복 확인
@@ -40,10 +42,33 @@ export const KakaoCommon = ({ onBack, kakaoInfo }) => {
   const handleInputChange = e => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
+
+    // 실시간 유효성 검사
+    if (id !== 'email') {
+      // 이메일은 카카오에서 가져온 것이므로 검증 제외
+      const validation = validateField(id, value);
+      setValidationErrors(prev => ({
+        ...prev,
+        [id]: validation.isValid ? '' : validation.message,
+      }));
+    }
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
+
+    // 전체 폼 유효성 검사
+    const nameValidation = validateField('name', formData.name);
+    const nicknameValidation = validateField('nickname', formData.nickname);
+
+    const errors = {};
+    if (!nameValidation.isValid) errors.name = nameValidation.message;
+    if (!nicknameValidation.isValid) errors.nickname = nicknameValidation.message;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
 
     if (nicknameStatus.isAvailable === false) {
       alert('이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.');
@@ -61,8 +86,8 @@ export const KakaoCommon = ({ onBack, kakaoInfo }) => {
       // 카카오 일반 사용자 회원가입 요청
       const requestBody = {
         email: formData.email,
-        username: formData.name,
-        nickname: formData.nickname,
+        username: formData.name.trim(),
+        nickname: formData.nickname.trim(),
         role: 'USER', // 일반 사용자
         platform: 'KAKAO',
         platformId: kakaoInfo?.platformId,
@@ -179,8 +204,14 @@ export const KakaoCommon = ({ onBack, kakaoInfo }) => {
                         className={styles.input}
                         required={field.required}
                       />
+                      {/* 유효성 검사 에러 메시지 */}
+                      {validationErrors[field.id] && (
+                        <span className={`${styles.statusMessage} ${styles.unavailable}`}>
+                          {validationErrors[field.id]}
+                        </span>
+                      )}
                       {/* 닉네임 중복 확인 메시지 */}
-                      {field.id === 'nickname' && nicknameStatus.message && (
+                      {field.id === 'nickname' && nicknameStatus.message && !validationErrors[field.id] && (
                         <span
                           className={`${styles.statusMessage} ${
                             nicknameStatus.isAvailable ? styles.available : styles.unavailable
