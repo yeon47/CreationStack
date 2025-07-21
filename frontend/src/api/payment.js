@@ -12,12 +12,13 @@ requestPayment : 결제 요청 API
 */
 
 // 등록된 모든 결제수단 조회 API
-export const readAllPaymentMethod = async () => {
+export const readAllPaymentMethod = async accessToken => {
   //accessToken 전달해서 인증하겠지만 지금은 userId 하드코딩
   try {
     const response = await axios.get('http://localhost:8080/api/payments', {
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -28,7 +29,7 @@ export const readAllPaymentMethod = async () => {
 };
 
 //등록된 결제수단 DB 저장 API
-export const savePaymentMethod = async billingKey => {
+export const savePaymentMethod = async (billingKey, accessToken) => {
   try {
     const response = await axios.post(
       'http://localhost:8080/api/billings/card',
@@ -38,6 +39,7 @@ export const savePaymentMethod = async billingKey => {
       {
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
@@ -52,37 +54,36 @@ export const registerBillingKey = async (storeId, channelKey, name, email) => {
   try {
     const customerId = `user-${uuidv4()}`;
 
-  // 결제수단 사용자 정보
-  const customer = {
-    customerId: `user-${uuidv4()}`,
-    fullName: name,
-    email: email,
-  };
+    // 결제수단 사용자 정보
+    const customer = {
+      customerId: `user-${uuidv4()}`,
+      fullName: name,
+      email: email,
+    };
 
-  const response = await PortOne.requestIssueBillingKey({
-    storeId: storeId, //상점 아이디. 포트원 계정에 생성된 상점 식별하는 고유값
-    channelKey: channelKey, //채널 키. 포트원에 등록된 결제 채널
-    billingKeyMethod: 'CARD', //빌링키 발급 수단
-    issueName: '정기결제용 카드 등록', //카드 등록 목적
-    issueId: `issue-${customerId}-${Date.now()}`, //카드 등록 요청에 대한 고유한 ID
-    customer: customer, // 결제수단 사용자 정보
-    offerPeriod: {
-      interval: '1y', //유효기간 1년
-    },
-    popup: {
-      center: true, //sdk 팝업 위치 center 고정
-    },
-  });
-  alert('이 billingkey를 .env sample billingkey로 사용하세요' + response.billingKey);
-  return response;
-    
+    const response = await PortOne.requestIssueBillingKey({
+      storeId: storeId, //상점 아이디. 포트원 계정에 생성된 상점 식별하는 고유값
+      channelKey: channelKey, //채널 키. 포트원에 등록된 결제 채널
+      billingKeyMethod: 'CARD', //빌링키 발급 수단
+      issueName: '정기결제용 카드 등록', //카드 등록 목적
+      issueId: `issue-${customerId}-${Date.now()}`, //카드 등록 요청에 대한 고유한 ID
+      customer: customer, // 결제수단 사용자 정보
+      offerPeriod: {
+        interval: '1y', //유효기간 1년
+      },
+      popup: {
+        center: true, //sdk 팝업 위치 center 고정
+      },
+    });
+    alert('이 billingkey를 .env sample billingkey로 사용하세요' + response.billingKey);
+    return response;
   } catch (error) {
     throw error;
   }
 };
 
 // 결제수단 삭제 deleteCardMethod
-export const deletePaymentMethod = async (paymentMethodId, reason) => {
+export const deletePaymentMethod = async (paymentMethodId, reason, accessToken) => {
   try {
     const response = await axios.post(
       'http://localhost:8080/api/billings/keys',
@@ -93,6 +94,7 @@ export const deletePaymentMethod = async (paymentMethodId, reason) => {
       {
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
@@ -102,8 +104,25 @@ export const deletePaymentMethod = async (paymentMethodId, reason) => {
   }
 };
 
+// 현재 로그인한 사용자 정보 조회 API
+export const getUserInfo = async accessToken => {
+  // 현재 로그인한 사용자 정보 조회
+  try {
+    const response = await axios.get('http://localhost:8080/api/user/profile', {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    return error;
+  }
+};
+
 // 결제 진행
-export const requestPayment = async (paymentInfo) => {
+export const requestPayment = async (paymentInfo, accessToken) => {
   try {
     const saveSubscription = await axios.post(
       'http://localhost:8080/api/subscriptions/pending',
@@ -114,6 +133,7 @@ export const requestPayment = async (paymentInfo) => {
       {
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
@@ -124,24 +144,26 @@ export const requestPayment = async (paymentInfo) => {
         paymentMethodId: paymentInfo.paymentMethodId,
         subscriptionId: saveSubscription.data.subscriptionId,
         amount: paymentInfo.amount,
-        creatorId:saveSubscription.data.creatorId,
-        orderName:'개발퀸 정기구독권'
+        creatorId: saveSubscription.data.creatorId,
+        orderName: paymentInfo.creatorNickname +'정기구독권',
       },
       {
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
 
     const updateSubscriptionStatus = await axios.post(
-  `http://localhost:8080/api/subscriptions/${saveSubscription.data.subscriptionId}/activate`,
+      `http://localhost:8080/api/subscriptions/${saveSubscription.data.subscriptionId}/activate`,
       {
-        paymentId:  savePayment.data.paymentId,
+        paymentId: savePayment.data.paymentId,
       },
       {
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );

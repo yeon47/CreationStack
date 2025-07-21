@@ -10,6 +10,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,19 +25,21 @@ public class PaymentMethodController {
 
   // 1. 카드 등록 후 결제 수단 반환
   @PostMapping("/api/billings/card")
-  public ResponseEntity<SavePaymentMethodResponseDto> savePaymentMethod(@RequestBody SavePaymentMethodRequestDto req){
-    return ResponseEntity.ok(paymentMethodService.save(req));
+  public ResponseEntity<SavePaymentMethodResponseDto> savePaymentMethod(Authentication authentication, @RequestBody SavePaymentMethodRequestDto req){
+    Long userId = (Long) authentication.getPrincipal();
+    return ResponseEntity.ok(paymentMethodService.save(userId,req));
   }
 
   // 2. 사용자의 모든 결제 수단 조회
   @GetMapping("/api/payments")
-  public ResponseEntity<List<PaymentMethodResponseDto>> getAllPaymentMethods(){
-    return ResponseEntity.ok(paymentMethodService.getPaymentMethod(2L));
+  public ResponseEntity<List<PaymentMethodResponseDto>> getAllPaymentMethods(Authentication authentication){
+    Long userId = (Long) authentication.getPrincipal();
+    return ResponseEntity.ok(paymentMethodService.getPaymentMethod(userId));
   }
 
   // 3. 결제 수단 삭제
   @PostMapping("/api/billings/keys")
-  public ResponseEntity<DeletePaymentMethodResponseDto> deletePaymentMethod(@RequestBody DeletePaymentMethodRequestDto req){
+  public ResponseEntity<DeletePaymentMethodResponseDto> deletePaymentMethod(Authentication authentication, @RequestBody DeletePaymentMethodRequestDto req){
     return ResponseEntity.ok(paymentMethodService.deletePaymentMethod(req));
   }
 }
