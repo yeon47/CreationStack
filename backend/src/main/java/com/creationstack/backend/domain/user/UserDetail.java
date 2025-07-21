@@ -1,6 +1,20 @@
 package com.creationstack.backend.domain.user;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,12 +37,19 @@ public class UserDetail {
     @MapsId
     private User user;
 
-    @Column(name = "username", nullable = false, length = 50)
+    @NotBlank(message = "실명은 필수 입력값입니다.")
+    @Size(min = 2, max = 20, message = "실명은 2-20자 사이여야 합니다.")
+    @Pattern(regexp = "^[가-힣a-zA-Z\\s]+$", message = "실명은 한글, 영문, 공백만 포함할 수 있습니다.")
+    @Column(name = "username", nullable = false, length = 20) // 50 -> 20으로 변경
     private String username;
 
-    @Column(name = "nickname", nullable = false, unique = true, length = 50)
+    @NotBlank(message = "닉네임은 필수 입력값입니다.")
+    @Size(min = 2, max = 10, message = "닉네임은 2-10자 사이여야 합니다.")
+    @Pattern(regexp = "^[가-힣a-zA-Z0-9_-]+$", message = "닉네임은 한글, 영문, 숫자, _, - 만 포함할 수 있습니다.")
+    @Column(name = "nickname", nullable = false, unique = true, length = 10) // 50 -> 10으로 변경
     private String nickname;
 
+    @Size(max = 500, message = "소개글은 500자 이하여야 합니다.")
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
 
@@ -42,17 +63,38 @@ public class UserDetail {
     @Column(name = "platform", nullable = false)
     private Platform platform;
 
+    @NotBlank(message = "이메일은 필수 입력값입니다.")
+    @Email(message = "올바른 이메일 형식이 아닙니다.")
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", message = "올바른 이메일 형식을 입력해주세요 (예: user@example.com)")
+    @Size(max = 100, message = "이메일은 100자 이하여야 합니다.")
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
+    // 비밀번호는 LOCAL 사용자만 필수, 카카오 사용자는 null 가능
+    @Size(min = 8, max = 20, message = "비밀번호는 8-20자 사이여야 합니다.")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", message = "비밀번호는 대소문자, 숫자, 특수문자를 모두 포함해야 합니다.")
     @Column(name = "password", length = 512)
     private String password;
 
     public enum Platform {
         LOCAL, KAKAO
     }
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_id")
     private Job job;
- 
+
+    // 플랫폼별 유효성 검사 헬퍼 메서드
+    public boolean isKakaoUser() {
+        return Platform.KAKAO.equals(this.platform);
+    }
+
+    public boolean isLocalUser() {
+        return Platform.LOCAL.equals(this.platform);
+    }
+
+    // 비밀번호 필수 여부 검증
+    public boolean isPasswordRequired() {
+        return isLocalUser();
+    }
 }
