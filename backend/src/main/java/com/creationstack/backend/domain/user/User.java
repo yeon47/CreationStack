@@ -1,9 +1,13 @@
 package com.creationstack.backend.domain.user;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.creationstack.backend.domain.content.Like;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -19,18 +23,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import com.creationstack.backend.domain.content.Like;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -45,6 +44,7 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
+    @NotNull(message = "역할은 필수 선택값입니다.")
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private UserRole role;
@@ -53,9 +53,12 @@ public class User {
     @JoinColumn(name = "job_id")
     private Job job;
 
+    @Min(value = 0, message = "구독자 수는 0 이상이어야 합니다.")
     @Column(name = "subscriber_count", nullable = false)
-    private int subscriberCount = 0; // 구독자 수
+    @Builder.Default
+    private Integer subscriberCount = 0;
 
+    @NotNull(message = "활성화 상태는 필수입니다.")
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;
@@ -71,12 +74,27 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserDetail userDetail;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Like> likes = new ArrayList<>();
+
     public enum UserRole {
         USER, CREATOR
     }
-    
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Like> likes = new ArrayList<>();
 
+    @AssertTrue(message = "크리에이터는 직업을 선택해야 합니다.")
+    private boolean isJobValidForCreator() {
+        if (UserRole.CREATOR.equals(this.role)) {
+            return this.job != null && this.job.getJobId() != null && this.job.getJobId() > 0;
+        }
+        return true;
+    }
 
+    // UserDetail과의 양방향 관계 설정 헬퍼
+    public void setUserDetail(UserDetail userDetail) {
+        this.userDetail = userDetail;
+        if (userDetail != null && userDetail.getUser() != this) {
+            userDetail.setUser(this);
+        }
+    }
 }
