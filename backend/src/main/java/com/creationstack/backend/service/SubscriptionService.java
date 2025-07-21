@@ -178,6 +178,7 @@ public class SubscriptionService {
         public List<UserSubscriptionDto> getMySubscriptions(Long userId) {
                 List<UserSubscriptionDto> list = subscriptionRepository.findAllBySubscriberId(userId);
 
+                log.info("구독 전체 수: {}", list.size());
                 for (UserSubscriptionDto dto : list) {
                         dto.setMessage(switch (dto.getStatusName()) {
                                 case "ACTIVE" -> "다음 결제 예정일: " + format(dto.getNextPaymentAt());
@@ -186,6 +187,7 @@ public class SubscriptionService {
                                 case "PENDING" -> "결제 대기 중입니다.";
                                 default -> "";
                         });
+                        log.info("구독 ID: {}, 상태: {}, 크리에이터 ID: {}", dto.getSubscriptionId(), dto.getStatusName(), dto.getCreatorId());
                 }
 
                 return list;
@@ -199,10 +201,8 @@ public class SubscriptionService {
         @Transactional(readOnly = true)
         public List<PublicProfileResponse> getSubscribedCreators(String nickname) {
                 try {
-                        log.info("닉네임으로 구독 조회 시작: {}", nickname);
                         List<PublicProfileResponse> list = subscriptionRepository
                                         .findSubscribedCreatorsByNickname(nickname);
-                        log.info("쿼리 결과 크기: {}", list.size());
                         return list;
                 } catch (Exception e) {
                         log.error("구독 조회 실패", e); // 여기서 반드시 스택트레이스 확인
