@@ -7,7 +7,7 @@ import styles from './PaymentModal.module.css';
 const CARD_WIDTH = 480; // 카드 1개 너비(px)
 const SWIPE_THRESHOLD = 250; // 슬라이드 전환 임계치
 
-const PaymentModal = ({ isOpen, onClose, cardData, onSuccess, onFailure }) => {
+const PaymentModal = ({ isOpen, onClose, cardData, creator, onSuccess, onFailure }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -58,10 +58,12 @@ const PaymentModal = ({ isOpen, onClose, cardData, onSuccess, onFailure }) => {
       const paymentInfo = {
         paymentMethodId: selectedCard.paymentMethodId, // id값이 있다고 가정
         amount: 4900, // 결제 금액 예시
-        creatorId: 3,
+        creatorNickname: creator.name,
+        creatorId: creator.id
       };
-
-      const result = await requestPayment(paymentInfo);
+      
+      const accessToken = localStorage.getItem("accessToken");
+      const result = await requestPayment(paymentInfo, accessToken);
       onSuccess();
     } catch (error) {
       onFailure();
@@ -94,23 +96,6 @@ const PaymentModal = ({ isOpen, onClose, cardData, onSuccess, onFailure }) => {
             onTouchEnd={handleDragEnd}
             style={{ cursor: dragging ? 'grabbing' : 'grab' }}
             ref={containerRef}>
-            {/* <div
-              className={styles.cardSliderTrack}
-              style={{
-                transform: `translateX(${-currentIndex * CARD_WIDTH + dragX + offset}px)`,
-                transition: dragging ? 'none' : 'transform 0.4s cubic-bezier(.39,.58,.57,1.13)',
-              }}
-            >
-              {cardData.map((card, idx) => (
-                <div className={styles.cardItem} key={idx}>
-                  <div className={styles.cardContent}>
-                    <div className={styles.cardBrand}>{card.brand}</div>
-                    <div className={styles.cardNumber}>{card.number}</div>
-                    <div className={styles.cardExpired}>유효기간: {card.expired}</div>
-                  </div>
-                </div>
-              ))}
-            </div> */}
 
             <div
               className={styles.cardSliderTrack}
