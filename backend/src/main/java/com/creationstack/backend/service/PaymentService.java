@@ -29,6 +29,7 @@ import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,16 +53,17 @@ public class PaymentService {
     log.info("[processingBillingKeyPay] paymentMethodService.getPaymentMethodForBillingKey: {}", paymentMethod);
 
     // 구매하는 사용자 정보 가져와 구매자 객체 생성
-    Long userId = 2L;
-    UserDetail userDetail = userDetailRepository.findById(userId).orElse(null);
-    CustomerDto customer = new CustomerDto(userId+"",userDetail.getEmail(),new Name(userDetail.getUsername()));
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Long subscriberId = Long.parseLong(authentication.getName());
+    UserDetail userDetail = userDetailRepository.findById(subscriberId).orElse(null);
+    CustomerDto customer = new CustomerDto(subscriberId+"",userDetail.getEmail(),new Name(userDetail.getUsername()));
 
     Subscription subscription = subscriptionRepository.findById(req.getSubscriptionId()).orElse(null);
 
-//    assert subscription != null;
-//    if(!subscription.getStatus().equals(SubscriptionStatusName.PENDING)){
-//      throw new CustomException(HttpStatus.NOT_FOUND,"구독 내역이 생성되지 않았습니다.");
-//    }
+    assert subscription != null;
+    if(!subscription.getStatus().equals(SubscriptionStatusName.PENDING)){
+      throw new CustomException(HttpStatus.NOT_FOUND,"구독 내역이 생성되지 않았습니다.");
+    }
 
     // 결제 내역 생성
     Payment payment = Payment.builder()

@@ -5,6 +5,7 @@ import com.creationstack.backend.config.PortOneClient;
 import com.creationstack.backend.domain.payment.Payment;
 import com.creationstack.backend.domain.payment.PaymentMethod;
 import com.creationstack.backend.domain.subscription.Subscription;
+import com.creationstack.backend.domain.user.UserDetail;
 import com.creationstack.backend.dto.Payment.DeletePaymentMethodRequestDto;
 import com.creationstack.backend.dto.Payment.DeletePaymentMethodResponseDto;
 import com.creationstack.backend.dto.Payment.PaymentMethodResponseDto;
@@ -15,6 +16,7 @@ import com.creationstack.backend.exception.CustomException;
 import com.creationstack.backend.repository.PaymentMethodRepository;
 import com.creationstack.backend.repository.PaymentRepository;
 import com.creationstack.backend.repository.SubscriptionRepository;
+import com.creationstack.backend.repository.UserDetailRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -33,16 +35,19 @@ public class PaymentMethodService {
   private final PortOneClient portOneClient;
   private final SubscriptionRepository subscriptionRepository;
   private final PaymentRepository paymentRepository;
+  private final UserDetailRepository userDetailRepository;
 
   // 1. 결제수단 저장
   @Transactional
-  public SavePaymentMethodResponseDto save(SavePaymentMethodRequestDto req) {
+  public SavePaymentMethodResponseDto save(Long userId, SavePaymentMethodRequestDto req) {
     try {
       String billingKey = req.getBillingKey();
       JsonNode card = portOneClient.getBillingKeyInfo(billingKey);
 
+      UserDetail userDetail = userDetailRepository.findById(userId).orElse(null);
+
       PaymentMethod paymentMethod = PaymentMethod.builder()
-          .userId(2L) // TODO: 실제 userId 할당
+          .userId(userId) // TODO: 실제 userId 할당
           .billingKey(billingKey)
           .cardName(card.get("name").asText())
           .cardBrand(card.get("brand").asText())
@@ -51,8 +56,9 @@ public class PaymentMethodService {
           .build();
 
       paymentMethodRepository.save(paymentMethod);
+      assert userDetail != null;
       SavePaymentMethodResponseDto res = new SavePaymentMethodResponseDto(
-          "test", paymentMethod.getCardBrand(), paymentMethod.getCardType(),
+          userDetail.getUsername(), paymentMethod.getCardBrand(), paymentMethod.getCardType(),
           paymentMethod.getCardName(), paymentMethod.getCardNumber()
       );
       return res;

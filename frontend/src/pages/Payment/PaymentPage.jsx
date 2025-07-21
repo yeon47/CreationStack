@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import SubscriptionDetails from '../../components/Payment/SubscriptionDetails';
 import PaymentModal from '../../components/Payment/PaymentModal';
 import WarningModal from '../../components/Payment/WarningModal';
-import { registerBillingKey, savePaymentMethod, readAllPaymentMethod } from '../../api/payment';
+import { registerBillingKey, savePaymentMethod, readAllPaymentMethod, getUserInfo } from '../../api/payment';
 import styles from './PaymentPage.module.css';
 
 function PaymentPage() {
@@ -29,7 +29,8 @@ function PaymentPage() {
   useEffect(() => {
     const fetchCards = async () => {
       try {
-        const res = await readAllPaymentMethod(); // API 호출
+        const accessToken = localStorage.getItem('accessToken');
+        const res = await readAllPaymentMethod(accessToken); // API 호출
         setCards(res);
       } catch (err) {
         console.error('카드 정보를 불러오는 데 실패했습니다.', err);
@@ -65,7 +66,15 @@ function PaymentPage() {
   // 결제수단 등록
   const handleCardRegister = async () => {
     try {
-      const issueResponse = await requestIssueBillingKey(storeId, channelKey, 'test', 'test@gmail.com');
+      const accessToken = localStorage.getItem('accessToken');
+      const userInfoResponse = await getUserInfo(accessToken);
+      alert(userInfoResponse.username);
+      const issueResponse = await registerBillingKey(
+        storeId,
+        channelKey,
+        userInfoResponse.username,
+        userInfoResponse.email
+      );
       const saveResponse = await savePaymentMethod(issueResponse.billingKey);
 
       // 카드 객체에서 username 제외

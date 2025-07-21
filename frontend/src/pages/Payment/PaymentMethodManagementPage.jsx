@@ -2,7 +2,13 @@ import React, { useEffect, useState } from 'react';
 import styles from './paymentMethodManagementPage.module.css';
 import PaymentMethodList from '../../components/Payment/PaymentMethodList';
 import WarningModal from '../../components/Payment/WarningModal';
-import { registerBillingKey, savePaymentMethod, readAllPaymentMethod, deletePaymentMethod } from '../../api/payment';
+import {
+  registerBillingKey,
+  savePaymentMethod,
+  readAllPaymentMethod,
+  deletePaymentMethod,
+  getUserInfo,
+} from '../../api/payment';
 
 function PaymentMethodManagementPage() {
   const [cards, setCards] = useState([]);
@@ -18,7 +24,8 @@ function PaymentMethodManagementPage() {
   useEffect(() => {
     const fetchCards = async () => {
       try {
-        const res = await readAllPaymentMethod();
+        const accessToken = localStorage.getItem('accessToken');
+        const res = await readAllPaymentMethod(accessToken);
         setCards(res);
       } catch (err) {
         console.error('카드 정보를 불러오는 데 실패했습니다.', err);
@@ -50,7 +57,8 @@ function PaymentMethodManagementPage() {
     // 300ms 후 새 모달 보여주기 (애니메이션 타이밍)
     setTimeout(async () => {
       try {
-        const response = await deletePaymentMethod(card.paymentMethodId, reason);
+        const accessToken = localStorage.getItem('accessToken');
+        const response = await deletePaymentMethod(card.paymentMethodId, reason, accessToken);
 
         if (card.paymentMethodId === response.paymentMethodId) {
           setCards(prev => prev.filter(c => c.paymentMethodId !== card.paymentMethodId));
@@ -66,8 +74,17 @@ function PaymentMethodManagementPage() {
   //빌링키 발급 후 결제수단 조회해 보여주는 메소드
   const handleCardRegister = async () => {
     try {
-      // 빌링키 발급 (로그인한 사용자로 test, test@gmail.com 부분 바꿀 예정)
-      const issueResponse = await registerBillingKey(storeId, channelKey, '김희연', 'happylotus145@gmail.com');
+      const accessToken = localStorage.getItem('accessToken');
+      // 빌링키 발급 위한 현재 로그인한 사용자의 정보 조회
+      const userInfoResponse = await getUserInfo(accessToken);
+      alert(userInfoResponse.username);
+      // 빌링키 발급
+      const issueResponse = await registerBillingKey(
+        storeId,
+        channelKey,
+        userInfoResponse.username,
+        userInfoResponse.email
+      );
 
       // 포트원에서 실패 응답을 반환한 경우 (성공했더라도 내부적으로 실패 코드 전달 가능)
       if (
@@ -79,7 +96,7 @@ function PaymentMethodManagementPage() {
       }
 
       // 발급된 빌링키 이용한 결제수단 조회 (빌링키 발급단계에서 이루어진 결제수단 조회)
-      const saveResponse = await savePaymentMethod(issueResponse.billingKey);
+      const saveResponse = await savePaymentMethod(issueResponse.billingKey, accessToken);
 
       // 회원이 추가한 결제수단을 cards에 저장
       const { username, ...cardWithoutUsername } = saveResponse;
