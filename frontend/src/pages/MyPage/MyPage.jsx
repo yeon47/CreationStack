@@ -1,27 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import styles from './mypage.module.css';
-import { Link } from 'react-router-dom';
-import { getMyProfile } from '../../api/user'; // 프로필 정보 API 호출 함수
+import { Link, useNavigate } from 'react-router-dom';
+import { getMyProfile, deleteMyAccount } from '../../api/user';
 
 export const MyPage = () => {
-  // ✅ 1. 사용자 정보를 저장할 state (초기값 null)
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
-  // ✅ 2. 컴포넌트 마운트 시 사용자 정보 API 호출
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await getMyProfile();
-        setUser(response.data.data); // state에 사용자 정보 저장
+        setUser(response.data.data);
       } catch (error) {
         console.error('Failed to fetch user data:', error);
-        // 에러 발생 시 로그인 페이지로 보내는 등의 처리 가능
       }
     };
     fetchUserData();
-  }, []); // 빈 배열을 전달하여 한 번만 실행
+  }, []);
 
-  // ✅ 3. 데이터 로딩 중일 때 로딩 화면 표시
+  const handleUnregister = async () => {
+    // 사용자에게 정말 탈퇴할 것인지 최종 확인을 받습니다.
+    const isConfirmed = window.confirm(
+      '정말로 회원 탈퇴를 하시겠습니까?\n모든 정보는 복구할 수 없으며, 닉네임은 "탈퇴한 사용자입니다."로 변경됩니다.'
+    );
+
+    if (isConfirmed) {
+      try {
+        await deleteMyAccount();
+        alert('회원 탈퇴가 완료되었습니다. 이용해주셔서 감사합니다.');
+        localStorage.removeItem('accessToken'); // 토큰 삭제
+        navigate('/'); // 홈페이지로 리디렉션
+      } catch (error) {
+        console.error('Failed to unregister:', error);
+        alert('회원 탈퇴 중 오류가 발생했습니다. 다시 시도해주세요.');
+      }
+    }
+  };
+
   if (!user) {
     return <div>Loading...</div>;
   }
@@ -33,7 +49,6 @@ export const MyPage = () => {
           <div className={styles.mypageSection}>
             <div className={styles.dashboardSection}>
               <div className={styles.profileInfoGroup}>
-                {/* ✅ 4. API로 가져온 실제 데이터 표시 */}
                 <img
                   className={styles.profileImage}
                   alt="Profile"
@@ -55,7 +70,6 @@ export const MyPage = () => {
             </div>
 
             <div className={styles.menuListSection}>
-              {/* ✅ 5. 역할(role)에 따라 메뉴를 조건부로 렌더링 */}
               {user.role === 'CREATOR' ? (
                 <Link to={`/creator-main/${user.nickname}`} className={styles.labelWrapper}>
                   <div className={`${styles.baseTextStyles} ${styles.label2}`}>내 프로필 보기</div>
@@ -72,7 +86,6 @@ export const MyPage = () => {
                 </Link>
               )}
 
-              {/* 공통 메뉴 */}
               <Link to="/subscription-manage" className={styles.labelWrapper}>
                 <div className={`${styles.baseTextStyles} ${styles.label2}`}>구독 관리</div>
               </Link>
@@ -82,9 +95,9 @@ export const MyPage = () => {
               <Link to="/payments" className={styles.labelWrapper}>
                 <div className={`${styles.baseTextStyles} ${styles.label2}`}>결제수단 관리</div>
               </Link>
-              <Link to="/unregister" className={styles.labelWrapper}>
+              <div className={styles.labelWrapper} onClick={handleUnregister} style={{ cursor: 'pointer' }}>
                 <div className={`${styles.baseTextStyles} ${styles.label2}`}>회원 탈퇴</div>
-              </Link>
+              </div>
             </div>
           </div>
         </div>
