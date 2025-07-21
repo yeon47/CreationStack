@@ -5,10 +5,12 @@ import com.creationstack.backend.domain.payment.PaymentStatus;
 import com.creationstack.backend.domain.subscription.Subscription;
 import com.creationstack.backend.domain.subscription.SubscriptionStatus;
 import com.creationstack.backend.domain.subscription.SubscriptionStatusName;
+import com.creationstack.backend.domain.user.User;
 import com.creationstack.backend.exception.CustomException;
 import com.creationstack.backend.repository.PaymentRepository;
 import com.creationstack.backend.repository.SubscriptionRepository;
 import com.creationstack.backend.repository.SubscriptionStatusRepository;
+import com.creationstack.backend.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +31,7 @@ public class SubscriptionBillingService {
   private final SubscriptionRepository subscriptionRepository;
   private final SubscriptionStatusRepository subscriptionStatusRepository;
   private final PaymentService paymentService;
-  private final PaymentRepository paymentRepository;
+  private final UserRepository userRepository;
 
   // 정기결제 서비스
   @Transactional
@@ -38,11 +40,15 @@ public class SubscriptionBillingService {
     List<Subscription> subscriptions = subscriptionRepository.findAllByNextPaymentAtBefore(LocalDateTime.now());
 
     for(Subscription subscription : subscriptions){
+      // 가입된 사용자인지 확인 후 없으면 정기결제 실패
+      User user = userRepository.findById(subscription.getSubscriberId()).orElseThrow(
+          () -> new CustomException(HttpStatus.NOT_FOUND, "정기결제 실패"));
+
       // 구독 상태 조회
       String status = subscription.getStatus().getName();
       if(SubscriptionStatusName.ACTIVE.equals(status)){// 활성화된 구독인 경우
         // 결제 진행 + 결제내역 생성
-        paymentService.processAutoBilling(subscription);
+        paymentService.processAutoBilling(subscription, user);
 
         // 구독 마지막날짜 + 다음 구독 갱신일 업데이트
         subscription.setLastPaymentAt(LocalDateTime.now());

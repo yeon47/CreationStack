@@ -4,10 +4,10 @@ import { useNavigate, useParams  } from 'react-router-dom';
 import SubscriptionDetails from '../../components/Payment/SubscriptionDetails';
 import PaymentModal from '../../components/Payment/PaymentModal';
 import WarningModal from '../../components/Payment/WarningModal';
-import { registerBillingKey, savePaymentMethod, readAllPaymentMethod } from '../../api/payment';
+import { registerBillingKey, savePaymentMethod, readAllPaymentMethod, getUserInfo } from '../../api/payment';
 import { getPublicCreatorProfile } from '../../api/profile';
-
 import logo from '../../assets/img/logo.svg'
+
 import styles from './PaymentPage.module.css';
 
 function PaymentPage() {
@@ -32,7 +32,8 @@ function PaymentPage() {
   useEffect(() => {
     const fetchCards = async () => {
       try {
-        const res = await readAllPaymentMethod(); // API 호출
+        const accessToken = localStorage.getItem('accessToken');
+        const res = await readAllPaymentMethod(accessToken); // API 호출
         setCards(res);
       } catch (err) {
         console.error('카드 정보를 불러오는 데 실패했습니다.', err);
@@ -54,6 +55,7 @@ function PaymentPage() {
       try {
         const res = await getPublicCreatorProfile(creatorNickname);
         setCreator({
+          id: res.data.userId,
           name: res.data.nickname,
           image: res.data.profileImageUrl || logo, // 기본값 일단 로고로 설정
         });
@@ -70,8 +72,8 @@ function PaymentPage() {
 
   const subscriptionDetails = [
     { label: '구독 상품', value: '프리미엄 멤버십' },
-    { label: '가격', value: '₩15,000/월', highlight: true },
-    { label: '총 결제 금액', value: '₩15,000', bold: true },
+    { label: '가격', value: '₩4,900/월', highlight: true },
+    { label: '총 결제 금액', value: '₩4,900', bold: true },
   ];
 
   const benefits = ['독점 콘텐츠 제공', '광고 제거', '라이브 방송 참여'];
@@ -81,6 +83,7 @@ function PaymentPage() {
     if (cardData.length === 0) {
       // 카드가 없으면 경고 모달 띄움
       setIsWarningModalOpen(true);
+      setModalType('method-fail');
     } else {
       // 카드 있으면 결제 모달 열기
       setIsPayModalOpen(true);
@@ -90,8 +93,16 @@ function PaymentPage() {
   // 결제수단 등록
   const handleCardRegister = async () => {
     try {
-      const issueResponse = await requestIssueBillingKey(storeId, channelKey, 'test', 'test@gmail.com');
-      const saveResponse = await savePaymentMethod(issueResponse.billingKey);
+      const accessToken = localStorage.getItem('accessToken');
+      const userInfoResponse = await getUserInfo(accessToken);
+      alert(userInfoResponse.username);
+      const issueResponse = await registerBillingKey(
+        storeId,
+        channelKey,
+        userInfoResponse.data.username,
+        userInfoResponse.data.email
+      );
+      const saveResponse = await savePaymentMethod(issueResponse.billingKey,accessToken);
 
       // 카드 객체에서 username 제외
       const { username, ...cardWithoutUsername } = saveResponse;
@@ -104,6 +115,7 @@ function PaymentPage() {
       setIsWarningModalOpen(true);
     } catch (error) {
       setModalType('register-fail');
+      setSelectedCard(null);
       setIsWarningModalOpen(true);
     }
   };
@@ -119,6 +131,10 @@ function PaymentPage() {
     setModalType('payment-fail'); // WarningModal 메시지 타입 지정
     setIsWarningModalOpen(true); // WarningModal 열기
   };
+
+  const handlePaymentMethod = () => {
+    navigate("/payments");
+  }
 
   return (
     <div className={styles.summary_container}>
@@ -154,6 +170,11 @@ function PaymentPage() {
           </div>
 
           {/* Action Buttons */}
+          <button className={styles.registerPayMethodButton} onClick={handlePaymentMethod}>
+            <span className={styles.icon}>→</span>
+            <span>결제 수단 등록</span>
+          </button>
+
           <button className={styles.payButton} onClick={handlePayClick}>
             <span className={styles.icon}>→</span>
             <span>결제 진행</span>
@@ -171,6 +192,7 @@ function PaymentPage() {
         isOpen={isPayModalOpen}
         onClose={closePayModal}
         cardData={cardData}
+        creator={creator}
         onSuccess={handlePaymentSuccess}
         onFailure={handlePaymentFailure}
       />

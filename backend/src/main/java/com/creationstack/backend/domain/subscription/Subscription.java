@@ -36,7 +36,7 @@ public class Subscription {
     @Column(nullable = false)
     private Long subscriberId; // 구독 요청한 사용자 ID
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "status_id", nullable = false)
     private SubscriptionStatus status; // ACTIVE, CANCELLED, EXPIRED
 

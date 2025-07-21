@@ -23,5 +23,6 @@ public class SearchResultDto { // 콘텐츠 검색 결과 Dto
     private int commentCount; // 댓글수
     private LocalDateTime createdAt; // 작성일(최신순 용)
     private List<String> categoryNames; // 카테고리 이름 목록
+    private List<Integer> categoryIds; // 카테고리 ID 목록 (필터용)
 
 }

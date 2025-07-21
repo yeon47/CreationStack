@@ -29,6 +29,7 @@ import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,27 +42,29 @@ public class PaymentService {
   private final PaymentRepository paymentRepository;
   private final PaymentMethodService paymentMethodService;
   private final PortOneClient portOneClient;
-  private final UserDetailRepository userDetailRepository;
   private final UserRepository userRepository;
   private final SubscriptionRepository subscriptionRepository;
 
-  // 구독 요청 시 결제 진행
+  // 구독 요청 시 결제 진행 (최초 결제)
   public BillingKeyPaymentResponseDto processingBillingKeyPay(BillingKeyPaymentRequestDto req) {
     // 결제수단과 연결된 빌링키
     PaymentMethod paymentMethod = paymentMethodService.getPaymentMethodForBillingKey(req.getPaymentMethodId());
     log.info("[processingBillingKeyPay] paymentMethodService.getPaymentMethodForBillingKey: {}", paymentMethod);
 
     // 구매하는 사용자 정보 가져와 구매자 객체 생성
-    Long userId = 2L;
-    UserDetail userDetail = userDetailRepository.findById(userId).orElse(null);
-    CustomerDto customer = new CustomerDto(userId+"",userDetail.getEmail(),new Name(userDetail.getUsername()));
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Long subscriberId = Long.parseLong(authentication.getName());
+    User user = userRepository.findById(subscriberId).orElseThrow(
+        () -> new CustomException(HttpStatus.NOT_FOUND,"가입되지 않은 사용자입니다.")
+    );
+    CustomerDto customer = new CustomerDto(subscriberId+"",user.getUserDetail().getEmail(),new Name(user.getUserDetail().getUsername()));
 
     Subscription subscription = subscriptionRepository.findById(req.getSubscriptionId()).orElse(null);
 
-//    assert subscription != null;
-//    if(!subscription.getStatus().equals(SubscriptionStatusName.PENDING)){
-//      throw new CustomException(HttpStatus.NOT_FOUND,"구독 내역이 생성되지 않았습니다.");
-//    }
+    assert subscription != null;
+    if(!subscription.getStatus().getName().equals(SubscriptionStatusName.PENDING)){
+      throw new CustomException(HttpStatus.NOT_FOUND,"구독 내역이 생성되지 않았습니다.");
+    }
 
     // 결제 내역 생성
     Payment payment = Payment.builder()
@@ -106,12 +109,11 @@ public class PaymentService {
 
   //정기 결제 진행 + 결제 내역 생성
   @Transactional
-  public void processAutoBilling(Subscription subscription) {
+  public void processAutoBilling(Subscription subscription, User user) {
     log.info("[processAutoBilling] subscription: {}", subscription);
 
-    // 연결된 결제 수단 & 구매자 조회
+    // 연결된 결제 수단 & 구매자 조회. 구매자 조회 안되면 정기결제 실패
     PaymentMethod paymentMethod = subscription.getPaymentMethod();
-    User user = userRepository.findById(subscription.getSubscriberId()).orElse(null);
 
     // 결제 요청할 dto 생성
     PortOnePaymentRequestDto req = PortOnePaymentRequestDto.builder()
