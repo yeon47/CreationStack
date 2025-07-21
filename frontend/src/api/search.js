@@ -1,4 +1,5 @@
 import axios from 'axios';
+import qs from 'qs';
 axios.defaults.withCredentials = true;
 
 export const searchCreator = async (page, keyword = '') => {
@@ -57,6 +58,7 @@ export const searchUnified = async ({
 
     const response = await axios.get('/api/search', {
       params,
+      paramsSerializer: params => qs.stringify(params, { arrayFormat: 'repeat' }), // 👉 categories=1&categories=2
     });
 
     return response.data;
