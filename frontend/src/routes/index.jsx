@@ -10,8 +10,6 @@ import PaymentMethodManagementPage from '../pages/Payment/PaymentMethodManagemen
 import PaymentPage from '../pages/Payment/PaymentPage';
 import PaymentSuccessPage from '../pages/Payment/PaymentSuccessPage';
 import ContentFormPage from '../pages/ContentForm/ContentFormPage';
-import { MyCreatorPage } from '../pages/MyPage/MyCreatorPage';
-import { MyUserPage } from '../pages/MyPage/MyUserPage';
 import { MyPage } from '../pages/MyPage/MyPage';
 import { SubscriptionManage } from '../pages/ManageSubscriptionPage/SubscriptionManage';
 import { UserMainPage } from '../pages/MainPage/UserMainPage/UserMainPage';
