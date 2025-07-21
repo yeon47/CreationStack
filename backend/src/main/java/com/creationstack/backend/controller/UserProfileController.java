@@ -46,7 +46,7 @@ public class UserProfileController {
     }
 
     // 사용자 공개 프로필 조회
-    @GetMapping("/{nickname}")
+    @GetMapping("/public/{nickname}")
     public ResponseEntity<PublicProfileResponse> getPublicProfile(@PathVariable String nickname) {
         PublicProfileResponse response = userService.getPublicProfile(nickname);
         return ResponseEntity.ok(response);

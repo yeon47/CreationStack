@@ -49,6 +49,7 @@ public class UserService {
                         .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "해당 닉네임의 사용자를 찾을 수 없습니다."));
    
                 return PublicProfileResponse.builder()
+                                .userId(user.getUserId())
                                 .nickname(nickname)
                                 .role(user.getRole())
                                 .jobName(user.getJob() != null ? user.getJob().getName() : null)

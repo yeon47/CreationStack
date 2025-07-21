@@ -50,6 +50,12 @@ export const LoginSection = () => {
         const result = await response.json();
         // 로그인 성공 처리
         localStorage.setItem('token', result.token);
+
+        const accessToken = result.data.tokens.accessToken;
+        const refreshToken = result.data.tokens.refreshToken;
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        
         window.location.href = '/';
       } else {
         const error = await response.json();

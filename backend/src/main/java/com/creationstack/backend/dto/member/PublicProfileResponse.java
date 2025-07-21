@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 @Builder
 public class PublicProfileResponse {
+    private Long userId; 
     private String nickname;
     private User.UserRole role;
     private String jobName;

@@ -22,6 +22,8 @@ import { CreatorSearchPage } from '../pages/CreatorSearchPage/CreatorSearchPage'
 import { ContentSearchPage } from '../pages/ContentSearchPage/ContentSearchPage';
 import { UnifiedSearchPage } from '../pages/UnifiedSearchPage/UnifiedSearchPage';
 
+import { ContentDetailPage } from '../pages/ContentDetail/ContentDetailPage'
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -43,6 +45,10 @@ export default function AppRoutes() {
         <Route path="/creators" element={<CreatorSearchPage />} />
         <Route path="/contents" element={<ContentSearchPage />} />
         <Route path="/search" element={<UnifiedSearchPage />} />
+
+        <Route path="/contents/:contentId" element={<ContentDetailPage />} />
+        <Route path="/payments/summary/:creatorNickname" element={<PaymentPage />} />
+      
       </Route>
 
       <Route path="/login" element={<LoginSection />} />

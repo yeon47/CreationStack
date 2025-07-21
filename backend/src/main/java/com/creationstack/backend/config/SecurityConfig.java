@@ -53,7 +53,7 @@ public class SecurityConfig {
                                     "/api/upload/image", // 이미지 업로드 경로 허용
                                     "/api/billings/**",
                                     "/api/payments/**",
-
+                                    "/api/user/public/**",
                                     "/api/contents/*/comments",
                                     "/api/contents/*/comments/*/like",
                                 "api/subscriptions/**")
@@ -61,7 +61,8 @@ public class SecurityConfig {
                             .permitAll()
                             // /api/user/** 경로는 인증 필요 (기존 설정 유지)
                             .requestMatchers("/api/user/**").authenticated()
-
+                            // 특정 크리에이터의 콘텐츠 접근 시 인증 필요
+                            .requestMatchers("/api/content/creator/**").authenticated()
                             // 그 외 모든 요청은 인증 필요 (기존 anyRequest().authenticated() 유지)
                             .anyRequest().authenticated();
 

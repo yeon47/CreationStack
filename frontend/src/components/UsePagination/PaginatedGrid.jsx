@@ -8,7 +8,9 @@ export const PaginatedGrid = ({ items, itemsPerPage = 6, renderItem, wrapperClas
   return (
     <>
       <div className={`${wrapperClassName || styles.grid} ${isFading ? styles.fadeOut : styles.fadeIn}`}>
-        {visibleItems.map(renderItem)}
+        {visibleItems.map(item => (
+          <div key={item.contentId || item.id}>{renderItem(item)}</div>
+        ))}
       </div>
       <div className={styles.pagination}>
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
