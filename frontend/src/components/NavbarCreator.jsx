@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import styles from "../styles/layout.module.css";
 import logo from "../assets/img/logo.svg"
-import { useNavigate, Link } from "react-router-dom"; // Link 임포트
+import { useNavigate, Link, useLocation } from "react-router-dom"; // Link, useLocation 임포트
 import { searchUnified } from "../api/search";
 
 export const NavbarCreator = () => {
   const [searchValue, setSearchValue] = useState('');
-  const [activeMenu, setActiveMenu] = useState('홈');
+  const [activeMenu, setActiveMenu] = useState('');
+  const location = useLocation();
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false); // 프로필 드롭다운 상태
   const navigate = useNavigate();
   const profileDropdownRef = useRef(null); // 프로필 드롭다운 ref
@@ -24,6 +25,19 @@ export const NavbarCreator = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // URL 경로에 따라 activeMenu 설정
+  useEffect(() => {
+    if (location.pathname === '/') {
+      setActiveMenu('홈');
+    } else if (location.pathname.startsWith('/creators')) {
+      setActiveMenu('크리에이터');
+    } else if (location.pathname.startsWith('/contents')) {
+      setActiveMenu('컨텐츠');
+    } else {
+      setActiveMenu(''); // 다른 경로일 경우 active 상태 해제
+    }
+  }, [location.pathname]);
 
   // 로그아웃 기능 함수
   const handleLogout = async () => {
