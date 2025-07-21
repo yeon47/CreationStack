@@ -21,10 +21,15 @@ const CommentItem = ({
   onReplyCancel,
   userId,
 }) => {
-  const isEditing = editingTargetId === `comment-${comment.commentId}`;
+  const isEditing =
+    editingTargetId === `comment-${comment.commentId}` && replyTargetId !== `reply-${comment.commentId}`;
+  const isReplying =
+    replyTargetId === `reply-${comment.commentId}` && editingTargetId !== `comment-${comment.commentId}`;
+
   const isOwner = comment.userId === userId;
   const isLiked = comment.likedByUser;
   const likeCount = comment.likeCount || 0;
+  console.log('댓글:', comment.commentId, '삭제됨?', comment.isDeleted);
 
   return (
     <div className={`${styles.commentItem} ${isReply ? styles.reply : ''}`}>
@@ -42,6 +47,7 @@ const CommentItem = ({
           </span>
         </div>
 
+        {/* 댓글 내용 or 수정 입력창 */}
         {isEditing ? (
           <div className={styles.editForm}>
             <textarea value={editContent} onChange={onEditChange} rows="4" className={styles.editTextarea} />
@@ -62,30 +68,39 @@ const CommentItem = ({
           </div>
         )}
 
-        <div className={styles.commentFooter}>
-          <button
-            onClick={() => onLike(comment.commentId)}
-            className={`${styles.actionButton} ${isLiked ? styles.liked : ''}`}>
-            {isLiked ? '❤️' : '🤍'} {likeCount}
-          </button>
-          {!isReply && (
-            <button onClick={() => onReplyToggle(comment.commentId)} className={styles.actionButton}>
-              답글
+        {/* 댓글 하단 버튼들 (삭제된 댓글이면 숨김) */}
+        {!comment.isDeleted && (
+          <div className={styles.commentFooter}>
+            {/* 좋아요 버튼 */}
+            <button
+              onClick={() => onLike(comment.commentId)}
+              className={`${styles.actionButton} ${isLiked ? styles.liked : ''}`}>
+              {isLiked ? '❤️' : '🤍'} {likeCount}
             </button>
-          )}
-          {isOwner && !comment.isDeleted && (
-            <>
-              <button onClick={() => onEditStart(comment)} className={styles.actionButton}>
-                수정
-              </button>
-              <button onClick={() => onDelete(comment.commentId)} className={styles.actionButton}>
-                삭제
-              </button>
-            </>
-          )}
-        </div>
 
-        {replyTargetId === `reply-${comment.commentId}` && (
+            {/* 답글 버튼 */}
+            {!isReply && (
+              <button onClick={() => onReplyToggle(comment.commentId)} className={styles.actionButton}>
+                답글
+              </button>
+            )}
+
+            {/* 수정/삭제 버튼 (작성자만) */}
+            {isOwner && (
+              <>
+                <button onClick={() => onEditStart(comment)} className={styles.actionButton}>
+                  수정
+                </button>
+                <button onClick={() => onDelete(comment.commentId)} className={styles.actionButton}>
+                  삭제
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* 답글 입력창 (수정 중일 때는 숨김) */}
+        {!comment.isDeleted && isReplying && (
           <div className={styles.replyForm}>
             <textarea
               value={replyContent || ''}

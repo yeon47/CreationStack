@@ -46,6 +46,9 @@ const ReplyList = ({ contentId }) => {
   // 댓글 등록
   const handleNewComment = async () => {
     if (!newComment.trim() || !userId) return alert('댓글 내용을 입력해주세요');
+
+    const token = localStorage.getItem('accessToken');
+
     try {
       await axios.post(
         `/api/contents/${contentId}/comments`,
@@ -53,7 +56,13 @@ const ReplyList = ({ contentId }) => {
           contentText: newComment,
           parentCommentId: null,
         },
-        getAuthHeaders()
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        }
       );
       setNewComment('');
       fetchComments();
@@ -194,6 +203,7 @@ const ReplyList = ({ contentId }) => {
                 onEditChange={e => setEditContent(e.target.value)}
                 onEditSubmit={handleEditSubmit}
                 onEditStart={comment => {
+                  setReplyTargetId(null);
                   setEditingTargetId(`comment-${comment.commentId}`);
                   setEditContent(comment.contentText);
                 }}
@@ -204,6 +214,7 @@ const ReplyList = ({ contentId }) => {
                 onLike={handleLike}
                 onDelete={handleDelete}
                 onReplyToggle={id => {
+                  setEditingTargetId(null);
                   setReplyTargetId(prev => (prev === `reply-${id}` ? null : `reply-${id}`));
                 }}
                 replyContent={replyContents[comment.commentId]}
@@ -232,6 +243,7 @@ const ReplyList = ({ contentId }) => {
                       onEditChange={e => setEditContent(e.target.value)}
                       onEditSubmit={handleEditSubmit}
                       onEditStart={comment => {
+                        setReplyTargetId(null);
                         setEditingTargetId(`comment-${comment.commentId}`);
                         setEditContent(comment.contentText);
                       }}
@@ -242,7 +254,10 @@ const ReplyList = ({ contentId }) => {
                       onLike={handleLike}
                       onDelete={handleDelete}
                       replyTargetId={replyTargetId}
-                      onReplyToggle={id => setReplyTargetId(prev => (prev === `reply-${id}` ? null : `reply-${id}`))}
+                      onReplyToggle={id => {
+                        setEditingTargetId(null);
+                        setReplyTargetId(prev => (prev === `reply-${id}` ? null : `reply-${id}`));
+                      }}
                       replyContent={replyContents[reply.commentId]}
                       onReplyChange={handleReplyChange}
                       onReplySubmit={handleReplySubmit}
