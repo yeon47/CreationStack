@@ -17,26 +17,21 @@ export const SearchingWrapper = ({
         </div>
 
         <p className="our-philosophy-is">
-          CreationStack에서 현직 IT 전문가들의 생생한 노하우를 지금 바로 확인해
-          보세요!
+          CreationStack에서 현직 IT 전문가들의 생생한 노하우를 지금 바로 확인해 보세요!
         </p>
 
         <div className="search-bar-wrapper">
           <div className="search-bar-2">
-            <img
-              className="img"
-              alt="Icons"
-              src="https://c.animaapp.com/md45uvjzPxvxqT/img/searchicon.svg"
-            />
+            <img className="img" alt="Icons" src="https://c.animaapp.com/md45uvjzPxvxqT/img/searchicon.svg" />
 
             <input
               className="text-wrapper-4"
               type="text"
-              placeholder="인프라"
+              placeholder="검색어를 입력하세요."
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
+              onChange={e => setInputValue(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
                   setKeyword(inputValue); // ✅ 실제 검색 실행
                   setPage(0); // ✅ 페이지 초기화
                 }

@@ -103,7 +103,10 @@ export const ContentSearchPage = () => {
               전체: [],
               개발: [1],
               디자인: [2],
-              데이터: [3],
+              기획: [3],
+              데이터: [4],
+              커리어: [5]
+
             };
 
             const mappedSort = selected.sort === '좋아요순' ? 'like' : 'createdAt';
