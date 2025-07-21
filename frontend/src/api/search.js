@@ -2,13 +2,11 @@ import axios from 'axios';
 import qs from 'qs';
 axios.defaults.withCredentials = true;
 
-export const searchCreator = async (page, keyword = '') => {
+export const searchCreator = async params => {
   try {
     const response = await axios.get(`/api/creators`, {
-      params: {
-        keyword, // ✅ SearchDto 필드
-        page, // ✅ Pageable용
-      },
+      params,
+      paramsSerializer: params => qs.stringify(params, { arrayFormat: 'repeat' }),
     });
 
     return response.data;

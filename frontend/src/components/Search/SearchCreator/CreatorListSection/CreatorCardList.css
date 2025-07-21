@@ -17,6 +17,7 @@
   width: calc((100% - (32px * 2)) / 3); /* 3열을 위한 너비 계산 (gap 32px 고려) */
   flex-basis: calc((100% - (32px * 2)) / 3); /* 3열을 위한 flex-basis 계산 */
   max-width: 300px; /* 각 카드의 최대 너비 설정 (선택 사항, 디자인에 따라 조절) */
+  cursor: pointer;
 }
 
 /* Add the rest of your styles for creator card items here */
