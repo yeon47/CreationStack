@@ -40,10 +40,9 @@ export const MyCreatorPage = () => {
                 </div>
               </div>
 
-              <div className={styles.profileEditButton}>
-                {/* baseTextStyles와 div를 함께 적용 */}
+              <Link to="/profile/edit" className={styles.profileEditButton}>
                 <div className={`${styles.baseTextStyles} ${styles.div}`}>프로필 수정</div>
-              </div>
+              </Link>
             </div>
 
             <div className={styles.menuListSection}>

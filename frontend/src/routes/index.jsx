@@ -4,6 +4,8 @@ import { LoginSection } from '../pages/Login/LoginSection';
 import { MemberRegister } from '../pages/Register/MemberRegister';
 import AuthCallback from '../pages/Register/KakaoRegisterCallback';
 
+import { ProfileEdit } from '../pages/ProfileSettings/ProfileEdit';
+
 import PaymentMethodManagementPage from '../pages/Payment/PaymentMethodManagementPage';
 import PaymentPage from '../pages/Payment/PaymentPage';
 import PaymentSuccessPage from '../pages/Payment/PaymentSuccessPage';
@@ -22,7 +24,7 @@ import { CreatorSearchPage } from '../pages/CreatorSearchPage/CreatorSearchPage'
 import { ContentSearchPage } from '../pages/ContentSearchPage/ContentSearchPage';
 import { UnifiedSearchPage } from '../pages/UnifiedSearchPage/UnifiedSearchPage';
 
-import { ContentDetailPage } from '../pages/ContentDetail/ContentDetailPage'
+import { ContentDetailPage } from '../pages/ContentDetail/ContentDetailPage';
 import { Home } from '../pages/Home/Home';
 
 export default function AppRoutes() {
@@ -46,10 +48,9 @@ export default function AppRoutes() {
         <Route path="/creators" element={<CreatorSearchPage />} />
         <Route path="/contents" element={<ContentSearchPage />} />
         <Route path="/search" element={<UnifiedSearchPage />} />
-
         <Route path="/contents/:contentId" element={<ContentDetailPage />} />
         <Route path="/payments/summary/:creatorNickname" element={<PaymentPage />} />
-      
+        <Route path="/profile/edit" element={<ProfileEdit />} />
       </Route>
 
       <Route path="/login" element={<LoginSection />} />
