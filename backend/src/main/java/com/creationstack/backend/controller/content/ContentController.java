@@ -116,6 +116,13 @@ public class ContentController {
         return ResponseEntity.ok(likedContents);
     }
 
+    @GetMapping("/creator/{creatorId}/top-viewed")
+    public ResponseEntity<List<ContentResponse>> getTopViewedContentsByCreator(@PathVariable Long creatorId) {
+        log.info("크리에이터 ID {} 의 조회수 TOP 3 콘텐츠 조회 요청 수신", creatorId);
+        List<ContentResponse> responses = contentService.getTopViewedContents(creatorId, 3); // 상위 3개
+        return ResponseEntity.ok(responses);
+    }
+
     // @PostMapping("/categories/initialize")
     // public ResponseEntity<String> initializeCategories(@RequestBody Set<String>
     // categoryNames) {
