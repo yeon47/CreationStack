@@ -16,12 +16,13 @@ const ContentFormPage = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState([]); // 첨부파일
   const [thumbnailFile, setThumbnailFile] = useState(null); // 썸네일 이미지 파일
+  const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState(null); // 썸네일 미리보기 URL 상태 추가
   const [isDragging, setIsDragging] = useState(false); // 드래그 중인지 여부
   const [isImageUploading, setIsImageUploading] = useState(false); // 이미지 업로드 중 상태 추가
   
-  
     // creatorId (임시 테스트용 하드코딩, 실제로는 로그인 사용자 정보에서 가져와야 함)
     //const creatorId = 2; // 예시: 로그인된 사용자의 ID
+
 
   // 드롭다운 외부 클릭 감지를 위한 ref
   const dropdownRef = useRef(null);
@@ -29,6 +30,8 @@ const ContentFormPage = () => {
   const editorRef = useRef(null);
   // 드래그앤드롭 영역 ref
   const dragAreaRef = useRef(null);
+  // 썸네일 input ref 추가
+  const thumbnailInputRef = useRef(null);
 
   /// ---------- 카테고리 드롭다운 관련
 
@@ -78,7 +81,7 @@ const ContentFormPage = () => {
         {
           id: Date.now() + Math.random(), // 고유 ID 생성
           name: file.name,
-          file: file // 실제 파일 객체도 저장
+          file: file, // 실제 파일 객체도 저장
         },
       ]);
     });
@@ -90,14 +93,54 @@ const ContentFormPage = () => {
   };
 
   // ----------- 썸네일 이미지
-  // 썸네일 이미지 업로드 핸들러 (drag-and-drop)
+  // 썸네일 파일 변경 시 URL 생성 및 해제 로직
+  useEffect(() => {
+    if (thumbnailFile) {
+      // 추가: thumbnailFile이 File 또는 Blob 인스턴스인지 명확히 확인
+      if (!(thumbnailFile instanceof File) && !(thumbnailFile instanceof Blob)) {
+        console.error('thumbnailFile이 File 또는 Blob 객체가 아닙니다:', thumbnailFile);
+        setThumbnailPreviewUrl(null); // 유효하지 않은 타입이면 미리보기 URL 초기화
+        return; // 오류 방지를 위해 실행 중단
+      }
+
+      const newUrl = URL.createObjectURL(thumbnailFile);
+      setThumbnailPreviewUrl(newUrl);
+
+      // cleanup 함수: 컴포넌트 언마운트 또는 thumbnailFile 변경 시 이전 URL 해제
+      return () => {
+        URL.revokeObjectURL(newUrl);
+      };
+    } else {
+      // thumbnailFile이 null이 되면 미리보기 URL도 null로 설정
+      setThumbnailPreviewUrl(null);
+    }
+  }, [thumbnailFile]); // thumbnailFile이 변경될 때마다 이 훅 실행
+
+  // 썸네일 파일 업로드 핸들러 (drag-and-drop 및 input change)
   const handleThumbnailUpload = file => {
+    console.log('handleThumbnailUpload: 파일 선택됨', file);
     if (file && file.type.startsWith('image/')) {
       setThumbnailFile(file);
     } else {
-      console.warn('이미지 파일만 업로드할 수 있습니다.');
+      console.warn('이미지 파일만 업로드할 수 있습니다.', file);
+      setThumbnailFile(null); // 이미지 파일이 아니면 썸네일 상태를 null로 명확히 설정
+    }
+    // 파일 입력 필드 값 초기화 (동일 파일 재선택 가능하게 하거나, 상태 초기화 보장)
+    if (thumbnailInputRef.current) {
+      thumbnailInputRef.current.value = '';
     }
   };
+
+  const handleRemoveThumbnail = () => {
+  // 썸네일 상태 초기화
+  setThumbnailFile(null);
+  setThumbnailPreviewUrl(null); // 혹시 useEffect 타이밍 안 맞을 경우를 대비해서 명시적 해제
+
+  // input 요소도 초기화 (동일 파일 다시 선택 가능하게)
+  if (thumbnailInputRef.current) {
+    thumbnailInputRef.current.value = '';
+  }
+};
 
   // 드래그 오버 이벤트 핸들러
   const handleDragOver = e => {
@@ -125,7 +168,6 @@ const ContentFormPage = () => {
     }
   };
 
-
   // Toast UI Editor 이미지 업로드 훅
   const onUploadImage = async (blob, callback) => {
     setIsImageUploading(true); // 이미지 업로드 시작
@@ -144,7 +186,7 @@ const ContentFormPage = () => {
 
   // --------------- 컨텐츠 저장/작성취소
 
- // 저장 버튼 핸들러
+  // 저장 버튼 핸들러
   const handleSave = async () => {
     let markdownContent = '';
     if (editorRef.current) {
@@ -154,6 +196,29 @@ const ContentFormPage = () => {
 
     // AccessType 매핑
     const accessType = isSubscriberOnly ? 'SUBSCRIBER' : 'FREE';
+
+    // 필수 입력 필드 유효성 검사
+    if (!title.trim()) {
+      console.warn('제목을 입력해주세요.');
+      alert('제목을 입력해주세요.');
+      return;
+    }
+    if (!markdownContent.trim()) {
+      console.warn('내용을 입력해주세요.');
+      alert('내용을 입력해주세요.');
+      return;
+    }
+    if (!thumbnailFile) {
+      console.warn('썸네일 이미지를 등록해주세요.');
+      alert('썸네일 이미지를 등록해주세요.');
+      return;
+    }
+    if (selectedCategories.length === 0) {
+      // 카테고리 미입력 시 경고 추가
+      console.warn('카테고리를 1개 이상 선택해주세요.');
+      alert('카테고리를 1개 이상 선택해주세요.');
+      return;
+    }
 
     // FormData 생성
     const formData = new FormData();
@@ -169,22 +234,25 @@ const ContentFormPage = () => {
     // 썸네일 파일 추가
     if (thumbnailFile) {
       formData.append('thumbnailFile', thumbnailFile);
-    } else {
-      // 썸네일이 필수인 경우 (백엔드 DTO에 @NotNull)
-      alert('썸네일 이미지는 필수입니다.');
-      return;
     }
 
     // 첨부 파일 추가 (수정된 부분)
-    if (attachedFiles.length > 0) { // 첨부 파일이 있을 때만 FormData에 추가
-      attachedFiles.forEach(file => {
-        formData.append('attachmentFiles', file.file); // 실제 파일 객체 append
+    if (attachedFiles.length > 0) {
+      // 첨부 파일이 있을 때만 FormData에 추가
+      attachedFiles.forEach(item => {
+        if (item.file) {
+          formData.append('attachmentFiles', item.file);
+        } else {
+          console.warn('Attached file item is missing the actual file object:', item);
+        }
       });
     }
 
     try {
-      // 분리된 API 함수 호출
-      const result = await createContent(formData, creatorId);
+      // 테스트용 코드 - creatorId 파라미터 전달 (추후 변경)
+      const result = await createContent(formData, creatorId); // creatorId 다시 전달
+      // 로그인 기능 구현 완료시 아래 코드 실행
+      //const result = await createContent(formData);
       console.log('콘텐츠 저장 성공:', result);
       alert('콘텐츠가 성공적으로 저장되었습니다!');
       // 저장 성공 후 폼 초기화 또는 다른 페이지로 이동
@@ -206,6 +274,10 @@ const ContentFormPage = () => {
     setThumbnailFile(null); // 썸네일 파일 초기화
     if (editorRef.current) {
       editorRef.current.getInstance().setMarkdown('');
+    }
+    // 썸네일 input 필드 값 초기화
+    if (thumbnailInputRef.current) {
+      thumbnailInputRef.current.value = '';
     }
   };
 
@@ -331,7 +403,7 @@ const ContentFormPage = () => {
           </div>
         )}
       </div>
-      {/* 썸네일 이미지 드래그앤드랍 영역 */}
+      {/* 썸네일 이미지 영역 */}
       <div
         className={`${styles.dragAndDropArea} ${isDragging ? styles.dragOver : ''}`}
         onDragOver={handleDragOver}
@@ -339,12 +411,8 @@ const ContentFormPage = () => {
         onDrop={handleDrop}
         ref={dragAreaRef}>
         <div className={styles.dragAndDropContent}>
-          {thumbnailFile ? (
-            <img
-              src={URL.createObjectURL(thumbnailFile)} // 파일 객체에서 URL 생성
-              alt="Thumbnail Preview"
-              className={styles.thumbnailPreview}
-            />
+          {thumbnailPreviewUrl ? (
+            <img src={thumbnailPreviewUrl} alt="Thumbnail Preview" className={styles.thumbnailPreview} />
           ) : (
             <>
               <svg className={styles.dragAndDropIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -360,6 +428,7 @@ const ContentFormPage = () => {
             </>
           )}
           <input
+            key={thumbnailFile ? 'has-thumbnail' : 'no-thumbnail'}
             type="file"
             onChange={e => handleThumbnailUpload(e.target.files[0])}
             className="hidden"
@@ -370,8 +439,8 @@ const ContentFormPage = () => {
             썸네일 등록
           </label>
           {thumbnailFile && (
-            <button type="button" className={styles.removeThumbnailButton} onClick={() => setThumbnailFile(null)}>
-              썸네일 제거
+            <button type="button" className={styles.removeThumbnailButton} onClick={handleRemoveThumbnail}>
+              썸네일 삭제
             </button>
           )}
         </div>
