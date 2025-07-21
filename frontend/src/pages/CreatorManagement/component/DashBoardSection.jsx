@@ -3,7 +3,6 @@ import styles from '../../../pages/CreatorManagement/CreatorManagementPage.modul
 
 export const DashBoardSection = ({ creator }) => {
   const { subscriberCount, newsubscriberCount } = creator;
-
   return (
     <div className={styles.dashBoardSection}>
       <div className={styles.dashBoardTitle}>크리에이터 대시보드</div>

@@ -18,6 +18,7 @@ import ReplyTestPage from '../pages/ContentDetail/ReplyTestPage';
 import FavoriteContent from '../pages/FavoriteContent/FavoriteContentPage';
 import { CreatorMainPage } from '../pages/MainPage/CreatorMainPage/CreatorMainPage';
 import CreatorManagementPage from '../pages/CreatorManagement/CreatorManagementPage';
+import CreatorNoticePage from '../pages/CreatorNoticePage/CreatorNoticePage';
 
 import { CreatorSearchPage } from '../pages/CreatorSearchPage/CreatorSearchPage';
 import { ContentSearchPage } from '../pages/ContentSearchPage/ContentSearchPage';
@@ -49,6 +50,7 @@ export default function AppRoutes() {
         <Route path="/contents/:contentId" element={<ContentDetailPage />} />
         <Route path="/payments/summary/:creatorNickname" element={<PaymentPage />} />
         <Route path="/profile/edit" element={<ProfileEdit />} />
+        <Route path="/creator/notice" element={<CreatorNoticePage />} />
       </Route>
 
       <Route path="/login" element={<LoginSection />} />
