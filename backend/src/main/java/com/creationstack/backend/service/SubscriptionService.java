@@ -1,6 +1,7 @@
 package com.creationstack.backend.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import com.creationstack.backend.domain.subscription.SubscriptionStatusName;
 import com.creationstack.backend.domain.user.User;
 import com.creationstack.backend.dto.Subscription.SubscriptionRequestDto;
 import com.creationstack.backend.dto.Subscription.SubscriptionResponseDto;
+import com.creationstack.backend.dto.Subscription.UserSubscriptionDto;
 import com.creationstack.backend.etc.Role;
 import com.creationstack.backend.exception.CustomException;
 import com.creationstack.backend.repository.PaymentMethodRepository;
@@ -23,6 +25,7 @@ import com.creationstack.backend.repository.SubscriptionStatusRepository;
 import com.creationstack.backend.repository.UserRepository;
 
 import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -166,4 +169,27 @@ public class SubscriptionService {
                 return subscriptionRepository.existsByCreatorIdAndSubscriberIdAndStatus(
                                 creatorId, SubscriberId, activeStatus);
         }
+
+        // 사용자의 구독 목록 조회
+        @Transactional
+        public List<UserSubscriptionDto> getMySubscriptions(Long userId) {
+                List<UserSubscriptionDto> list = subscriptionRepository.findAllBySubscriberId(userId);
+
+                for (UserSubscriptionDto dto : list) {
+                        dto.setMessage(switch (dto.getStatusName()) {
+                                case "ACTIVE" -> "다음 결제 예정일: " + format(dto.getNextPaymentAt());
+                                case "CANCELLED" -> "만료 예정일: " + format(dto.getNextPaymentAt());
+                                case "EXPIRED" -> "만료된 구독입니다.";
+                                case "PENDING" -> "결제 대기 중입니다.";
+                                default -> "";
+                        });
+                }
+
+                return list;
+        }
+
+        private String format(LocalDateTime dt) {
+                return dt != null ? dt.toLocalDate().toString() : "";
+        }
+
 }
