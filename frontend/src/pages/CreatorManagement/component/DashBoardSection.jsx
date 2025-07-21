@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from '../../../pages/CreatorManagement/CreatorManagementPage.module.css'; // 페이지 CSS 임포트
 
-export const DashBoardSection = ({ creatorId }) => {
+export const DashBoardSection = () => {
   return (
     <div className={styles.dashBoardSection}>
       <div className={styles.dashBoardTitle}>크리에이터 대시보드</div>

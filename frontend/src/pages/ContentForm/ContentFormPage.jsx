@@ -19,9 +19,6 @@ const ContentFormPage = () => {
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState(null); // 썸네일 미리보기 URL 상태 추가
   const [isDragging, setIsDragging] = useState(false); // 드래그 중인지 여부
   const [isImageUploading, setIsImageUploading] = useState(false); // 이미지 업로드 중 상태 추가
-  
-    // creatorId (임시 테스트용 하드코딩, 실제로는 로그인 사용자 정보에서 가져와야 함)
-    //const creatorId = 2; // 예시: 로그인된 사용자의 ID
 
 
   // 드롭다운 외부 클릭 감지를 위한 ref
@@ -249,10 +246,7 @@ const ContentFormPage = () => {
     }
 
     try {
-      // 테스트용 코드 - creatorId 파라미터 전달 (추후 변경)
-      const result = await createContent(formData, creatorId); // creatorId 다시 전달
-      // 로그인 기능 구현 완료시 아래 코드 실행
-      //const result = await createContent(formData);
+      const result = await createContent(formData);
       console.log('콘텐츠 저장 성공:', result);
       alert('콘텐츠가 성공적으로 저장되었습니다!');
       // 저장 성공 후 폼 초기화 또는 다른 페이지로 이동
