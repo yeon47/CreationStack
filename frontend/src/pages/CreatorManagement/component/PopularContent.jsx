@@ -1,34 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../../../pages/CreatorManagement/CreatorManagementPage.module.css'; // 페이지 CSS 임포트
-import { getTopViewedContentsByCreator } from '../../../api/contentAPI'; // API 함수 임포트
+import { getMyTopViewedContents } from '../../../api/contentAPI'; // API 함수 임포트
 
-export const PopularContent = ({ creatorId }) => { // creatorId를 prop으로 받음
-  const [topContents, setTopContents] = useState([]);
+export const PopularContent =() => {
+    const [topContents, setTopContents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchTopContents = async () => {
-      if (!creatorId) { // creatorId가 없으면 API 호출하지 않음
-        setLoading(false);
-        setError(new Error("크리에이터 ID가 제공되지 않았습니다."));
-        return;
-      }
       try {
         setLoading(true);
-        // API 호출하여 조회수 TOP 3 콘텐츠 가져오기
-        const data = await getTopViewedContentsByCreator(creatorId);
+        const data = await getMyTopViewedContents();
         setTopContents(data);
       } catch (err) {
         setError(err);
-        console.error("조회수 TOP 3 콘텐츠 로드 실패:", err);
+        console.error('조회수 TOP 3 콘텐츠 로드 실패:', err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchTopContents();
-  }, [creatorId]); // creatorId가 변경될 때마다 다시 로드
+  }, []); // 컴포넌트 마운트 시 1회 호출
 
   if (loading) {
     return <div className={styles.loadingMessage}>인기 콘텐츠를 불러오는 중...</div>;
@@ -39,9 +33,9 @@ export const PopularContent = ({ creatorId }) => { // creatorId를 prop으로 �
   }
 
   return (
-    <div className={styles.popularContent}> {/* 이 div가 누락되어 있었습니다. */}
+    <div className={styles.popularContent}> 
       <div className={styles.overlapPopular}>
-        <div className={styles.sectionTitle}>조회수 TOP 3 콘텐츠</div> {/* 이 제목도 누락되어 있었습니다. */}
+        <div className={styles.sectionTitle}>조회수 TOP 3 콘텐츠</div> 
         <div className={styles.contentList}>
           {topContents.length > 0 ? (
             topContents.map((content, index) => (
