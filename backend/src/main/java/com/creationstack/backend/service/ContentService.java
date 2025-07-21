@@ -1,36 +1,43 @@
 package com.creationstack.backend.service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service; // CustomException 임포트
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.creationstack.backend.domain.content.AccessType;
 import com.creationstack.backend.domain.content.Attachment;
 import com.creationstack.backend.domain.content.Content;
-import com.creationstack.backend.domain.content.ContentCategory;
+import com.creationstack.backend.domain.content.ContentCategory; // FileStorageService 임포트
 import com.creationstack.backend.domain.content.ContentCategoryMapping;
 import com.creationstack.backend.domain.content.Like;
 import com.creationstack.backend.domain.user.User;
 import com.creationstack.backend.dto.content.ContentCreateRequest;
 import com.creationstack.backend.dto.content.ContentList;
 import com.creationstack.backend.dto.content.ContentResponse;
-import com.creationstack.backend.dto.content.ContentUpdateRequest;
-import com.creationstack.backend.exception.CustomException; // CustomException 임포트
+import com.creationstack.backend.dto.content.ContentUpdateRequest; // HttpStatus 임포트
+import com.creationstack.backend.exception.CustomException;
+import com.creationstack.backend.repository.LikeRepository;
+import com.creationstack.backend.repository.UserRepository;
 import com.creationstack.backend.repository.content.AttachmentRepository;
 import com.creationstack.backend.repository.content.ContentCategoryRepository;
 import com.creationstack.backend.repository.content.ContentRepository;
-import com.creationstack.backend.repository.LikeRepository;
-import com.creationstack.backend.repository.UserRepository;
-import com.creationstack.backend.service.FileStorageService; // FileStorageService 임포트
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus; // HttpStatus 임포트
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 콘텐츠 관련 비즈니스 로직을 처리하는 서비스 클래스입니다.
@@ -48,7 +55,8 @@ public class ContentService {
     private final AttachmentRepository attachmentRepository;
     private final FileStorageService fileStorageService; // S3 연동을 위한 FileStorageService 주입
     private final LikeRepository likeRepository;
-    
+    private final SubscriptionService subscriptionService;
+
     // 콘텐츠 생성
     @Transactional // 쓰기 작업이므로 트랜잭션 적용
     public ContentResponse createContent(ContentCreateRequest request, Long creatorId) {
@@ -88,12 +96,10 @@ public class ContentService {
                         }))
                 .collect(Collectors.toSet());
 
-        categories.forEach(category ->
-            content.getCategoryMappings().add(ContentCategoryMapping.builder()
+        categories.forEach(category -> content.getCategoryMappings().add(ContentCategoryMapping.builder()
                 .content(content)
                 .category(category)
-                .build())
-        );
+                .build()));
 
         // 5. Content 저장
         Content savedContent = contentRepository.save(content);
@@ -110,7 +116,7 @@ public class ContentService {
                             // 여기서는 S3에 저장된 파일의 고유한 이름 (UUID-originalFileName)을 storedFileName으로 사용.
                             storedFileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
                         } catch (IOException e) {
-                            log.error("첨부파일 업로드 실패: {}",((MultipartFile) file).getOriginalFilename(), e);
+                            log.error("첨부파일 업로드 실패: {}", ((MultipartFile) file).getOriginalFilename(), e);
                             throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "첨부파일 업로드에 실패했습니다.", e);
                         }
 
@@ -137,14 +143,30 @@ public class ContentService {
 
     // 특정 콘텐츠 조회
     @Transactional // 조회수 증가로 인해 쓰기 트랜잭션 필요
-    public ContentResponse getContentById(Long contentId) {
+    public ContentResponse getContentById(Long contentId, Long userId) {
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "콘텐츠를 찾을 수 없습니다. ID: " + contentId));
 
-        content.incrementViewCount(); // 조회수 증가
-        // contentRepository.save(content); // @Transactional 어노테이션이 있으면 변경 감지(Dirty Checking)로 자동 저장됨
+        // 구독자 전용일 경우, 권한 확인
+        if (content.getAccessType() == AccessType.SUBSCRIBER) {
+            log.info("구독자 전용 콘텐츠 조회");
+            Long creatorId = content.getCreator().getUserId();
 
-        log.info("콘텐츠 조회 및 조회수 증가: Content ID = {}", contentId);
+            boolean isSubscribed = subscriptionService.isActiveSubscriber(creatorId, userId);
+
+            if (!isSubscribed && !creatorId.equals(userId)) {
+                log.info("구독자 아님 X => 접근 불가");
+                throw new CustomException(HttpStatus.FORBIDDEN, "구독자가 아니므로 콘텐츠 접근 불가.");
+            } 
+        }
+
+        log.info("조회 성공");
+                content.incrementViewCount(); // 조회수 증가
+                // contentRepository.save(content); // @Transactional 어노테이션이 있으면 변경 감지(Dirty
+                // Checking)로 자동 저장됨
+
+                log.info("콘텐츠 조회 및 조회수 증가: Content ID = {}", contentId);
+
         return ContentResponse.from(content);
     }
 
@@ -205,22 +227,22 @@ public class ContentService {
             }
         }
 
-
-
         // 3. 콘텐츠 핵심 정보 및 카테고리 매핑 업데이트
         Set<ContentCategory> categoriesToUpdate = new HashSet<>();
         if (request.getCategoryNames() != null && !request.getCategoryNames().isEmpty()) {
             for (String categoryName : request.getCategoryNames()) {
                 ContentCategory category = contentCategoryRepository.findByName(categoryName)
-                        .orElseGet(() -> contentCategoryRepository.save(ContentCategory.builder().name(categoryName).build()));
+                        .orElseGet(() -> contentCategoryRepository
+                                .save(ContentCategory.builder().name(categoryName).build()));
                 categoriesToUpdate.add(category);
             }
         }
 
         // 4. 첨부파일 처리 (수정된 부분)
         // 기존 첨부파일 중 유지할 파일 ID 목록
-        Set<Long> existingAttachmentIdsToKeep = request.getExistingAttachmentIds() != null ?
-                new HashSet<>(request.getExistingAttachmentIds()) : new HashSet<>();
+        Set<Long> existingAttachmentIdsToKeep = request.getExistingAttachmentIds() != null
+                ? new HashSet<>(request.getExistingAttachmentIds())
+                : new HashSet<>();
 
         // 삭제할 첨부파일을 임시로 담을 리스트
         List<Attachment> attachmentsToDeleteFromCollection = new ArrayList<>();
@@ -238,7 +260,6 @@ public class ContentService {
         // 식별된 첨부파일들을 Content 엔티티의 컬렉션에서 제거
         // Content 엔티티의 @OneToMany(orphanRemoval=true) 설정으로 인해 이 제거가 DB 삭제로 이어집니다.
         content.getAttachments().removeAll(attachmentsToDeleteFromCollection);
-
 
         // 새로 추가될 첨부파일 처리
         if (request.getNewAttachmentFiles() != null && !request.getNewAttachmentFiles().isEmpty()) {
@@ -273,15 +294,14 @@ public class ContentService {
                 request.getContent(),
                 newThumbnailUrl,
                 request.getAccessType(),
-                categoriesToUpdate
-        );
-        //6. 저장
+                categoriesToUpdate);
+        // 6. 저장
         log.info("콘텐츠 수정 완료: {}", contentId);
         Content updatedContent = contentRepository.save(content);
         return ContentResponse.from(updatedContent);
     }
 
-   // 콘텐츠 삭제
+    // 콘텐츠 삭제
     @Transactional // 쓰기 작업이므로 트랜잭션 적용
     public void deleteContent(Long contentId, Long creatorId) {
         Content content = contentRepository.findById(contentId)
@@ -302,7 +322,6 @@ public class ContentService {
         log.info("콘텐츠 삭제 완료: {}", contentId);
     }
 
-
     @Transactional
     public void initializeCategories(Set<String> categoryNames) {
         categoryNames.forEach(name -> {
@@ -312,7 +331,7 @@ public class ContentService {
             }
         });
     }
-    
+
     // 콘텐츠 좋아요/취소
     @Transactional
     public boolean toggleLike(Long contentId, Long userId) {
@@ -352,15 +371,18 @@ public class ContentService {
             return true;
         }
     }
-    
-    // 좋아요 콘텐츠 조회
-    /*public Page<ContentList> getLikedContents(Long userId, Pageable pageable) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
 
-        return likeRepository.findByUserAndIsActiveTrue(user, pageable)
-                .map(like -> ContentList.from(like.getContent())); 
-    }*/
+    // 좋아요 콘텐츠 조회
+    /*
+     * public Page<ContentList> getLikedContents(Long userId, Pageable pageable) {
+     * User user = userRepository.findById(userId)
+     * .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND,
+     * "사용자를 찾을 수 없습니다."));
+     * 
+     * return likeRepository.findByUserAndIsActiveTrue(user, pageable)
+     * .map(like -> ContentList.from(like.getContent()));
+     * }
+     */
     public Page<ContentList> getLikedContents(Long userId, Pageable pageable) {
         Page<Like> likes = likeRepository.findByUserIdAndIsActiveTrue(userId, pageable);
 
@@ -374,9 +396,17 @@ public class ContentService {
         return likes.map(like -> ContentList.from(like.getContent()));
     }
 
-
-
-
-
+    // 특정 크리에이터의 조회수 TOP N 콘텐츠를 조회합니다.
+    public List<ContentResponse> getTopViewedContents(Long creatorId, int limit) {
+        if (!userRepository.existsById(creatorId)) {
+            throw new CustomException(HttpStatus.NOT_FOUND, "크리에이터를 찾을 수 없습니다. ID: " + creatorId);
+        }
+        // 몇개 컨텐츠 조회할지 메서드 이름에 직접 명시하여 동적으로 처리가능
+        List<Content> topContents = contentRepository.findTop3ByCreator_UserIdOrderByViewCountDesc(creatorId);
+        log.info("크리에이터 ID {} 의 조회수 TOP {} 콘텐츠 {}개 조회", creatorId, limit, topContents.size());
+        return topContents.stream()
+                .map(ContentResponse::from)
+                .collect(Collectors.toList());
+    }
 
 }

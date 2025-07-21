@@ -1,78 +1,137 @@
 // PaymentPage.jsx
 import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams  } from 'react-router-dom';
 import SubscriptionDetails from '../../components/Payment/SubscriptionDetails';
 import PaymentModal from '../../components/Payment/PaymentModal';
+import WarningModal from '../../components/Payment/WarningModal';
+import { registerBillingKey, savePaymentMethod, readAllPaymentMethod, getUserInfo } from '../../api/payment';
+import { getPublicCreatorProfile } from '../../api/profile';
+import logo from '../../assets/img/logo.svg'
+
 import styles from './PaymentPage.module.css';
-// import SubscriptionSummary from "../../components/Payment/SubscriptionSummary";
 
 function PaymentPage() {
-  // props 데이터 선언 또는 상태 관리
-
-  //     const [creator, setCreator] = useState(null);
-  //     const [subscriptionDetails, setSubscriptionDetails] = useState([]);
-  //     const [benefits, setBenefits] = useState([]);
-
-  //     useEffect(() => {
-  //         setCreator({
-  //   name: "크리에이터 닉네임",
-  //   image: "https://c.animaapp.com/md94mkfi7RFWrF/img/creatorimage.png",
-  //         })
-
-  //         setSubscriptionDetails([
-  //   { label: "구독 상품", value: "프리미엄 멤버십" },
-  //   { label: "가격", value: "₩15,000/월", highlight: true },
-  //   { label: "부가세", value: "₩0", bold: false },
-  //             { label: "총 결제 금액", value: "₩15,000", bold: true },
-
-  //             set([
-  //   "독점 콘텐츠 제공",
-  //   "광고 제거",
-  //   "라이브 방송 참여",
-  // ])
-  // ])
-  //     }, []);
-
   // 모달 열기/닫기 핸들러
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPayModalOpen, setIsPayModalOpen] = useState(false);
+  const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('method-fail');
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(true);
+  const [cardData, setCards] = useState([]);
+  const navigate = useNavigate();
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  const openPayModal = () => setIsPayModalOpen(true);
+  const closePayModal = () => setIsPayModalOpen(false);
+  const openWarningModal = () => setIsWarningModalOpen(true);
+  const closeWarningModal = () => setIsWarningModalOpen(false);
 
-  const cardData = [
-    {
-      brand: 'Visa',
-      number: '**** **** **** 1234',
-      expired: '12/28',
-      bank: '신한은행',
-    },
-    {
-      brand: 'MasterCard',
-      number: '**** **** **** 5678',
-      expired: '08/27',
-      bank: '국민은행',
-    },
-    {
-      brand: 'Toss',
-      number: '**** **** **** 4321',
-      expired: '03/26',
-      bank: '토스뱅크',
-    },
-  ];
+  const storeId = import.meta.env.VITE_STORE_ID;
+  const channelKey = import.meta.env.VITE_CHANNEL_KEY;
 
-  // 예시용 데이터
-  const creator = {
-    name: '크리에이터 닉네임',
-    image: 'https://c.animaapp.com/md94mkfi7RFWrF/img/creatorimage.png',
-  };
+  // 컴포넌트가 마운트될 때 카드 정보 불러오기
+  useEffect(() => {
+    const fetchCards = async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        const res = await readAllPaymentMethod(accessToken); // API 호출
+        setCards(res);
+      } catch (err) {
+        console.error('카드 정보를 불러오는 데 실패했습니다.', err);
+      }
+    };
+    fetchCards();
+  }, []); // 빈 배열 → 최초 한 번만 실행됨
+
+  const { creatorNickname } = useParams();
+  const [creator, setCreator] = useState(null);
+
+  useEffect( () => {
+    const fetchCreator = async () => {
+      try {
+        const res = await getPublicCreatorProfile(creatorNickname);
+        setCreator({
+          id: res.data.userId,
+          name: res.data.nickname,
+          image: res.data.profileImageUrl || logo, // 기본값 일단 로고로 설정
+        });
+      } catch (err) {
+        console.error('크리에이터 정보를 불러올 수 없습니다. : ', err);
+      }
+    };
+
+    if (creatorNickname) fetchCreator();
+  },[creatorNickname]);
+
+  if (!creator) return <div>크리에이터 정보를 찾을 수 없습니다.</div>;
+
 
   const subscriptionDetails = [
-    { label: '구독 상품', value: '프리미엄 멤버십' },
-    { label: '가격', value: '₩15,000/월', highlight: true },
-    { label: '부가세', value: '₩0', bold: false },
-    { label: '총 결제 금액', value: '₩15,000', bold: true },
+    { label: '구독 상품', value: creator.nickname}+'정기 구독권',
+    { label: '가격', value: '₩4,900/월', highlight: true },
+    { label: '총 결제 금액', value: '₩4,900', bold: true },
   ];
 
   const benefits = ['독점 콘텐츠 제공', '광고 제거', '라이브 방송 참여'];
+
+  // 결제 진행 버튼 클릭
+  const handlePayClick = () => {
+    if (cardData.length === 0) {
+      // 카드가 없으면 경고 모달 띄움
+      setIsWarningModalOpen(true);
+      setModalType('method-fail');
+    } else {
+      // 카드 있으면 결제 모달 열기
+      setIsPayModalOpen(true);
+    }
+  };
+
+  // 결제수단 등록
+  const handleCardRegister = async () => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      const userInfoResponse = await getUserInfo(accessToken);
+      alert(userInfoResponse.username);
+      const issueResponse = await registerBillingKey(
+        storeId,
+        channelKey,
+        userInfoResponse.data.username,
+        userInfoResponse.data.email
+      );
+      const saveResponse = await savePaymentMethod(issueResponse.billingKey,accessToken);
+
+      // 카드 객체에서 username 제외
+      const { username, ...cardWithoutUsername } = saveResponse;
+
+      // 카드 리스트에 추가
+      setCards([...cards, cardWithoutUsername]);
+
+      // 모달 상태 전환
+      setModalType('register-success');
+      setIsWarningModalOpen(true);
+    } catch (error) {
+      setModalType('register-fail');
+      setSelectedCard(null);
+      setIsWarningModalOpen(true);
+    }
+  };
+
+  // 결제 성공 시 결제완료 페이지 이동
+  const handlePaymentSuccess = () => {
+navigate('/payments/success', {
+  state: { creator },
+});
+  };
+
+  // 결제 실패 시 결제 실패 모달창 호출
+  const handlePaymentFailure = () => {
+    setIsPayModalOpen(false); // PaymentModal 닫기
+    setModalType('payment-fail'); // WarningModal 메시지 타입 지정
+    setIsWarningModalOpen(true); // WarningModal 열기
+  };
+
+  const handlePaymentMethod = () => {
+    navigate("/payments");
+  }
 
   return (
     <div className={styles.summary_container}>
@@ -84,12 +143,6 @@ function PaymentPage() {
             <p className={styles.summary_subtitle}>구독 정보를 확인하고 결제를 진행하세요</p>
           </div>
 
-          {/* <SubscriptionSummary 
-                      creator={creator},
-                  subscriptionDetails={subscriptionDetails},
-              benefits={benefits}
-                  /> */}
-
           {/* Creator Information */}
           <div className={styles.creator_info}>
             <img className={styles.creator_image} src={creator.image} alt="Creator" />
@@ -100,19 +153,6 @@ function PaymentPage() {
           </div>
 
           <SubscriptionDetails subscriptionDetails={subscriptionDetails} benefits={benefits} />
-
-          {/* Benefits List */}
-          {/* <div className={styles.benefits_box}>
-            <h3 className={styles.benefits_title}>구독 혜택</h3>
-            <ul className={styles.benefits_list}>
-              {benefits.map((benefit, index) => (
-                <li key={index} className={styles.benefit_item}>
-                  <span className={styles.check}>✔</span>
-                  <span>{benefit}</span>
-                </li>
-              ))}
-            </ul>
-          </div> */}
 
           {/* Payment Alert */}
           <div className={styles.alert}>
@@ -127,7 +167,12 @@ function PaymentPage() {
           </div>
 
           {/* Action Buttons */}
-          <button className={styles.payButton} onClick={openModal}>
+          <button className={styles.registerPayMethodButton} onClick={handlePaymentMethod}>
+            <span className={styles.icon}>→</span>
+            <span>결제 수단 등록</span>
+          </button>
+
+          <button className={styles.payButton} onClick={handlePayClick}>
             <span className={styles.icon}>→</span>
             <span>결제 진행</span>
           </button>
@@ -139,9 +184,24 @@ function PaymentPage() {
         </div>
       </div>
 
-      {/* ✅ 모달 렌더링 */}
+      {/* 모달 렌더링 */}
+      <PaymentModal
+        isOpen={isPayModalOpen}
+        onClose={closePayModal}
+        cardData={cardData}
+        creator={creator}
+        onSuccess={handlePaymentSuccess}
+        onFailure={handlePaymentFailure}
+      />
 
-      <PaymentModal isOpen={isModalOpen} onClose={closeModal} cardData={cardData} />
+      {/* 결제수단 미등록 알림 모달 */}
+      <WarningModal
+        isOpen={isWarningModalOpen}
+        onClose={closeWarningModal}
+        type={modalType}
+        isVisible={isModalVisible}
+        onConfirm={handleCardRegister}
+      />
     </div>
   );
 }

@@ -30,7 +30,7 @@ public class PaymentMethod {
   private Long userId;
   //  private User user;
 
-  @Column(length = 255)
+  @Column(length = 255, name = "billing_key")
   private String billingKey;
 
   @Column(nullable = false, length = 100)

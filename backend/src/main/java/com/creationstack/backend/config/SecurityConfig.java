@@ -50,18 +50,29 @@ public class SecurityConfig {
                                     "/api/auth/login", // 로그인
                                     "/api/auth/refresh", // 토큰 갱신
                                     "/api/auth/logout", // 로그아웃 (refresh token 방식)
+                                    "/api/auth/kakao/callback", // 카카오 로그인 콜백 경로
+                                    "/api/auth/kakao/user-info", // 카카오 정보 가져오는 경로
                                     "/api/content/**", // 모든 /api/content 경로 허용
                                     "/api/upload/image", // 이미지 업로드 경로 허용
+                                    "/api/creators/**", // 크리에이터 관련 API
+                                    "/api/contents/**",
+                                    "/api/search/**",
                                     "/api/billings/**",
                                     "/api/payments/**",
                                     "/api/contents/*/comments",  // 댓글 목록 조회
                                     "/api/contents/*/comments/*", // 댓글 수정,삭제,대댓글
-                                    "/api/contents/*/comments/*/like" // 댓글 좋아요
-                                    )
+                                    "/api/contents/*/comments/*/like", // 댓글 좋아요
+                                    "/api/subscriptions/**")
+
                             .permitAll()
                             
                             // /api/user/** 경로는 인증 필요 (기존 설정 유지)
                             .requestMatchers("/api/user/**").authenticated()
+
+                        .requestMatchers("/api/billings/**").authenticated()
+                        .requestMatchers("/api/payments/**").authenticated()
+                            // 특정 크리에이터의 콘텐츠 접근 시 인증 필요
+                            .requestMatchers("/api/content/creator/**").authenticated()
 
                             // 그 외 모든 요청은 인증 필요 (기존 anyRequest().authenticated() 유지)
                             .anyRequest().authenticated();

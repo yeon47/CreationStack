@@ -5,6 +5,7 @@ import com.creationstack.backend.dto.content.ContentList;
 import com.creationstack.backend.dto.content.ContentResponse;
 import com.creationstack.backend.dto.content.ContentUpdateRequest;
 import com.creationstack.backend.service.ContentService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,12 +17,15 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 // import org.springframework.security.core.annotation.AuthenticationPrincipal; // @AuthenticationPrincipal 임포트 제거 (임시)
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
+
+import jakarta.annotation.Nullable;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -42,11 +46,20 @@ public class ContentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    //특정 콘텐츠 조회
+    // 특정 콘텐츠 조회
     @GetMapping("/{contentId}")
-    public ResponseEntity<ContentResponse> getContentById(@PathVariable Long contentId) {
+    public ResponseEntity<ContentResponse> getContentById(@PathVariable Long contentId,
+            @Nullable Authentication authentication) {
         log.info("콘텐츠 조회 요청 수신: Content ID={}", contentId);
-        ContentResponse response = contentService.getContentById(contentId);
+
+        Long userId = null;
+        if (authentication != null && authentication.isAuthenticated() &&
+                !"anonymousUser".equals(authentication.getPrincipal())) {
+            userId = Long.parseLong(authentication.getName());
+        }
+        log.info("authentication:{}", authentication);
+        log.info("userid:{}", userId);
+        ContentResponse response = contentService.getContentById(contentId, userId);
         return ResponseEntity.ok(response);
     }
 
@@ -59,7 +72,8 @@ public class ContentController {
     }
 
     // 특정 콘텐츠 수정
-    @PutMapping(value = "/{contentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // 파일 업로드를 위해 multipart/form-data 소비
+    @PutMapping(value = "/{contentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // 파일 업로드를 위해
+                                                                                        // multipart/form-data 소비
     public ResponseEntity<ContentResponse> updateContent(
             @PathVariable Long contentId,
             @Valid @ModelAttribute ContentUpdateRequest request, // @ModelAttribute로 폼 데이터 바인딩
@@ -70,7 +84,7 @@ public class ContentController {
         return ResponseEntity.ok(response);
     }
 
-   // 특정 콘텐츠 삭제
+    // 특정 콘텐츠 삭제
     @DeleteMapping("/{contentId}")
     public ResponseEntity<Void> deleteContent(
             @PathVariable Long contentId,
@@ -80,19 +94,18 @@ public class ContentController {
         contentService.deleteContent(contentId, creatorId);
         return ResponseEntity.noContent().build(); // 204 No Content 반환
     }
-    
+
     // 콘텐츠 좋아요
- // 좋아요 토글
+    // 좋아요 토글
     @PostMapping("/{contentId}/like")
     public ResponseEntity<String> toggleContentLike(
             @PathVariable Long contentId,
-            @RequestParam("userId") Long userId  // ← requestParam으로 받음
+            @RequestParam("userId") Long userId // ← requestParam으로 받음
     ) {
         boolean isLiked = contentService.toggleLike(contentId, userId);
         return ResponseEntity.ok(isLiked ? "liked" : "unliked");
     }
 
-    
     // 좋아요 콘텐츠 목록 조회-페이징
     @GetMapping("/liked")
     public ResponseEntity<?> getLikedContents(
@@ -103,13 +116,18 @@ public class ContentController {
         return ResponseEntity.ok(likedContents);
     }
 
-    
+    @GetMapping("/creator/{creatorId}/top-viewed")
+    public ResponseEntity<List<ContentResponse>> getTopViewedContentsByCreator(@PathVariable Long creatorId) {
+        log.info("크리에이터 ID {} 의 조회수 TOP 3 콘텐츠 조회 요청 수신", creatorId);
+        List<ContentResponse> responses = contentService.getTopViewedContents(creatorId, 3); // 상위 3개
+        return ResponseEntity.ok(responses);
+    }
 
-
-//    @PostMapping("/categories/initialize")
-//    public ResponseEntity<String> initializeCategories(@RequestBody Set<String> categoryNames) {
-//        log.info("카테고리 초기화 요청 수신: {}", categoryNames);
-//        contentService.initializeCategories(categoryNames);
-//        return ResponseEntity.ok("카테고리 초기화가 완료되었습니다.");
-//    }
+    // @PostMapping("/categories/initialize")
+    // public ResponseEntity<String> initializeCategories(@RequestBody Set<String>
+    // categoryNames) {
+    // log.info("카테고리 초기화 요청 수신: {}", categoryNames);
+    // contentService.initializeCategories(categoryNames);
+    // return ResponseEntity.ok("카테고리 초기화가 완료되었습니다.");
+    // }
 }

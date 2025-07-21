@@ -2,7 +2,13 @@ import React, { useEffect, useState } from 'react';
 import styles from './paymentMethodManagementPage.module.css';
 import PaymentMethodList from '../../components/Payment/PaymentMethodList';
 import WarningModal from '../../components/Payment/WarningModal';
-import { requestIssueBillingKey, savePaymentMethod, readAllPaymentMethod, deleteCardMethod } from '../../api/payment';
+import {
+  registerBillingKey,
+  savePaymentMethod,
+  readAllPaymentMethod,
+  deletePaymentMethod,
+  getUserInfo,
+} from '../../api/payment';
 
 function PaymentMethodManagementPage() {
   const [cards, setCards] = useState([]);
@@ -18,38 +24,9 @@ function PaymentMethodManagementPage() {
   useEffect(() => {
     const fetchCards = async () => {
       try {
-        const res = await readAllPaymentMethod(); // API 호출
-
-        // 샘플 데이터 삭제 예정
-        const testCards = [
-          {
-            cardName: '국민카드',
-            cardNumber: '11111111****111*',
-            cardType: '신용카드',
-            cardBrand: 'VISA',
-          },
-          {
-            cardName: '토스뱅크',
-            cardNumber: '11111111****111*',
-            cardType: '신용카드',
-            cardBrand: 'VISA',
-          },
-          {
-            cardName: '농협카드',
-            cardNumber: '11111111****111*',
-            cardType: '신용카드',
-            cardBrand: 'MASTER',
-          },
-          {
-            cardName: '비씨카드',
-            cardNumber: '11111111****111*',
-            cardType: '신용카드',
-            cardBrand: 'MASTER',
-          },
-        ];
-
-        // 실제 카드 + 테스트 카드 결합
-        setCards([...res, ...testCards]);
+        const accessToken = localStorage.getItem('accessToken');
+        const res = await readAllPaymentMethod(accessToken);
+        setCards(res);
       } catch (err) {
         console.error('카드 정보를 불러오는 데 실패했습니다.', err);
       }
@@ -68,19 +45,25 @@ function PaymentMethodManagementPage() {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedCard(null);
+    setModalType(''); // 혹은 null, '' 등 초기 상태로 변경
   };
 
   // 결제수단 삭제 확인 후 삭제진행 + 완료/실패 팝업
   const handleDeleteConfirm = async card => {
     // 기존 모달 닫기
     setIsModalVisible(false);
+    const reason = card.cardName + '을 삭제합니다.';
 
     // 300ms 후 새 모달 보여주기 (애니메이션 타이밍)
     setTimeout(async () => {
       try {
-        await deleteCardMethod(card.paymentMethodId);
-        setCards(prev => prev.filter(c => c.paymentMethodId !== selectedCard.paymentMethodId));
-        setModalType('delete-success');
+        const accessToken = localStorage.getItem('accessToken');
+        const response = await deletePaymentMethod(card.paymentMethodId, reason, accessToken);
+
+        if (card.paymentMethodId === response.paymentMethodId) {
+          setCards(prev => prev.filter(c => c.paymentMethodId !== card.paymentMethodId));
+          setModalType('delete-success');
+        }
       } catch (error) {
         setModalType('delete-fail');
       }
@@ -90,23 +73,45 @@ function PaymentMethodManagementPage() {
 
   //빌링키 발급 후 결제수단 조회해 보여주는 메소드
   const handleCardRegister = async () => {
-    // 빌링키 발급 (로그인한 사용자로 test, test@gmail.com 부분 바꿀 예정)
-    const issueResponse = await requestIssueBillingKey(storeId, channelKey, 'test', 'test@gmail.com');
-    // 발급된 빌링키 이용한 결제수단 조회 (빌링키 발급단계에서 이루어진 결제수단 조회)
-    const saveResponse = await savePaymentMethod(issueResponse.billingKey);
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      // 빌링키 발급 위한 현재 로그인한 사용자의 정보 조회
+      const userInfoResponse = await getUserInfo(accessToken);
+      alert(userInfoResponse.data.username);
+      // 빌링키 발급
+      const issueResponse = await registerBillingKey(
+        storeId,
+        channelKey,
+        userInfoResponse.data.username,
+        userInfoResponse.data.email
+      );
 
-    // 회원이 추가한 결제수단을 cards에 저장
-    const { username, ...cardWithoutUsername } = saveResponse;
+      // 포트원에서 실패 응답을 반환한 경우 (성공했더라도 내부적으로 실패 코드 전달 가능)
+      if (
+        issueResponse.code === 'FAILURE_TYPE_PG' ||
+        issueResponse.message?.includes('사용자') ||
+        issueResponse.message?.includes('취소')
+      ) {
+        return; // 사용자 취소 또는 결제 실패 → 아무것도 하지 않음
+      }
 
-    setCards(prev => [...prev, cardWithoutUsername]);
+      // 발급된 빌링키 이용한 결제수단 조회 (빌링키 발급단계에서 이루어진 결제수단 조회)
+      const saveResponse = await savePaymentMethod(issueResponse.billingKey, accessToken);
+
+      // 회원이 추가한 결제수단을 cards에 저장
+      const { username, ...cardWithoutUsername } = saveResponse;
+
+      setCards(prev => [...prev, cardWithoutUsername]);
+    } catch (error) {
+      console.log(error);
+
+      // 실제 실패만 모달 표시
+      setModalType('method-fail');
+      setSelectedCard(null);
+      setIsModalVisible(true);
+      setIsModalOpen(true);
+    }
   };
-
-  //  const handleCardRegister = async () => {
-  //     const issueResponse = await requestIssueBillingKey(storeId, channelKey, 'test', 'test@gmail.com');
-  //     const saveResponse = await savePaymentMethod(issueResponse.billingKey);
-  //     const { username, ...cardWithoutUsername } = saveResponse;
-  //     setCards(prev => [...prev, cardWithoutUsername]);
-  //   };
 
   return (
     <div className={styles.payment_container}>
@@ -131,7 +136,7 @@ function PaymentMethodManagementPage() {
         isOpen={isModalOpen}
         onClose={closeModal}
         type={modalType}
-        isVisible={isModalVisible} // 추가
+        isVisible={isModalVisible}
         cardData={selectedCard}
         onConfirm={handleDeleteConfirm}
       />

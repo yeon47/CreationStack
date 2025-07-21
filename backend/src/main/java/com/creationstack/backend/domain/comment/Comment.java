@@ -40,7 +40,7 @@ private Content content;
 @JoinColumn(name="parent_comment_id")
 private Comment parentComment;
 
-@Column(name="content", nullable=false)
+@Column(name="content", columnDefinition = "TEXT", nullable=false)
 private String contentText;
 
 private int likeCount;

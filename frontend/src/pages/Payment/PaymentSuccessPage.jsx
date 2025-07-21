@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import SubscriptionDetails from '../../components/Payment/SubscriptionDetails';
 import styles from './PaymentPage.module.css';
 
 function PaymentSuccessPage() {
-  // 예시용 데이터
-  const creator = {
-    name: '크리에이터 닉네임',
-    image: 'https://c.animaapp.com/md94mkfi7RFWrF/img/creatorimage.png',
-  };
+  const location = useLocation();
+  const { creator } = location.state || {};
 
   const subscriptionDetails = [
-    { label: '구독 상품', value: '프리미엄 멤버십' },
-    { label: '가격', value: '₩15,000/월', highlight: true },
-    { label: '부가세', value: '₩0', bold: false },
-    { label: '총 결제 금액', value: '₩15,000', bold: true },
+    { label: '구독 상품', value: creator.name+' 정기 구독권' },
+    { label: '가격', value: '₩4,900/월', highlight: true },
+    { label: '총 결제 금액', value: '₩4,900', bold: true },
   ];
 
   const benefits = ['독점 콘텐츠 제공', '광고 제거', '라이브 방송 참여'];

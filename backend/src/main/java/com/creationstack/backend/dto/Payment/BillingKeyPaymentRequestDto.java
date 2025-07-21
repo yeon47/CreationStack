@@ -12,7 +12,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class BillingKeyPaymentRequestDto {
   private int amount; //가격
+  private Long subscriptionId;
   private Long paymentMethodId; //결제수단
-  private Long creatorId; //구독 상품 크리에이터
+  private String creatorId; //구독 상품 크리에이터
   private String orderName; //구독 상품 제목
 }

@@ -6,13 +6,14 @@
 }
 
 .content-search-page .team-section {
+  align-items: center;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 1280px;
-  padding: 48px 32px;
   gap: 32px;
+  padding: 48px 0;
+  width: 100%;
+  
+  box-sizing: border-box;
 }
 
 .content-search-page .filtering {

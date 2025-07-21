@@ -1,13 +1,14 @@
-import React from "react";
-import { ContentCardList } from "../../SearchContent/ContentContainer/ContentCardList";
-import { SearchResultHeader } from "../SearchResultHeader/SearchResultHeader";
-import { useNavigate } from "react-router-dom";
-import "./ContentSearchWrapper.css";
+import React from 'react';
+import { SearchResultHeader } from '../SearchResultHeader/SearchResultHeader';
+import { useNavigate } from 'react-router-dom';
+import { ContentCard } from '../../../ContentCard/ContentCard';
+import gridStyles from '../../../UsePagination/PaginatedGrid.module.css';
+import './ContentSearchWrapper.css';
 
 export const ContentSearchWrapper = ({ contents = [] }) => {
   const navigate = useNavigate();
   const handleMoreClick = () => {
-    navigate("/contents");
+    navigate('/contents');
   };
   if (!contents || contents.length === 0) {
     return (
@@ -17,28 +18,26 @@ export const ContentSearchWrapper = ({ contents = [] }) => {
     );
   }
   if (!contents || contents.length === 0) {
-    console.log("❌ 검색 결과 없음");
+    console.log('❌ 검색 결과 없음');
     return <div>검색 결과가 없습니다.</div>;
   } else {
-    console.log("✅ 검색 결과 있음:", contents.length);
+    console.log('✅ 검색 결과 있음:', contents.length);
   }
 
   return (
     <div className="content-search-wrapper">
-      <div className="content-search">
-        <SearchResultHeader
-          className="design-component-instance-node"
-          text="컨텐츠 검색 결과"
-          onMoreClick={handleMoreClick}
-        />
-        <div className="heading-and-content">
-          <div className="content">
-            <ContentCardList
-              className="design-component-instance-node"
-              contents={contents}
-            />
-          </div>
-        </div>
+      <div className={gridStyles.grid}>
+        {contents.slice(0, 6).map(item => (
+          <ContentCard
+            key={item.contentId}
+            id={item.contentId}
+            creator={item.creator.nickname}
+            thumbnailUrl={item.thumbnailUrl}
+            title={item.title}
+            likes={item.likeCount}
+            categoryNames={item.categoryNames}
+          />
+        ))}
         {contents.length > 6 && (
           <div className="arrow-up-right" onClick={handleMoreClick}>
             더보기

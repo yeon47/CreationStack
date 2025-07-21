@@ -1,54 +1,51 @@
 package com.creationstack.backend.dto.member;
 
-import com.creationstack.backend.domain.user.User;
-
-import jakarta.validation.constraints.AssertTrue;
+import com.creationstack.backend.domain.user.User.UserRole;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SignupRequest {
 
-    @NotBlank(message = "실명은 필수 입력값입니다.")
-    @Size(min = 2, max = 50, message = "실명은 2-50자 사이여야 합니다.")
-    @Pattern(regexp = "^[가-힣a-zA-Z\\s]+$", message = "실명은 한글, 영문, 공백만 포함할 수 있습니다.")
-    private String username;
-
-    @NotBlank(message = "닉네임은 필수 입력값입니다.")
-    @Size(min = 2, max = 50, message = "닉네임은 2-50자 사이여야 합니다.")
-    @Pattern(regexp = "^[가-힣a-zA-Z0-9_-]+$", message = "닉네임은 한글, 영문, 숫자, _, - 만 포함할 수 있습니다.")
-    private String nickname;
-
-    @NotBlank(message = "이메일은 필수 입력값입니다.")
-    @Email(message = "올바른 이메일 형식이 아닙니다.")
-    @Size(max = 100, message = "이메일은 100자 이하여야 합니다.")
+    @NotBlank(message = "이메일은 필수입니다")
+    @Email(message = "유효한 이메일 형식이 아닙니다")
     private String email;
 
-    @NotBlank(message = "비밀번호는 필수 입력값입니다.")
-    @Size(min = 8, max = 128, message = "비밀번호는 8-128자 사이여야 합니다.")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", message = "비밀번호는 대소문자, 숫자, 특수문자를 모두 포함해야 합니다.")
+    @NotBlank(message = "사용자명은 필수입니다")
+    private String username;
+
+    @NotBlank(message = "닉네임은 필수입니다")
+    private String nickname;
+
+    // 비밀번호는 LOCAL 사용자만 필수 (KAKAO 사용자는 null 가능)
     private String password;
 
-    @NotNull(message = "역할은 필수 선택값입니다.")
-    private User.UserRole role;
+    @NotNull(message = "역할은 필수입니다")
+    private UserRole role;
 
-    @Min(value = 1, message = "올바른 직업 ID를 선택해주세요.")
+    // 크리에이터인 경우 필수
     private Integer jobId;
 
-    @Size(max = 500, message = "소개글은 500자 이하여야 합니다.")
     private String bio;
 
-    // 크리에이터인 경우 직업 ID 필수 검증
-    @AssertTrue(message = "크리에이터는 직업을 선택해야 합니다.")
-    private boolean isJobIdValidForCreator() {
-        if (role == User.UserRole.CREATOR) {
-            return jobId != null && jobId > 0;
-        }
-        return true;
+    // 플랫폼 관련 필드 (카카오 사용자용)
+    private String platform; // "LOCAL" 또는 "KAKAO"
+    private String platformId; // 카카오 사용자 ID
+
+    // 유효성 검증 메서드들 추가
+    public boolean isKakaoUser() {
+        return "KAKAO".equals(platform);
+    }
+
+    public boolean isLocalUser() {
+        return platform == null || "LOCAL".equals(platform);
     }
 }

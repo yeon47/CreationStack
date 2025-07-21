@@ -69,10 +69,12 @@
 /* 로고 섹션 */
 .logoSection {
   flex-shrink: 0; /* New */
+  display: flex;
+  align-items: center; 
 }
 
 .logoImg {
-  height: 40px; /* Retained */
+  height: 60px; /* Retained */
   width: auto; /* New */
   cursor: pointer; /* New */
   object-fit: contain; /* Retained (was in previous version of this class) */
@@ -397,4 +399,43 @@
       padding: 0 0.5rem;
     }
   }
+}
+
+/* 로그인, 회원가입 버튼 공통 기본 스타일 */
+.authButton,
+.authButtonFilled {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+/* 로그인 버튼 */
+.authButton {
+  color: #4682a9;
+  background-color: white;
+  border-color: #4682a9;
+}
+
+.authButton:hover {
+  background-color: #f0f8ff;
+  color: #3b7194;
+  border-color: #3b7194;
+}
+
+/* 회원가입 버튼 */
+.authButtonFilled {
+  color: white;
+  background-color: #4682a9;
+}
+
+.authButtonFilled:hover {
+  background-color: #3b7194;
 }

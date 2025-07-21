@@ -1,11 +1,54 @@
 package com.creationstack.backend.repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import com.creationstack.backend.domain.payment.PaymentMethod;
 import com.creationstack.backend.domain.subscription.Subscription;
+import com.creationstack.backend.domain.subscription.SubscriptionStatus;
+import com.creationstack.backend.domain.subscription.SubscriptionStatusName;
+import com.creationstack.backend.dto.Subscription.UserSubscriptionDto;
 
-public interface SubscriptionRepository extends JpaRepository<Subscription, Long>{
+public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
     Optional<Subscription> findBySubscriberIdAndCreatorId(Long subscriberId, Long creatorId);
+    List<Subscription> findByPaymentMethod(PaymentMethod paymentMethod);
+    List<Subscription> findAllByNextPaymentAtBefore(LocalDateTime time);
+    boolean existsByCreatorIdAndSubscriberIdAndStatus(Long creatorId, Long subscriberId, SubscriptionStatus status);
+    int countByCreatorIdAndStatus_Name(Long creatorId, SubscriptionStatusName statusName);
+
+    @Modifying
+    @Query("DELETE FROM Subscription s WHERE s.status.name IN ('EXPIRED') AND s.nextPaymentAt <= :threshold")
+    void deleteOldExpiredSubscriptions(@Param("threshold") LocalDateTime threshold);
+
+    @Query("""
+            SELECT new com.creationstack.backend.dto.Subscription.UserSubscriptionDto(
+                s.subscriptionId,
+                s.creatorId,
+                ud.nickname,
+                ud.profileImageUrl,
+                ud.bio,
+                (
+                    SELECT COUNT(sub2)
+                    FROM Subscription sub2
+                    WHERE sub2.creatorId = s.creatorId
+                        AND sub2.status.name = 'ACTIVE'
+                ),
+                ss.name,
+                s.startedAt,
+                s.nextPaymentAt,
+                s.lastPaymentAt,
+                NULL
+            )
+                FROM Subscription s
+                JOIN UserDetail ud ON s.creatorId = ud.userId
+                JOIN SubscriptionStatus ss ON s.status.statusId = ss.statusId
+                WHERE s.subscriberId = :subscriberId
+            """)
+    List<UserSubscriptionDto> findAllBySubscriberId(@Param("subscriberId") Long subscriberId);
 }

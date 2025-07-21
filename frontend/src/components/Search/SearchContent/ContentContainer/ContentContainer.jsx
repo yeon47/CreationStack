@@ -1,33 +1,24 @@
 import React from "react";
-import { ContentCardList } from "./ContentCardList";
+import { ContentCard } from "../../../ContentCard/ContentCard";
+import gridStyles from "../../../UsePagination/PaginatedGrid.module.css";
 import "./ContentContainer.css";
 
-export const ContentContainer = ({ creators = [] }) => {
-  if (creators.length === 0) {
-    return (
-        <div className="no-search-result">검색 결과가 없습니다.</div>
-    );
+export const ContentContainer = ({ contents = [] }) => {
+  if (contents.length === 0) {
+    return <div className="no-search-result">검색 결과가 없습니다.</div>;
   }
-  
 
   return (
-    <div className="content-container">
-      <ContentCardList
-        className="content-card-list-instance"
-        divClassName="design-component-instance-node"
-        divClassNameOverride="design-component-instance-node"
-        textClassName="design-component-instance-node"
-        textClassNameOverride="design-component-instance-node"
-        contents={creators.slice(0, 3)}
-      />
-      <ContentCardList
-        className="content-card-list-instance"
-        contents={creators.slice(3, 6)}
-      />
-      <ContentCardList
-        className="content-card-list-instance"
-        contents={creators.slice(6, 9)}
-      />
+    <div className="heading-and-content">
+      <div className={gridStyles.grid}>
+        {contents.map(item => (
+          <ContentCard
+            key={item.contentId} 
+                  {...item} 
+                  isPaid={item.accessType === 'SUBSCRIBER'}
+          />
+        ))}
+      </div>
     </div>
   );
 };

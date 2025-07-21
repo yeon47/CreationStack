@@ -21,4 +21,8 @@ public interface ContentRepository extends JpaRepository<Content, Long>, JpaSpec
             "creator", "creator.userDetail", "creator.job", "categoryMappings.category"
     })
     Page<Content> findAll(Specification<Content> spec, Pageable pageable);
+
+    // 특정 크리에이터의 조회수 TOP N 콘텐츠를 조회하는 메서드 추가
+    // findTopNBy...OrderBy...Desc 패턴을 사용
+    List<Content> findTop3ByCreator_UserIdOrderByViewCountDesc(Long creatorId);
 }

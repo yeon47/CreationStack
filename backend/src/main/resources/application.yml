@@ -13,10 +13,10 @@ spring:
 
   # 데이터베이스 설정
   datasource:
-    url: jdbc:mysql://localhost:3306/creationstack
-    username: mydb
-    password: dhaha1102!
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: ${DB_DRIVER_CLASS_NAME}
     hikari:
       maximum-pool-size: 20
       minimum-idle: 5
@@ -99,3 +99,7 @@ cloud:
       static: ap-northeast-2 # ← 한국(서울) 리전으로 고정
     stack:
       auto: false # CloudFormation 스택 자동 생성 비활성화
+
+kakao:
+  client-id: ${Kakao_Client_Id}
+  redirect-uri: ${Kakao_Redirect_Uri}
