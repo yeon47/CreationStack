@@ -13,13 +13,9 @@ export const ContentContainer = ({ contents = [] }) => {
       <div className={gridStyles.grid}>
         {contents.map(item => (
           <ContentCard
-            key={item.id}
-            id={item.id}
-            creator={item.creator}
-            thumbnailUrl={item.thumbnailUrl}
-            title={item.title}
-            likes={item.likes}
-            categoryNames={item.categoryNames}
+            key={item.contentId} 
+                  {...item} 
+                  isPaid={item.accessType === 'SUBSCRIBER'}
           />
         ))}
       </div>
