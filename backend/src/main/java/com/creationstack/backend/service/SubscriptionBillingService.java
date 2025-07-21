@@ -66,15 +66,4 @@ public class SubscriptionBillingService {
       }
     }
   }
-
-   //구독 해지 시 상태 변경
-  @Transactional
-  public void changePaymentAndSubscriptionStatus(Long subscriptionId) {
-    Subscription subscription = subscriptionRepository.findById(subscriptionId).orElseThrow(
-        () ->  new CustomException(HttpStatus.NOT_FOUND,"결제 내역을 찾지 못했습니다.")
-    );
-    SubscriptionStatus cancelled = subscriptionStatusRepository.findByName(SubscriptionStatusName.CANCELLED).orElseThrow(()-> new CustomException(
-        HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류"));
-    subscription.setStatus(cancelled);
-  }
 }
