@@ -1,7 +1,11 @@
 package com.creationstack.backend.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.creationstack.backend.dto.Subscription.ActivateSubscriptionRequestDto;
 import com.creationstack.backend.dto.Subscription.SubscriptionRequestDto;
 import com.creationstack.backend.dto.Subscription.SubscriptionResponseDto;
-import com.creationstack.backend.repository.UserDetailRepository;
+import com.creationstack.backend.dto.Subscription.UserSubscriptionDto;
 import com.creationstack.backend.service.SubscriptionService;
 
 import lombok.RequiredArgsConstructor;
@@ -24,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
-    private final UserDetailRepository userRepository;
 
     // 구독 생성 요청
     @PostMapping("/subscriptions/pending")
@@ -56,6 +59,14 @@ public class SubscriptionController {
     public ResponseEntity<String> failSubscription(@PathVariable Long subscriptionId) {
         subscriptionService.handleSubscriptionFailure(subscriptionId);
         return ResponseEntity.ok("구독 실패 처리가 완료되었습니다.");
+    }
+
+    // 사용자 구독 목록 조회
+    @GetMapping("/users/me/subscriptions")
+    public ResponseEntity<Map<String, Object>> getMySubscriptions(Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        List<UserSubscriptionDto> subscriptions = subscriptionService.getMySubscriptions(userId);
+        return ResponseEntity.ok(Map.of("subscriptions", subscriptions));
     }
 
 }
