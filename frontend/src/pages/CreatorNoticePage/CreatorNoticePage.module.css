@@ -1,0 +1,210 @@
+.notice_page {
+  background-color: #fff;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: black;
+}
+.separator {
+  width: 100%;
+  margin-top: 10px;
+  background-color: #e0e0e0; /* 연한 회색 선 */
+  height: 1px;
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.profileImage {
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 30px;
+}
+
+.nicknameWrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nickname {
+  font-size: 40px;
+  font-weight: 400;
+  color: #292929;
+}
+
+.bio {
+  font-size: 14px;
+  font-weight: 300;
+  color: #64748b;
+  max-width: 50%;
+  margin-top: 10px;
+  margin-bottom: 0px;
+  overflow: hidden; /* 넘치는 글자 숨기기 */
+  word-wrap: break-word; /* 단어가 너무 길면 줄바꿈 */
+  white-space: normal; /* 줄바꿈 허용 */
+}
+
+.divider {
+  width: 100%;
+  border: none;
+  height: 2px;
+  background-color: #e0e0e0;
+  margin-top: 50px;
+}
+
+.creatorBadge {
+  width: 30px;
+  height: 30px;
+  vertical-align: middle;
+}
+
+.subscriberCount {
+  font-size: 14px;
+  color: #555;
+  margin-top: 6px;
+}
+
+.job {
+  font-size: 15px;
+  color: #6941c6;
+  margin-top: 4px;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.noticeButton,
+.subscribeButton {
+  width: 8rem;
+  padding: 15px 30px;
+  font-size: 1rem;
+  border-radius: 10px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  outline: none;
+}
+
+.noticeButton:focus,
+.subscribeButton:focus {
+  outline: none;
+}
+
+.noticeButton {
+  background-color: #b2d9de;
+}
+
+.noticeButton:hover {
+  background-color: #7bbfc4;
+}
+
+.subscribeButton {
+  background-color: #4682a9;
+}
+
+.subscribeButton:hover {
+  background-color: #35678b;
+}
+
+.notice_container {
+  background-color: white;
+  width: 100%;
+}
+.notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 40px 20px 80px 20px;
+}
+
+.date p {
+  font-size: 30px;
+  color: #adb5bd;
+}
+
+/*왼쪽 프로필이미지, 오른쪽 카드내용블록전체*/
+.post_container {
+  display: flex;
+  flex-direction: row;
+  margin-top: 20px;
+  gap: 20px;
+}
+
+.creator_img {
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: 44px;
+  flex-direction: column;
+}
+
+.creator_img img {
+  width: 80px;
+  height: 80px;
+  border-radius: 80px;
+}
+
+.post_card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.post_content_container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 20px;
+}
+
+.button_container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: 10px;
+}
+
+.post_box {
+  max-width: 600px;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 11px 2px 20px 0px #adadad;
+}
+
+.write_button {
+  background-color: #4682a9;
+}
+.delete_button,
+.edit_button {
+  font-size: 12px;
+  background-color: white;
+  color: black;
+}
+
+.delete_button {
+  background-color: rgb(253, 239, 239);
+  border: 1px solid red;
+  color: red;
+}
+
+.edit_button {
+  background-color: rgb(239, 244, 253);
+  border: 1px solid blue;
+  color: blue;
+}
+
+.time {
+  padding-left: 10px;
+}
