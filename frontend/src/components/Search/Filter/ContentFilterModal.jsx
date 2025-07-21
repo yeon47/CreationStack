@@ -83,7 +83,7 @@ export const ContentFilterModal = ({ onClose, onApply }) => {
         <div className="category-filtering">
           <div className="text-wrapper">카테고리</div>
           <div className="frame">
-            {['전체', '개발', '디자인', '데이터'].map(item => (
+            {['전체', '개발', '디자인', '기획', '데이터', '커리어'].map(item => (
               <div key={item} className="group-5" onClick={() => handleSelect('category', item)}>
                 <div
                   className="rectangle"
