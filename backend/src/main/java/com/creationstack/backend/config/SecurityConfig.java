@@ -1,6 +1,7 @@
 package com.creationstack.backend.config;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,12 +59,13 @@ public class SecurityConfig {
                                     "/api/search/**",
                                     "/api/billings/**",
                                     "/api/payments/**",
-                                    "/api/user/public/**",
-                                    "/api/contents/*/comments",
-                                    "/api/contents/*/comments/*/like",
+                                    "/api/contents/*/comments",  // 댓글 목록 조회
+                                    "/api/contents/*/comments/*", // 댓글 수정,삭제,대댓글
+                                    "/api/contents/*/comments/*/like", // 댓글 좋아요
                                     "/api/subscriptions/**")
 
                             .permitAll()
+                            
                             // /api/user/** 경로는 인증 필요 (기존 설정 유지)
                             .requestMatchers("/api/user/**").authenticated()
 
@@ -90,13 +92,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowedOrigins(List.of("http://localhost:5173")); 
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true); 
+        configuration.setExposedHeaders(List.of("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 }
