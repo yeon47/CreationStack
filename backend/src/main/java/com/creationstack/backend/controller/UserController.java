@@ -4,7 +4,9 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +19,7 @@ import com.creationstack.backend.dto.member.NicknameCheckResponse;
 import com.creationstack.backend.dto.member.SignupRequest;
 import com.creationstack.backend.dto.member.SignupResponse;
 import com.creationstack.backend.service.AuthService;
+import com.creationstack.backend.service.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -121,5 +124,20 @@ public class UserController {
                     .build();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+
+    private final UserService userService;
+
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> unregisterUser(Authentication authentication) {
+        if (authentication == null) {
+            throw new IllegalStateException("인증된 사용자 정보가 없습니다.");
+        }
+
+        Long userId = Long.parseLong(authentication.getName());
+
+        userService.softDeleteUser(userId);
+
+        return ResponseEntity.ok().build();
     }
 }

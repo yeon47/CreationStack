@@ -84,6 +84,10 @@ public class User {
 
     @AssertTrue(message = "크리에이터는 직업을 선택해야 합니다.")
     private boolean isJobValidForCreator() {
+        if (this.isActive == false) {
+            return true;
+        }
+
         if (UserRole.CREATOR.equals(this.role)) {
             return this.job != null && this.job.getJobId() != null && this.job.getJobId() > 0;
         }

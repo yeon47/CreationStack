@@ -69,13 +69,11 @@ public class UserService {
 
         @Transactional
         public void updateUserProfile(Long userId, UpdateProfileRequest request) {
-                // 1. 사용자 정보 조회
                 User user = userRepository.findByUserIdAndIsActiveTrue(userId)
                                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
                 UserDetail userDetail = user.getUserDetail();
 
-                // 2. 현재 비밀번호 입력 여부 및 정확성 검증 (필수)
                 String currentPassword = request.getCurrentPassword();
                 if (currentPassword == null || currentPassword.isEmpty()) {
                         throw new IllegalArgumentException("프로필을 수정하려면 현재 비밀번호를 입력해야 합니다.");
@@ -84,33 +82,54 @@ public class UserService {
                         throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
                 }
 
-                // 3. 비밀번호 검증 통과 시, 프로필 정보 업데이트
-                // 닉네임 변경
                 if (request.getNickname() != null && !request.getNickname().isEmpty()) {
                         userDetail.setNickname(request.getNickname());
                 }
-                // 소개글 변경
                 if (request.getBio() != null) {
                         userDetail.setBio(request.getBio());
                 }
-                // 직업 변경
                 if (user.getRole() == User.UserRole.CREATOR && request.getJobId() != null) {
                         Job job = jobRepository.findById(request.getJobId())
                                         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직업입니다."));
                         user.setJob(job);
                 }
-                // 프로필 이미지 URL 변경
                 if (request.getProfileImageUrl() != null) {
                         userDetail.setProfileImageUrl(request.getProfileImageUrl());
                 }
 
-                // 4. 새 비밀번호 입력 시, 비밀번호 변경 (선택)
                 String newPassword = request.getNewPassword();
                 if (newPassword != null && !newPassword.isEmpty()) {
                         userDetail.setPassword(passwordEncoder.encode(newPassword));
                 }
 
-                // 5. 변경된 정보 저장
+                userRepository.save(user);
+        }
+
+        @Transactional
+        public void softDeleteUser(Long userId) {
+                User user = userRepository.findById(userId)
+                                .orElseThrow(() -> new RuntimeException("해당 사용자를 찾을 수 없습니다. ID: " + userId));
+
+                user.setIsActive(false);
+                user.setJob(null);
+
+                UserDetail userDetail = user.getUserDetail();
+
+                if (userDetail != null) {
+                        // 길이(10자 이하)와 유일성(unique) 제약 조건을 모두 만족하도록 userId를 추가
+                        userDetail.setNickname("탈퇴한 사용자_" + user.getUserId());
+
+                        // @NotBlank를 만족시키기 위한 더미 데이터
+                        userDetail.setUsername("탈퇴한 사용자");
+
+                        // @NotBlank, @Email, unique 제약 조건을 모두 만족하도록 userId를 추가
+                        userDetail.setEmail("deleted_" + user.getUserId() + "@example.com");
+                        userDetail.setBio(null);
+                        userDetail.setProfileImageUrl(null);
+                        userDetail.setPassword(null);
+                        userDetail.setPlatformId(null);
+                }
+
                 userRepository.save(user);
         }
 }
