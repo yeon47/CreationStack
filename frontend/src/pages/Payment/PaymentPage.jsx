@@ -1,10 +1,13 @@
 // PaymentPage.jsx
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams  } from 'react-router-dom';
 import SubscriptionDetails from '../../components/Payment/SubscriptionDetails';
 import PaymentModal from '../../components/Payment/PaymentModal';
 import WarningModal from '../../components/Payment/WarningModal';
 import { registerBillingKey, savePaymentMethod, readAllPaymentMethod, getUserInfo } from '../../api/payment';
+import { getPublicCreatorProfile } from '../../api/profile';
+import logo from '../../assets/img/logo.svg'
+
 import styles from './PaymentPage.module.css';
 
 function PaymentPage() {
@@ -39,10 +42,32 @@ function PaymentPage() {
     fetchCards();
   }, []); // 빈 배열 → 최초 한 번만 실행됨
   // 예시용 데이터
-  const creator = {
-    name: '크리에이터 닉네임',
-    image: 'https://c.animaapp.com/md94mkfi7RFWrF/img/creatorimage.png',
-  };
+  // const creator = {
+  //   name: '크리에이터 닉네임',
+  //   image: 'https://c.animaapp.com/md94mkfi7RFWrF/img/creatorimage.png',
+  // };
+
+  const { creatorNickname } = useParams();
+  const [creator, setCreator] = useState(null);
+
+  useEffect( () => {
+    const fetchCreator = async () => {
+      try {
+        const res = await getPublicCreatorProfile(creatorNickname);
+        setCreator({
+          name: res.data.nickname,
+          image: res.data.profileImageUrl || logo, // 기본값 일단 로고로 설정
+        });
+      } catch (err) {
+        console.error('크리에이터 정보를 불러올 수 없습니다. : ', err);
+      }
+    };
+
+    if (creatorNickname) fetchCreator();
+  },[creatorNickname]);
+
+  if (!creator) return <div>크리에이터 정보를 찾을 수 없습니다.</div>;
+
 
   const subscriptionDetails = [
     { label: '구독 상품', value: '프리미엄 멤버십' },

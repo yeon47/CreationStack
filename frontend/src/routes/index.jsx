@@ -16,7 +16,7 @@ import MainLayout from '../layouts/mainLayout';
 import ReplyTestPage from '../pages/ContentDetail/ReplyTestPage';
 import FavoriteContent from '../pages/FavoriteContent/FavoriteContentPage';
 import { CreatorMainPage } from '../pages/MainPage/CreatorMainPage/CreatorMainPage';
-//import CreatorManagementPage from '../pages/CreatorManagement/CreatorManagementPage';
+import CreatorManagementPage from '../pages/CreatorManagement/CreatorManagementPage';
 
 import { CreatorSearchPage } from '../pages/CreatorSearchPage/CreatorSearchPage';
 import { ContentSearchPage } from '../pages/ContentSearchPage/ContentSearchPage';
@@ -36,7 +36,7 @@ export default function AppRoutes() {
         <Route path="/payments/success" element={<PaymentSuccessPage />} />
         <Route path="/reply-test" element={<ReplyTestPage />} />
         <Route path="/favorites" element={<FavoriteContent />} />
-        {/* <Route path="/creator-management" element={<CreatorManagementPage />} /> */}
+        <Route path="/creator-management" element={<CreatorManagementPage />} />
         <Route path="/content-form" element={<ContentFormPage />} />
         <Route path="/mypage-creator" element={<MyCreatorPage />} /> {/* 크리에이터 마이페이지 */}
         <Route path="/mypage-user" element={<MyUserPage />} /> {/* 사용자 마이페이지 */}
