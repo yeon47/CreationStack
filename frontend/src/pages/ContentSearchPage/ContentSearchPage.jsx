@@ -9,6 +9,7 @@ import "./ContentSearchPage.css";
 export const ContentSearchPage = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [page, setPage] = useState(0);
+  const [size, setSize] = useState(9);
   const [totalPages, setTotalPages] = useState(0);
   const [creators, setCreators] = useState([]);
   const [keyword, setKeyword] = useState("");
@@ -17,7 +18,7 @@ export const ContentSearchPage = () => {
   useEffect(() => {
     const fetchCreators = async () => {
       try {
-        const result = await searchContent(page, keyword);
+        const result = await searchContent(page, keyword, size);
         if (!result || !result.contents) {
           setCreators([]);
           setTotalPages(0);
@@ -25,11 +26,12 @@ export const ContentSearchPage = () => {
         }
 
         const mapped = result.contents.map((item) => ({
-          contentId: item.contentId,
-          nickname: item.creator.nickname,
+          id: item.contentId,
+          creator: item.creator.nickname,
           thumbnailUrl: item.thumbnailUrl,
           title: item.title,
-          likeCount: item.likeCount,
+          likes: item.likeCount,
+          isSubscriber: item.isSubscriber, // 이 값은 API 응답에 따라 달라질 수 있습니다.
           categoryNames: item.categoryNames,
         }));
         setCreators(mapped);
@@ -40,7 +42,7 @@ export const ContentSearchPage = () => {
     };
 
     fetchCreators();
-  }, [page, keyword]);
+  }, [page, keyword, size]);
 
   return (
     <div className="content-search-page">
@@ -61,7 +63,7 @@ export const ContentSearchPage = () => {
             </div>
           </div>
         </div>
-        <ContentContainer creators={creators} />
+        <ContentContainer contents={creators} />
         <Pagination page={page} totalPages={totalPages} setPage={setPage} />
       </div>
       {/* ✅ 필터 모달 표시 */}

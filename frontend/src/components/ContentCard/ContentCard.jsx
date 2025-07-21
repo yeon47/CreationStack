@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import SubsIcon from '../../assets/img/subs_icon.svg';
 import { UnauthorizedModal } from '../UnauthorizedModal';
 
-export const ContentCard = ({ contentId, thumbnailUrl, creatorNickname, title, likes, isPaid }) => {
+export const ContentCard = ({ contentId, thumbnailUrl, creatorNickname, title, likes, isPaid, categoryNames = [] }) => {
+
   return (
     <Link to={`/contents/${contentId}`} className={styles.card}>
       {/* 썸네일 */}
@@ -20,6 +21,11 @@ export const ContentCard = ({ contentId, thumbnailUrl, creatorNickname, title, l
         <div className={styles.title}>{title}</div>
         <div className={styles.meta}>
           <span className={styles.likes}>❤️ ({likes})</span>
+          <div className={styles.categories}>
+            {categoryNames.map((category, index) => (
+              <span key={index} className={styles.category}>{category}</span>
+            ))}
+          </div>
         </div>
       </div>
     </Link>

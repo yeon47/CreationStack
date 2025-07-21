@@ -1,102 +1,70 @@
-import React from "react";
-import "./Pagination.css";
+import React from 'react';
+import styles from '../../../styles/pagination.module.css';
 
 export const Pagination = ({ page, totalPages, setPage }) => {
-  const handlePageClick = (pageNum) => {
-    if (pageNum >= 0 && pageNum < totalPages) {
-      setPage(pageNum);
-    }
+  const currentPage = page + 1;
+
+  const onPageChange = (pageNumber) => {
+    setPage(pageNumber - 1);
   };
 
-  const renderPages = () => {
-    const pages = [];
-    const maxVisible = 3;
-    const showLeftDots = page > 2;
-    const showRightDots = page < totalPages - 3;
+  const pageNumbers = [];
 
-    let start = Math.max(0, page - 1);
-    let end = Math.min(totalPages, start + maxVisible);
-
-    if (showLeftDots) {
-      pages.push(
-        <div
-          key="first"
-          className="num-wrapper"
-          onClick={() => handlePageClick(0)}
-        >
-          <div className="num-2">1</div>
-        </div>
-      );
-      pages.push(
-        <div key="dots-left" className="num-wrapper">
-          <div className="num-3">...</div>
-        </div>
-      );
+  if (totalPages <= 5) {
+    for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
+  } else {
+    if (currentPage <= 3) {
+      pageNumbers.push(1, 2, 3, '...', totalPages);
+    } else if (currentPage >= totalPages - 2) {
+      pageNumbers.push(1, '...', totalPages - 2, totalPages - 1, totalPages);
+    } else {
+      pageNumbers.push(1, '...', currentPage, '...', totalPages);
     }
-
-    for (let i = start; i < end; i++) {
-      pages.push(
-        <div
-          key={i}
-          className={i === page ? "element" : "num-wrapper"}
-          onClick={() => handlePageClick(i)}
-        >
-          <div className={i === page ? "num" : "num-2"}>{i + 1}</div>
-        </div>
-      );
-    }
-
-    if (showRightDots) {
-      pages.push(
-        <div key="dots-right" className="num-wrapper">
-          <div className="num-3">...</div>
-        </div>
-      );
-      pages.push(
-        <div
-          key={totalPages - 1}
-          className="num-wrapper"
-          onClick={() => handlePageClick(totalPages - 1)}
-        >
-          <div className="num-4">{totalPages}</div>
-        </div>
-      );
-    }
-
-    return pages;
-  };
+  }
 
   return (
-    <div className="pagination">
+    <div className={styles.pagination}>
+      {/* Prev */}
       <div
-        className="prev"
-        onClick={() => handlePageClick(page - 1)}
-        style={{ opacity: page === 0 ? 0.3 : 1 }}
+        className={styles.prev}
+        onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
+        style={{ cursor: currentPage > 1 ? 'pointer' : 'default', opacity: currentPage > 1 ? 1 : 0.3 }}
       >
-        <div className="text-wrapper-5">Prev</div>
-        <div className="chevron-left">
-          <img
-            className="vector"
-            src="https://cdn-icons-png.flaticon.com/512/271/271220.png"
-            alt="prev"
-          />
+        <div className={styles['text-wrapper-2']}>Prev</div>
+        <div className={styles['chevron-left']}>
+          <img className={styles.vector} alt="Prev" src="https://c.animaapp.com/md5g8ubjTWUbxD/img/vector-1.svg" />
         </div>
       </div>
 
-      <div className="nums">{renderPages()}</div>
+      {/* Numbers */}
+      <div className={styles.nums}>
+        {pageNumbers.map((num, index) =>
+          num === '...' ? (
+            <div className={styles['num-wrapper']} key={`ellipsis-${index}`}>
+              <div className={styles['num-3']}>...</div>
+            </div>
+          ) : (
+            <div
+              key={num}
+              className={`${styles['num-wrapper']} ${num === currentPage ? styles['element'] : ''}`}
+              onClick={() => onPageChange(num)}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className={num === currentPage ? styles['num'] : styles['num-2']}>{num}</div>
+            </div>
+          )
+        )}
+      </div>
 
+      {/* Next */}
       <div
-        className="next"
-        onClick={() => handlePageClick(page + 1)}
-        style={{ opacity: page === totalPages - 1 ? 0.3 : 1 }}
+        className={styles.next}
+        onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
+        style={{ cursor: currentPage < totalPages ? 'pointer' : 'default', opacity: currentPage < totalPages ? 1 : 0.3 }}
       >
-        <div className="prev-2">Next</div>
-        <div className="vector-wrapper">
-          <img
-            className="vector"
-            src="https://cdn-icons-png.flaticon.com/512/271/271228.png"
-            alt="prev"
-          />
+        <div className={styles['prev-2']}>Next</div>
+        <div className={styles['vector-wrapper']}>
+          <img className={styles.vector} alt="Next" src="https://c.animaapp.com/md5g8ubjTWUbxD/img/vector.svg" />
         </div>
       </div>
     </div>

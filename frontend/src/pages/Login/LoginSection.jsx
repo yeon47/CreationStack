@@ -1,11 +1,12 @@
+import { useNavigate } from 'react-router-dom';
 import React, { useState } from 'react';
-import { Button } from '../../components/Member/Button';
 import { Card, CardContent } from '../../components/Member/Card';
 import { Input } from '../../components/Member/Input';
 import { Label } from '../../components/Member/Label';
 import styles from './Login.module.css';
 
 export const LoginSection = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -13,7 +14,6 @@ export const LoginSection = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Data for the left side content
   const leftSideContent = {
     title: '로그인',
     subtitle: '개발자 커뮤니티',
@@ -48,15 +48,16 @@ export const LoginSection = () => {
 
       if (response.ok) {
         const result = await response.json();
-        // 로그인 성공 처리
-        localStorage.setItem('token', result.token);
-
+        const nickname = result.data.user.nickname;
         const accessToken = result.data.tokens.accessToken;
         const refreshToken = result.data.tokens.refreshToken;
+
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
-        
-        window.location.href = '/';
+
+        alert(`${nickname}님 어서오세요.`);
+        navigate('/');
+        window.location.reload();
       } else {
         const error = await response.json();
         alert(`로그인 실패: ${error.message}`);
@@ -70,8 +71,11 @@ export const LoginSection = () => {
   };
 
   const handleKakaoLogin = () => {
-    // 카카오 로그인 처리
-    window.location.href = '/api/auth/kakao';
+    const KAKAO_REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
+    const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
+
+    const kakaoLoginUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code`;
+    window.location.href = kakaoLoginUrl;
   };
 
   const handleSignupClick = () => {
