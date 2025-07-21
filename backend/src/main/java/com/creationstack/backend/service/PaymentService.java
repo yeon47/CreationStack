@@ -9,7 +9,6 @@ import com.creationstack.backend.domain.payment.PaymentStatus;
 import com.creationstack.backend.domain.subscription.Subscription;
 import com.creationstack.backend.domain.subscription.SubscriptionStatusName;
 import com.creationstack.backend.domain.user.User;
-import com.creationstack.backend.domain.user.UserDetail;
 import com.creationstack.backend.dto.Payment.AmountDto;
 import com.creationstack.backend.dto.Payment.BillingKeyPaymentRequestDto;
 import com.creationstack.backend.dto.Payment.BillingKeyPaymentResponseDto;
