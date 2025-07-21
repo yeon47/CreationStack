@@ -38,9 +38,6 @@ export const ContentSearchPage = () => {
         }
         console.log(result.contents);
 
-        const mapped = result.contents.map(item => ({
-          id: item.contentId,
-          creator: item.creator.nickname,
         const mapped = result.contents.map((item) => ({
           // contentId, thumbnailUrl, creatorNickname, title, likes, isPaid, categoryNames
           // isPaid={content.accessType === 'SUBSCRIBER'}
