@@ -23,11 +23,11 @@
 }
 
 /* 상태별 기본색 + hover색 */
-.subscribed {
+.active {
   background-color: #4682a9;
   transition: background-color 0.2s ease;
 }
-.subscribed:hover {
+.active:hover {
   background-color: #35678b;
 }
 
@@ -39,10 +39,10 @@
   background-color: #7bbfc4;
 }
 
-.failed {
+.expired {
   background-color: #6840c6c7;
   transition: background-color 0.2s ease;
 }
-.failed:hover {
+.expired:hover {
   background-color: #503491c7;
 }
