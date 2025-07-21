@@ -4,12 +4,13 @@ import { LoginSection } from '../pages/Login/LoginSection';
 import { MemberRegister } from '../pages/Register/MemberRegister';
 import AuthCallback from '../pages/Register/KakaoRegisterCallback';
 
+import { ProfileEdit } from '../pages/ProfileSettings/ProfileEdit';
+
 import PaymentMethodManagementPage from '../pages/Payment/PaymentMethodManagementPage';
 import PaymentPage from '../pages/Payment/PaymentPage';
 import PaymentSuccessPage from '../pages/Payment/PaymentSuccessPage';
 import ContentFormPage from '../pages/ContentForm/ContentFormPage';
-import { MyCreatorPage } from '../pages/MyPage/MyCreatorPage';
-import { MyUserPage } from '../pages/MyPage/MyUserPage';
+import { MyPage } from '../pages/MyPage/MyPage';
 import { SubscriptionManage } from '../pages/ManageSubscriptionPage/SubscriptionManage';
 import { UserMainPage } from '../pages/MainPage/UserMainPage/UserMainPage';
 import MainLayout from '../layouts/mainLayout';
@@ -22,7 +23,7 @@ import { CreatorSearchPage } from '../pages/CreatorSearchPage/CreatorSearchPage'
 import { ContentSearchPage } from '../pages/ContentSearchPage/ContentSearchPage';
 import { UnifiedSearchPage } from '../pages/UnifiedSearchPage/UnifiedSearchPage';
 
-import { ContentDetailPage } from '../pages/ContentDetail/ContentDetailPage'
+import { ContentDetailPage } from '../pages/ContentDetail/ContentDetailPage';
 import { Home } from '../pages/Home/Home';
 
 export default function AppRoutes() {
@@ -38,18 +39,16 @@ export default function AppRoutes() {
         <Route path="/favorites" element={<FavoriteContent />} />
         <Route path="/creator-management" element={<CreatorManagementPage />} />
         <Route path="/content-form" element={<ContentFormPage />} />
-        <Route path="/mypage-creator" element={<MyCreatorPage />} /> {/* 크리에이터 마이페이지 */}
-        <Route path="/mypage-user" element={<MyUserPage />} /> {/* 사용자 마이페이지 */}
+        <Route path="/mypage" element={<MyPage />} />
         <Route path="/subscription-manage" element={<SubscriptionManage />} />
         <Route path="/user-main/:nickname" element={<UserMainPage />} />
         <Route path="/creator-main/:creatorNickname" element={<CreatorMainPage />} />
         <Route path="/creators" element={<CreatorSearchPage />} />
         <Route path="/contents" element={<ContentSearchPage />} />
         <Route path="/search" element={<UnifiedSearchPage />} />
-
         <Route path="/contents/:contentId" element={<ContentDetailPage />} />
         <Route path="/payments/summary/:creatorNickname" element={<PaymentPage />} />
-      
+        <Route path="/profile/edit" element={<ProfileEdit />} />
       </Route>
 
       <Route path="/login" element={<LoginSection />} />

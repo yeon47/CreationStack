@@ -133,9 +133,11 @@ public class SubscriptionService {
 
                 // 기존 nextPaymentAt이 없을 수도 있으니 null check
                 subscription.setNextPaymentAt(
-                                subscription.getNextPaymentAt() != null
-                                                ? subscription.getNextPaymentAt().plusMonths(1)
-                                                : LocalDateTime.now().plusMonths(1));
+                    subscription.getNextPaymentAt() == null ?
+                        subscription.getStartedAt().plusMonths(1)
+                        : subscription.getNextPaymentAt()
+                );
+
 
                 subscriptionRepository.save(subscription);
         }
