@@ -27,9 +27,8 @@ const CommentItem = ({
     replyTargetId === `reply-${comment.commentId}` && editingTargetId !== `comment-${comment.commentId}`;
 
   const isOwner = comment.userId === userId;
-  const isLiked = comment.likedByUser;
+  const isLiked = comment.liked === true;
   const likeCount = comment.likeCount || 0;
-  console.log('댓글:', comment.commentId, '삭제됨?', comment.isDeleted);
 
   return (
     <div className={`${styles.commentItem} ${isReply ? styles.reply : ''}`}>
@@ -42,7 +41,6 @@ const CommentItem = ({
           <span className={styles.username}>{comment.nickname}</span>
           <span className={styles.userRole}>{comment.job}</span>
           <span className={styles.date}>
-            {' '}
             {comment.createdAt ? new Date(comment.createdAt.replace(' ', 'T')).toLocaleString('ko-KR') : ''}
           </span>
         </div>
@@ -73,6 +71,7 @@ const CommentItem = ({
           <div className={styles.commentFooter}>
             {/* 좋아요 버튼 */}
             <button
+              key={`like-${comment.commentId}-${isLiked}`} // key로 강제 리렌더링 유도
               onClick={() => onLike(comment.commentId)}
               className={`${styles.actionButton} ${isLiked ? styles.liked : ''}`}>
               {isLiked ? '❤️' : '🤍'} {likeCount}

@@ -129,20 +129,8 @@ const ReplyList = ({ contentId }) => {
           Authorization: `Bearer ${token}`,
         },
       });
-      // 로컬 상태 업데이트 (서버 응답을 기다리지 않고 즉시 UI 업데이트)
-      setComments(prevComments =>
-        prevComments.map(comment => {
-          if (comment.commentId === commentId) {
-            const isCurrentlyLiked = comment.likedByUser;
-            return {
-              ...comment,
-              likedByUser: !isCurrentlyLiked,
-              likeCount: isCurrentlyLiked ? (comment.likeCount || 1) - 1 : (comment.likeCount || 0) + 1,
-            };
-          }
-          return comment;
-        })
-      );
+
+      await fetchComments();
     } catch (error) {
       alert('좋아요 처리 실패');
       console.error(error);
