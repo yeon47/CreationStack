@@ -210,4 +210,20 @@ public class SubscriptionService {
                 }
         }
 
+        @Transactional
+        public void cancelSubscription(Long subscriptionId, Long userId) {
+                Subscription subscription = subscriptionRepository.findById(subscriptionId)
+                                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "구독 정보를 찾을 수 없습니다."));
+
+                if (!subscription.getSubscriberId().equals(userId)) {
+                        throw new CustomException(HttpStatus.FORBIDDEN, "해당 구독을 해지할 권한이 없습니다.");
+                }
+
+                SubscriptionStatus cancelledStatus = statusRepository.findByName("CANCELLED")
+                                .orElseThrow(() -> new CustomException(HttpStatus.INTERNAL_SERVER_ERROR,
+                                                "CANCELLED 상태 정보를 찾을 수 없습니다."));
+
+                subscription.setStatus(cancelledStatus);
+        }
+
 }

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -82,6 +83,19 @@ public class SubscriptionController {
         List<PublicProfileResponse> subscriptions = subscriptionService.getSubscribedCreators(nickname);
         log.info("creators: {}", subscriptions);
         return ResponseEntity.ok(Map.of("subscriptions", subscriptions));
+    }
+
+    // 구독 해지 (CANCELLED로 변경)
+    @PatchMapping("/subscriptions/{subscriptionId}")
+    public ResponseEntity<?> cancelSubscription(@PathVariable Long subscriptionId, Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        subscriptionService.cancelSubscription(subscriptionId, userId);
+
+        return ResponseEntity.ok(Map.of(
+            "subscriptionId", subscriptionId,
+            "status", "CANCELLED",
+            "message", "구독이 정상적으로 해지되었습니다."
+        ));
     }
 
 
