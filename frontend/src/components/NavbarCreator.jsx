@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
-import styles from "../styles/layout.module.css";
-import logo from "../assets/img/logo.svg"
-import { useNavigate, Link, useLocation } from "react-router-dom"; // Link, useLocation 임포트
-import { searchUnified } from "../api/search";
+import React, { useState, useRef, useEffect } from 'react';
+import styles from '../styles/layout.module.css';
+import logo from '../assets/img/logo.svg';
+import { useNavigate, Link, useLocation } from 'react-router-dom'; // Link 임포트
+import { searchUnified } from '../api/search';
 
 export const NavbarCreator = () => {
   const [searchValue, setSearchValue] = useState('');
@@ -71,15 +71,15 @@ export const NavbarCreator = () => {
     setSearchValue(e.target.value);
   };
 
-  const handleSearchSubmit = async (e) => {
+  const handleSearchSubmit = async e => {
     e.preventDefault();
     if (searchValue.trim()) {
       try {
         const searchResult = await searchUnified({ keyword: searchValue });
-        console.log("검색 결과:", searchResult);
+        console.log('검색 결과:', searchResult);
         navigate(`/search?keyword=${searchValue}`);
       } catch (error) {
-        console.error("통합 검색 실패:", error);
+        console.error('통합 검색 실패:', error);
       }
     }
   };
@@ -120,11 +120,7 @@ export const NavbarCreator = () => {
     <nav className={styles.navbarCreator}>
       {/* 로고 섹션 */}
       <Link to="/" className={styles.logoSection}>
-        <img
-          className={styles.logoImg}
-          alt="Logo"
-          src={logo}
-        />
+        <img className={styles.logoImg} alt="Logo" src={logo} />
       </Link>
 
       {/* 링크 메뉴바 */}
@@ -181,7 +177,7 @@ export const NavbarCreator = () => {
               {isProfileDropdownOpen && (
                 <div className={styles.profileDropdownMenu}>
                   <Link
-                    to="/mypage-creator"
+                    to="/mypage"
                     className={styles.profileDropdownMenuItem}
                     onClick={() => handleProfileMenuItemClick('/mypage-creator')}>
                     마이페이지
