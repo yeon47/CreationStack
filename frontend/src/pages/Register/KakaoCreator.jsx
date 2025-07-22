@@ -1,4 +1,3 @@
-import { ChevronDownIcon } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Member/Button';
@@ -7,17 +6,17 @@ import { Input } from '../../components/Member/Input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/Member/Select';
 import { validateField } from '../../utils/validationUtils';
 import styles from './KakaoCreator.module.css';
+import { signupUser, checkNickname } from '../../api/auth.js';
+import { getJobs } from '../../api/job.js';
 
 export const KakaoCreator = ({ onBack, kakaoInfo }) => {
   const navigate = useNavigate();
-
-  // kakaoInfo가 props로 전달되는 경우와 location.state로 전달되는 경우 모두 처리
   const location = useLocation();
   const initialInfo = kakaoInfo || location.state || {};
 
   const [formData, setFormData] = useState({
     email: initialInfo.email || '',
-    name: '', // 이름은 직접 입력받음
+    name: '',
     nickname: initialInfo.nickname || '',
     jobId: '',
   });
@@ -27,15 +26,11 @@ export const KakaoCreator = ({ onBack, kakaoInfo }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 직업 목록 불러오기
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await fetch('/api/jobs');
-        if (response.ok) {
-          const result = await response.json();
-          setJobs(result.data || []);
-        }
+        const response = await getJobs();
+        setJobs(response.data.data || []);
       } catch (error) {
         console.error('직업 목록 요청 중 오류 발생:', error);
       }
@@ -43,7 +38,6 @@ export const KakaoCreator = ({ onBack, kakaoInfo }) => {
     fetchJobs();
   }, []);
 
-  // 닉네임 중복 확인
   useEffect(() => {
     const nickname = formData.nickname.trim();
     if (nickname.length < 2) {
@@ -52,8 +46,7 @@ export const KakaoCreator = ({ onBack, kakaoInfo }) => {
     }
     const handler = setTimeout(async () => {
       try {
-        const response = await fetch(`/api/user/check-nickname?nickname=${nickname}`);
-        const result = await response.json();
+        const result = await checkNickname(nickname);
         setNicknameStatus({ message: result.message, isAvailable: result.available });
       } catch (error) {
         setNicknameStatus({ message: '확인 중 오류 발생', isAvailable: false });
@@ -66,7 +59,6 @@ export const KakaoCreator = ({ onBack, kakaoInfo }) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
 
-    // 실시간 유효성 검사
     if (id !== 'email') {
       const validation = validateField(id, value);
       setValidationErrors(prev => ({
@@ -93,31 +85,22 @@ export const KakaoCreator = ({ onBack, kakaoInfo }) => {
 
     setIsSubmitting(true);
     try {
-      // 백엔드에 회원가입 요청 (일반 회원가입 API 사용)
-      const response = await fetch('/api/user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email,
-          username: formData.name,
-          nickname: formData.nickname,
-          password: 'KAKAO_USER', // 카카오 사용자는 임시 비밀번호
-          role: 'CREATOR',
-          jobId: parseInt(formData.jobId),
-          platform: 'KAKAO',
-          platformId: initialInfo.platformId,
-        }),
-      });
+      const userData = {
+        email: formData.email,
+        username: formData.name,
+        nickname: formData.nickname,
+        password: 'KAKAO_USER',
+        role: 'CREATOR',
+        jobId: parseInt(formData.jobId),
+        platform: 'KAKAO',
+        platformId: initialInfo.platformId,
+      };
 
-      const result = await response.json();
-      if (response.ok) {
-        alert('카카오 계정으로 회원가입이 완료되었습니다!');
-        navigate('/login');
-      } else {
-        alert(`회원가입 실패: ${result.message}`);
-      }
+      const result = await signupUser(userData);
+      alert('카카오 계정으로 회원가입이 완료되었습니다!');
+      navigate('/login');
     } catch (error) {
-      alert('회원가입 처리 중 오류가 발생했습니다.');
+      alert(`회원가입 실패: ${error.message}`);
       console.error('Registration error:', error);
     } finally {
       setIsSubmitting(false);

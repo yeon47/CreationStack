@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { getMyProfile } from '../api/user'; // ✅ getMyProfile import 추가
+import { getMyProfile } from '../api/user';
 import styles from '../styles/layout.module.css';
 import logo from '../assets/img/logo.svg';
 import { useNavigate, Link } from 'react-router-dom';
 import { searchUnified } from '../api/search';
+import { logoutUser } from '../api/auth';
 
 export const NavbarCreator = () => {
   const [searchValue, setSearchValue] = useState('');
@@ -68,11 +69,7 @@ export const NavbarCreator = () => {
     }
 
     try {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
-      });
+      await logoutUser(refreshToken);
     } catch (error) {
       console.error('Logout API call failed:', error);
     } finally {
@@ -102,31 +99,27 @@ export const NavbarCreator = () => {
 
   const handleMenuClick = menu => {
     setActiveMenu(menu);
-    // 메뉴 클릭 시 라우팅 로직 구현
     console.log('선택된 메뉴:', menu);
-    // 실제 라우트 경로에 따라 navigate 호출
     if (menu === '홈') {
       navigate('/');
     } else if (menu === '크리에이터') {
-      navigate('/creators'); // 예시 경로
+      navigate('/creators');
     } else if (menu === '컨텐츠') {
-      navigate('/contents'); // 예시 경로
+      navigate('/contents');
     }
   };
 
   const handleCreateContent = () => {
-    // 콘텐츠 작성 페이지로 이동
     console.log('콘텐츠 작성 버튼 클릭');
     navigate('/content-form');
   };
 
   const handleProfileClick = () => {
-    // 프로필 드롭다운 토글
     setIsProfileDropdownOpen(prev => !prev);
   };
 
   const handleProfileMenuItemClick = path => {
-    setIsProfileDropdownOpen(false); // 메뉴 클릭 시 드롭다운 닫기
+    setIsProfileDropdownOpen(false);
     navigate(path);
   };
 
@@ -177,7 +170,6 @@ export const NavbarCreator = () => {
       {/* 우측 버튼들 */}
       <div className={styles.rightSection}>
         {isLoggedIn ? (
-          // --- 로그인 상태일 때 보여줄 UI ---
           <>
             {userRole === 'CREATOR' && (
               <button className={styles.createContentButton} onClick={handleCreateContent}>
@@ -204,7 +196,6 @@ export const NavbarCreator = () => {
             </div>
           </>
         ) : (
-          // --- 비로그인 상태일 때 보여줄 UI ---
           <>
             <Link to="/login" className={styles.authButton}>
               로그인
