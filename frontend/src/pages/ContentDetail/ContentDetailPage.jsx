@@ -3,6 +3,17 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
+// 컴포넌트 임포트
+import ContentHeader from '../../components/ContentDetail/ContentHeader/ContentHeader';
+import AuthorInfoCard from '../../components/ContentDetail/AuthorInfoCard/AuthorInfoCard';
+import ContentBody from '../../components/ContentDetail/ContentBody/ContentBody';
+import FileDownloadList from '../../components/ContentDetail/FileDownloadList/FileDownloadList';
+import LikeCommentBar from '../../components/ContentDetail/LikeCommentBar/LikeCommentBar';
+import CommentSection from '../../components/ContentDetail/CommentSection/CommentSection';
+import RelatedContentList from '../../components/ContentDetail/RelatedContentList/RelatedContentList';
+
+import styles from './ContentDetailPage.module.css';
+
 /* 권한 확인용으로 임의 작성한 페이지 입니다. */
 export const ContentDetailPage = () => {
   const { contentId } = useParams();
@@ -35,22 +46,18 @@ export const ContentDetailPage = () => {
 
   console.log('content 정보', content);
   return (
-    <div>
-      <h1>{content.title}</h1>
-      <img src={content.thumbnailUrl} alt={content.title} style={{ width: '100%', maxWidth: 600 }} />
-      <p>크리에이터닉네임: {content.creatorNickname}</p>
-      <p>조회수: {content.viewCount}</p>
-      <p>좋아요 수: {content.likeCount}</p>
-      <p>댓글 수: {content.commentCount}</p>
-      <p>등록일: {new Date(content.createdAt).toLocaleDateString()}</p>
-      <p>유형: {content.accessType === 'SUBSCRIBER' ? '구독 전용 콘텐츠' : '무료 콘텐츠'}</p>
-      {content.categories && content.categories.length > 0 ? (
-        <p>카테고리: {content.categories.map(c => c.name).join(', ')}</p>
-      ) : (
-        <p>카테고리: 없음</p>
-      )}
-      <hr />
-      <p>{content.content}</p>
+    <div className={styles.pageWrapper}>
+      <ContentHeader title={content.title} categories={content.categories} createdAt={content.createdAt} />
+      <AuthorInfoCard
+        nickname={content.creatorNickname}
+        job={content.creatorJob}
+        profileImageUrl={content.creatorProfileUrl}
+      />
+      <ContentBody thumbnailUrl={content.thumbnailUrl} description={content.content} />
+      <FileDownloadList files={content.fileUrls} />
+      <LikeCommentBar likeCount={content.likeCount} commentCount={content.commentCount} />
+      <CommentSection contentId={contentId} />
+      <RelatedContentList creatorId={content.creatorId} />
     </div>
   );
 };
