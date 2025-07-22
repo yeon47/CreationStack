@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import styles from './mypage.module.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { getMyProfile, deleteMyAccount } from '../../api/user';
+import { LeaveMemberModal } from '../../components/Member/LeaveMemberModal';
 
 export const MyPage = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -19,22 +21,28 @@ export const MyPage = () => {
     fetchUserData();
   }, []);
 
-  const handleUnregister = async () => {
-    // 사용자에게 정말 탈퇴할 것인지 최종 확인을 받습니다.
-    const isConfirmed = window.confirm(
-      '정말로 회원 탈퇴를 하시겠습니까?\n모든 정보는 복구할 수 없으며, 닉네임은 "탈퇴한 사용자입니다."로 변경됩니다.'
-    );
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
 
-    if (isConfirmed) {
-      try {
-        await deleteMyAccount();
-        alert('회원 탈퇴가 완료되었습니다. 이용해주셔서 감사합니다.');
-        localStorage.removeItem('accessToken'); // 토큰 삭제
-        navigate('/'); // 홈페이지로 리디렉션
-      } catch (error) {
-        console.error('Failed to unregister:', error);
-        alert('회원 탈퇴 중 오류가 발생했습니다. 다시 시도해주세요.');
-      }
+  // 모달을 닫는 함수
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  // 모달의 '확인'을 눌렀을 때 실행될 실제 회원 탈퇴 처리 함수
+  const handleConfirmUnregister = async () => {
+    try {
+      await deleteMyAccount();
+      alert('회원 탈퇴가 완료되었습니다. 이용해주셔서 감사합니다.');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken'); // refreshToken도 함께 삭제
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to unregister:', error);
+      alert('회원 탈퇴 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      closeModal(); // 성공하든 실패하든 모달을 닫음
     }
   };
 
@@ -95,13 +103,14 @@ export const MyPage = () => {
               <Link to="/payments" className={styles.labelWrapper}>
                 <div className={`${styles.baseTextStyles} ${styles.label2}`}>결제수단 관리</div>
               </Link>
-              <div className={styles.labelWrapper} onClick={handleUnregister} style={{ cursor: 'pointer' }}>
+              <div className={styles.labelWrapper} onClick={openModal} style={{ cursor: 'pointer' }}>
                 <div className={`${styles.baseTextStyles} ${styles.label2}`}>회원 탈퇴</div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <LeaveMemberModal isOpen={isModalOpen} onClose={closeModal} onConfirm={handleConfirmUnregister} />
     </div>
   );
 };
