@@ -21,15 +21,16 @@ export async function createContent(formData) {
     throw error.response?.data || error;
   }
 }
-  // 콘텐츠 상세보기
-  export async function getContentById(contentId) {
+// 콘텐츠 상세보기
+export async function getContentById(contentId) {
   try {
     const accessToken = localStorage.getItem('accessToken'); // accessToken 가져오기 (선택적)
 
     const headers = {
       'Content-Type': 'application/json',
     };
-    if (accessToken) { // 토큰이 있을 경우에만 Authorization 헤더 추가
+    if (accessToken) {
+      // 토큰이 있을 경우에만 Authorization 헤더 추가
       headers.Authorization = `Bearer ${accessToken}`;
     }
 
@@ -86,7 +87,7 @@ export async function getMyTopViewedContents() {
 }
 
 // 콘텐츠 삭제
-export async function deleteContent(contentId) { 
+export async function deleteContent(contentId) {
   try {
     const accessToken = localStorage.getItem('accessToken'); // accessToken 가져오기
     if (!accessToken) {
@@ -106,7 +107,7 @@ export async function deleteContent(contentId) {
 }
 
 // 콘텐츠 수정
-export async function updateContent(contentId, formData) { 
+export async function updateContent(contentId, formData) {
   try {
     const accessToken = localStorage.getItem('accessToken'); // accessToken 가져오기
     if (!accessToken) {
@@ -125,7 +126,6 @@ export async function updateContent(contentId, formData) {
     throw error.response?.data || error;
   }
 }
-
 
 // 특정 크리에이터의 콘텐츠 목록을 조회하는 API 호출 함수
 export async function getContentsByCreator(creatorId) {
@@ -157,9 +157,8 @@ export async function getTopViewedContentsByCreator(creatorId) {
   }
 }
 
-
 // 콘텐츠 접근 권한 확인
-export const checkContentAccess = async (contentId) => {
+export const checkContentAccess = async contentId => {
   const token = localStorage.getItem('accessToken');
   return axios.get(`/api/content/${contentId}`, {
     headers: {
