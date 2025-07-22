@@ -29,7 +29,7 @@ export const KakaoCommon = ({ onBack, kakaoInfo }) => {
     }
     const handler = setTimeout(async () => {
       try {
-        const response = await fetch(`/api/users/check-nickname?nickname=${nickname}`);
+        const response = await fetch(`/api/user/check-nickname?nickname=${nickname}`);
         const result = await response.json();
         setNicknameStatus({ message: result.message, isAvailable: result.available });
       } catch (error) {
@@ -96,7 +96,7 @@ export const KakaoCommon = ({ onBack, kakaoInfo }) => {
 
       console.log('카카오 일반 사용자 회원가입 요청:', requestBody);
 
-      const response = await fetch('/api/users', {
+      const response = await fetch('/api/user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),

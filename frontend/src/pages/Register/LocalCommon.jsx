@@ -56,7 +56,7 @@ export const LocalCommon = ({ onBack }) => {
       setNicknameStatus(prev => ({ ...prev, isChecking: true }));
 
       try {
-        const response = await fetch(`/api/users/check-nickname?nickname=${nickname}`);
+        const response = await fetch(`/api/user/check-nickname?nickname=${nickname}`);
         const result = await response.json();
         setNicknameStatus({
           message: result.message,
@@ -232,7 +232,7 @@ export const LocalCommon = ({ onBack }) => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/users', {
+      const response = await fetch('/api/user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -281,7 +281,7 @@ export const LocalCommon = ({ onBack }) => {
     setEmailStatus(prev => ({ ...prev, isChecking: true }));
 
     try {
-      const response = await fetch(`/api/users/check-email?email=${formData.email}`);
+      const response = await fetch(`/api/user/check-email?email=${formData.email}`);
       const result = await response.json();
       setEmailStatus({
         message: result.message,

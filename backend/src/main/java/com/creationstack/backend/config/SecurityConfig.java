@@ -42,10 +42,10 @@ public class SecurityConfig {
                     auth
                             // 인증 없이 접근 가능한 경로들
                             .requestMatchers(
-                                    "/api/users", // 회원가입
+                                    "/api/user", // 회원가입
                                     "/api/jobs", // 직업 목록
-                                    "/api/users/check-email", // 이메일 중복 확인
-                                    "/api/users/check-nickname", // 닉네임 중복 확인
+                                    "/api/user/check-email", // 이메일 중복 확인
+                                    "/api/user/check-nickname", // 닉네임 중복 확인
                                     "/api/auth/login", // 로그인
                                     "/api/auth/refresh", // 토큰 갱신
                                     "/api/auth/logout", // 로그아웃 (refresh token 방식)
@@ -67,8 +67,8 @@ public class SecurityConfig {
                             // /api/user/** 경로는 인증 필요 (기존 설정 유지)
                             .requestMatchers("/api/user/**").authenticated()
 
-                        .requestMatchers("/api/billings/**").authenticated()
-                        .requestMatchers("/api/payments/**").authenticated()
+                            .requestMatchers("/api/billings/**").authenticated()
+                            .requestMatchers("/api/payments/**").authenticated()
                             // 특정 크리에이터의 콘텐츠 접근 시 인증 필요
                             .requestMatchers("/api/content/creator/**").authenticated()
 

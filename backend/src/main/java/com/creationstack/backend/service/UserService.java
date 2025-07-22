@@ -13,6 +13,7 @@ import com.creationstack.backend.dto.member.UpdateProfileRequest;
 import com.creationstack.backend.dto.member.UserProfileResponse;
 import com.creationstack.backend.exception.CustomException;
 import com.creationstack.backend.repository.JobRepository;
+import com.creationstack.backend.repository.UserDetailRepository;
 import com.creationstack.backend.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class UserService {
         private final UserRepository userRepository;
         private final JobRepository jobRepository;
         private final PasswordEncoder passwordEncoder;
+        private final UserDetailRepository userDetailRepository;
 
         public UserProfileResponse getUserProfile(Long userId) {
                 User user = userRepository.findByUserIdAndIsActiveTrue(userId)
@@ -107,29 +109,16 @@ public class UserService {
 
         @Transactional
         public void softDeleteUser(Long userId) {
-                User user = userRepository.findById(userId)
-                                .orElseThrow(() -> new RuntimeException("해당 사용자를 찾을 수 없습니다. ID: " + userId));
+                // 1. 익명화할 정보 생성
+                String anonymizedNickname = "탈퇴한 사용자_" + userId;
+                String anonymizedUsername = "탈퇴한 사용자";
+                String anonymizedEmail = "deleted_" + userId + "@example.com";
 
-                user.setIsActive(false);
-                user.setJob(null);
+                // 2. UserDetail 정보 익명화 (직접 업데이트)
+                userDetailRepository.anonymizeUserDetails(userId, anonymizedNickname, anonymizedUsername,
+                                anonymizedEmail);
 
-                UserDetail userDetail = user.getUserDetail();
-
-                if (userDetail != null) {
-                        // 길이(10자 이하)와 유일성(unique) 제약 조건을 모두 만족하도록 userId를 추가
-                        userDetail.setNickname("탈퇴한 사용자_" + user.getUserId());
-
-                        // @NotBlank를 만족시키기 위한 더미 데이터
-                        userDetail.setUsername("탈퇴한 사용자");
-
-                        // @NotBlank, @Email, unique 제약 조건을 모두 만족하도록 userId를 추가
-                        userDetail.setEmail("deleted_" + user.getUserId() + "@example.com");
-                        userDetail.setBio(null);
-                        userDetail.setProfileImageUrl(null);
-                        userDetail.setPassword(null);
-                        userDetail.setPlatformId(null);
-                }
-
-                userRepository.save(user);
+                // 3. User 상태 비활성화 (직접 업데이트)
+                userRepository.deactivateUser(userId);
         }
 }

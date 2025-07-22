@@ -52,7 +52,7 @@ export const KakaoCreator = ({ onBack, kakaoInfo }) => {
     }
     const handler = setTimeout(async () => {
       try {
-        const response = await fetch(`/api/users/check-nickname?nickname=${nickname}`);
+        const response = await fetch(`/api/user/check-nickname?nickname=${nickname}`);
         const result = await response.json();
         setNicknameStatus({ message: result.message, isAvailable: result.available });
       } catch (error) {
@@ -94,7 +94,7 @@ export const KakaoCreator = ({ onBack, kakaoInfo }) => {
     setIsSubmitting(true);
     try {
       // 백엔드에 회원가입 요청 (일반 회원가입 API 사용)
-      const response = await fetch('/api/users', {
+      const response = await fetch('/api/user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
