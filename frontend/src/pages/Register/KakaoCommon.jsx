@@ -6,6 +6,7 @@ import { Input } from '../../components/Member/Input';
 import { Label } from '../../components/Member/Label';
 import { validateField } from '../../utils/validationUtils';
 import styles from './KakaoCommon.module.css';
+import { signupUser, checkNickname } from '../../api/auth.js';
 
 export const KakaoCommon = ({ onBack, kakaoInfo }) => {
   const navigate = useNavigate();
@@ -20,7 +21,6 @@ export const KakaoCommon = ({ onBack, kakaoInfo }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 닉네임 중복 확인
   useEffect(() => {
     const nickname = formData.nickname.trim();
     if (nickname.length < 2) {
@@ -29,8 +29,7 @@ export const KakaoCommon = ({ onBack, kakaoInfo }) => {
     }
     const handler = setTimeout(async () => {
       try {
-        const response = await fetch(`/api/users/check-nickname?nickname=${nickname}`);
-        const result = await response.json();
+        const result = await checkNickname(nickname);
         setNicknameStatus({ message: result.message, isAvailable: result.available });
       } catch (error) {
         setNicknameStatus({ message: '확인 중 오류 발생', isAvailable: false });
@@ -43,9 +42,7 @@ export const KakaoCommon = ({ onBack, kakaoInfo }) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
 
-    // 실시간 유효성 검사
     if (id !== 'email') {
-      // 이메일은 카카오에서 가져온 것이므로 검증 제외
       const validation = validateField(id, value);
       setValidationErrors(prev => ({
         ...prev,
@@ -56,8 +53,7 @@ export const KakaoCommon = ({ onBack, kakaoInfo }) => {
 
   const handleSubmit = async e => {
     e.preventDefault();
-
-    // 전체 폼 유효성 검사
+    1;
     const nameValidation = validateField('name', formData.name);
     const nicknameValidation = validateField('nickname', formData.nickname);
 
@@ -83,38 +79,26 @@ export const KakaoCommon = ({ onBack, kakaoInfo }) => {
     setIsSubmitting(true);
 
     try {
-      // 카카오 일반 사용자 회원가입 요청
       const requestBody = {
         email: formData.email,
         username: formData.name.trim(),
         nickname: formData.nickname.trim(),
-        role: 'USER', // 일반 사용자
+        role: 'USER',
         platform: 'KAKAO',
         platformId: kakaoInfo?.platformId,
-        // 비밀번호는 카카오 사용자이므로 보내지 않음
       };
 
-      console.log('카카오 일반 사용자 회원가입 요청:', requestBody);
-
-      const response = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-      });
-
-      const result = await response.json();
+      const result = await signupUser(requestBody);
 
       if (response.ok) {
         alert('카카오 계정으로 회원가입이 완료되었습니다!');
 
-        // 회원가입 성공 시 토큰 저장 (백엔드에서 토큰을 반환하는 경우)
         if (result.data?.tokens) {
           localStorage.setItem('accessToken', result.data.tokens.accessToken);
           localStorage.setItem('refreshToken', result.data.tokens.refreshToken);
           navigate('/');
           window.location.reload();
         } else {
-          // 토큰이 없으면 로그인 페이지로
           navigate('/login');
         }
       } else {
@@ -132,7 +116,6 @@ export const KakaoCommon = ({ onBack, kakaoInfo }) => {
     navigate('/login');
   };
 
-  // Form field data
   const formFields = [
     {
       id: 'email',
@@ -191,7 +174,6 @@ export const KakaoCommon = ({ onBack, kakaoInfo }) => {
                   </Label>
 
                   {field.isEmail ? (
-                    // 이메일은 읽기 전용으로 표시
                     <div className={styles.emailDisplay}>{field.value}</div>
                   ) : (
                     <>

@@ -3,7 +3,6 @@ package com.creationstack.backend.service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -124,7 +123,8 @@ public class AuthService {
                                 savedUser.getUserId(),
                                 userDetail.getEmail(),
                                 savedUser.getRole().name(),
-                                userDetail.getNickname());
+                                userDetail.getNickname(),
+                                userDetail.getPlatform().name());
 
                 String refreshToken = jwtUtil.generateRefreshToken(savedUser.getUserId());
 
@@ -234,7 +234,8 @@ public class AuthService {
                                         user.getUserId(),
                                         userDetail.getEmail(),
                                         user.getRole().name(),
-                                        userDetail.getNickname());
+                                        userDetail.getNickname(),
+                                        userDetail.getPlatform().name());
 
                         String refreshToken = jwtUtil.generateRefreshToken(user.getUserId());
 
@@ -320,7 +321,8 @@ public class AuthService {
                                 user.getUserId(),
                                 user.getUserDetail().getEmail(),
                                 user.getRole().name(),
-                                user.getUserDetail().getNickname());
+                                user.getUserDetail().getNickname(),
+                                user.getUserDetail().getPlatform().name());
 
                 return TokenRefreshResponse.builder()
                                 .success(true)

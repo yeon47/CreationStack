@@ -1,30 +1,41 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { getMyProfile } from '../api/user';
 import styles from '../styles/layout.module.css';
 import logo from '../assets/img/logo.svg';
-import { useNavigate, Link, useLocation } from 'react-router-dom'; // Link 임포트
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { searchUnified } from '../api/search';
+import { logoutUser } from '../api/auth';
 
 export const NavbarCreator = () => {
   const [searchValue, setSearchValue] = useState('');
   const [activeMenu, setActiveMenu] = useState('');
-  const location = useLocation();
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false); // 프로필 드롭다운 상태
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
-  const profileDropdownRef = useRef(null); // 프로필 드롭다운 ref
-  const isLoggedIn = !!localStorage.getItem('accessToken'); // 로그인 상태 확인하는 변수
+  const location = useLocation();
+  const profileDropdownRef = useRef(null);
+  const isLoggedIn = !!localStorage.getItem('accessToken');
+  const [profileImageUrl, setProfileImageUrl] = useState('https://c.animaapp.com/md5nv2zm9suaL3/img/profileimage.png');
 
-  // 프로필 드롭다운 외부 클릭 감지
-  useEffect(() => {
-    const handleClickOutside = event => {
-      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
-        setIsProfileDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+  const getRoleFromToken = token => {
+    try {
+      const payloadBase64 = token.split('.')[1];
+      if (!payloadBase64) return null;
+      const jsonPayload = atob(payloadBase64);
+      const decodedPayload = JSON.parse(jsonPayload);
+      return decodedPayload.role;
+    } catch (error) {
+      console.error('Failed to decode token:', error);
+      return null;
+    }
+  };
+
+  const userRole = useMemo(() => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      return getRoleFromToken(token);
+    }
+    return null;
+  }, [isLoggedIn]);
 
   // URL 경로에 따라 activeMenu 설정
   useEffect(() => {
@@ -39,7 +50,61 @@ export const NavbarCreator = () => {
     }
   }, [location.pathname]);
 
-  // 로그아웃 기능 함수
+  useEffect(() => {
+    if (isLoggedIn) {
+      const fetchProfileImage = async () => {
+        try {
+          const response = await getMyProfile();
+          const userData = response.data.data;
+          const imageUrl = userData.profileImageUrl;
+
+          if (imageUrl && imageUrl.trim() !== '') {
+            // 상대 경로인지 절대 경로인지 확인
+            if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+              setProfileImageUrl(imageUrl);
+            } else {
+              // 상대 경로인 경우 서버 URL 추가
+              setProfileImageUrl(`http://localhost:8080${imageUrl}`);
+            }
+          } else {
+            // 프로필 이미지가 없는 경우 기본 이미지 사용
+            setProfileImageUrl('https://c.animaapp.com/md5nv2zm9suaL3/img/profileimage.png');
+          }
+        } catch (error) {
+          console.error('Failed to fetch profile image:', error);
+          // 에러 발생 시 기본 이미지 사용
+          setProfileImageUrl('https://c.animaapp.com/md5nv2zm9suaL3/img/profileimage.png');
+        }
+      };
+      fetchProfileImage();
+    }
+  }, [isLoggedIn]);
+
+  // 프로필 이미지 업데이트 이벤트 리스너
+  useEffect(() => {
+    const handleProfileImageUpdate = event => {
+      const newImageUrl = event.detail.profileImageUrl;
+
+      if (newImageUrl && newImageUrl.trim() !== '') {
+        // 상대 경로인지 절대 경로인지 확인
+        if (newImageUrl.startsWith('http://') || newImageUrl.startsWith('https://')) {
+          setProfileImageUrl(newImageUrl);
+        } else {
+          // 상대 경로인 경우 서버 URL 추가
+          setProfileImageUrl(`http://localhost:8080${newImageUrl}`);
+        }
+      }
+    };
+
+    // 이벤트 리스너 등록
+    window.addEventListener('profileImageUpdated', handleProfileImageUpdate);
+
+    // 컴포넌트 언마운트 시 이벤트 리스너 제거
+    return () => {
+      window.removeEventListener('profileImageUpdated', handleProfileImageUpdate);
+    };
+  }, []);
+
   const handleLogout = async () => {
     setIsProfileDropdownOpen(false);
     const refreshToken = localStorage.getItem('refreshToken');
@@ -52,18 +117,14 @@ export const NavbarCreator = () => {
     }
 
     try {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
-      });
+      await logoutUser(refreshToken);
     } catch (error) {
       console.error('Logout API call failed:', error);
     } finally {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       alert('로그아웃 되었습니다.');
-      window.location.reload(); // 네비바 상태 업데이트를 위해 페이지 새로고침
+      window.location.reload();
     }
   };
 
@@ -86,31 +147,27 @@ export const NavbarCreator = () => {
 
   const handleMenuClick = menu => {
     setActiveMenu(menu);
-    // 메뉴 클릭 시 라우팅 로직 구현
     console.log('선택된 메뉴:', menu);
-    // 실제 라우트 경로에 따라 navigate 호출
     if (menu === '홈') {
       navigate('/');
     } else if (menu === '크리에이터') {
-      navigate('/creators'); // 예시 경로
+      navigate('/creators');
     } else if (menu === '컨텐츠') {
-      navigate('/contents'); // 예시 경로
+      navigate('/contents');
     }
   };
 
   const handleCreateContent = () => {
-    // 콘텐츠 작성 페이지로 이동
     console.log('콘텐츠 작성 버튼 클릭');
     navigate('/content-form');
   };
 
   const handleProfileClick = () => {
-    // 프로필 드롭다운 토글
     setIsProfileDropdownOpen(prev => !prev);
   };
 
   const handleProfileMenuItemClick = path => {
-    setIsProfileDropdownOpen(false); // 메뉴 클릭 시 드롭다운 닫기
+    setIsProfileDropdownOpen(false);
     navigate(path);
   };
 
@@ -161,25 +218,22 @@ export const NavbarCreator = () => {
       {/* 우측 버튼들 */}
       <div className={styles.rightSection}>
         {isLoggedIn ? (
-          // --- 로그인 상태일 때 보여줄 UI ---
           <>
-            <button className={styles.createContentButton} onClick={handleCreateContent}>
-              콘텐츠 작성
-            </button>
+            {userRole === 'CREATOR' && (
+              <button className={styles.createContentButton} onClick={handleCreateContent}>
+                콘텐츠 작성
+              </button>
+            )}
             <div className={styles.profileButtonContainer} ref={profileDropdownRef}>
               <button className={styles.profileButton} onClick={handleProfileClick}>
-                <img
-                  className={styles.profileImage}
-                  alt="Profile"
-                  src="https://c.animaapp.com/md45uvjzPxvxqT/img/profilebutton-1.png"
-                />
+                <img className={styles.profileImage} alt="Profile" src={profileImageUrl} />
               </button>
               {isProfileDropdownOpen && (
                 <div className={styles.profileDropdownMenu}>
                   <Link
                     to="/mypage"
                     className={styles.profileDropdownMenuItem}
-                    onClick={() => handleProfileMenuItemClick('/mypage-creator')}>
+                    onClick={() => handleProfileMenuItemClick('/mypage')}>
                     마이페이지
                   </Link>
                   <button className={styles.profileDropdownMenuItem} onClick={handleLogout}>
@@ -190,7 +244,6 @@ export const NavbarCreator = () => {
             </div>
           </>
         ) : (
-          // --- 비로그인 상태일 때 보여줄 UI ---
           <>
             <Link to="/login" className={styles.authButton}>
               로그인
