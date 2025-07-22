@@ -1,5 +1,9 @@
 package com.creationstack.backend.dto.Subscription;
-import lombok.*;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Builder
 @Getter

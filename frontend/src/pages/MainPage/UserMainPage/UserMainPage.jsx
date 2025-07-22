@@ -1,40 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 
-import { Pagination } from '../../../components/pagination';
 import styles from './UserMainPage.module.css';
 import { UserInfo } from '../../../components/MainPage/UserInfo/UserInfo';
 import CreatorCardList from '../../../components/CreatorCard/CreatorCardList';
 import logo from '../../../assets/img/logo.svg';
+import { getPublicUserProfile } from '../../../api/profile';
+import { getSubscriptionsByNickname } from '../../../api/subscription';
 
 export const UserMainPage = () => {
-  const { nickname } = useParams();   // URL에서 닉네임 추출
-  console.log('닉네임:', nickname);
+  const { nickname } = useParams(); // URL에서 닉네임 추출
   const [user, setUser] = useState(null);
   const [creators, setCreators] = useState([]);
 
   useEffect(() => {
     if (!nickname) return;
 
-    // 1. 사용자 정보 불러오기
-    axios
-      .get(`/api/user/public/${encodeURIComponent(nickname)}`)
-      .then(res => {
-        const data = res.data;
-        console.log(data);
-        setUser(data);
+    const fetchUserData = async () => {
+      try {
+        const userData = await getPublicUserProfile(nickname);
+        setUser(userData);
+        const creatorsData = await getSubscriptionsByNickname(userData.nickname);
+        setCreators(creatorsData);
+      } catch (error) {
+        console.error('사용자 정보 또는 구독 목록 불러오기 실패', error);
+      }
+    };
 
-        // 2. 해당 유저의 구독한 크리에이터 목록 불러오기
-        return axios.get(`/api/users/${data.nickname}/subscriptions`);
-      })
-      .then(res => {
-        console.log('크리에이터 목록 응답:', res.data);
-        setCreators(res.data);
-      })
-      .catch(err => {
-        console.error('크리에이터 정보 또는 콘텐츠 불러오기 실패', err);
-      });
+    fetchUserData();
   }, [nickname]);
 
   if (!user || !creators) return null;

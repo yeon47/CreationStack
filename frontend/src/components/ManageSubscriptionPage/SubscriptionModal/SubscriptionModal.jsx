@@ -2,7 +2,6 @@ import React from "react";
 import styles from "./SubscriptionModal.module.css";
 
 // 구독 내역이 있는 사용자의 구독 관련 모달
-// 결제 시스템 연결해야 함
 export const SubscriptionModal = ({ type, onClose, onConfirm }) => {
   const config = {
     cancel: {

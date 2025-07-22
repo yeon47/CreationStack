@@ -26,7 +26,7 @@ public class PublicProfileResponse {
     }
 
     public PublicProfileResponse(Long userId, String nickname, User.UserRole role, String jobName,
-                                 String bio, String profileImageUrl, boolean isActive, Number subsCount) {
+            String bio, String profileImageUrl, boolean isActive, Number subsCount) {
         this.userId = userId;
         this.nickname = nickname;
         this.role = role;
@@ -37,4 +37,3 @@ public class PublicProfileResponse {
         this.subsCount = subsCount != null ? subsCount.longValue() : 0L;
     }
 }
-

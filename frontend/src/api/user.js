@@ -50,13 +50,11 @@ export const updateMyProfile = profileData => {
   });
 };
 
-export const deleteMyAccount = async () => {
-  const token = localStorage.getItem('accessToken');
-  if (!token) throw new Error('인증 토큰이 없습니다.');
-
-  return await axios.delete('http://localhost:8080/api/users/me', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+export const deleteMyAccount = () => {
+  return requestApi(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    return axios.delete(`${BASE_URL}/api/user/me`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
   });
 };

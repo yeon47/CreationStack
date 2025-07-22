@@ -5,6 +5,8 @@ import { Card, CardContent } from '../../components/Member/Card';
 import { Input } from '../../components/Member/Input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/Member/Select';
 import { validateField, debounce } from '../../utils/validationUtils';
+import { checkNickname, signupUser, checkEmail } from '../../api/auth';
+import { getJobs } from '../../api/job';
 import Eye from '../../components/Member/Eye';
 import EyeOff from '../../components/Member/EyeOff';
 
@@ -37,21 +39,15 @@ export const LocalCreator = ({ onBack }) => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await fetch('/api/jobs');
-        if (response.ok) {
-          const result = await response.json();
-          setJobs(result.data || []);
-        } else {
-          console.error('직업 목록을 불러오는 데 실패했습니다.');
-        }
+        const response = await getJobs();
+        setJobs(response.data.data || []);
       } catch (error) {
-        console.error('직업 목록 요청 중 오류 발생:', error);
+        console.error('직업 목록을 불러오는 데 실패했습니다:', error);
       }
     };
     fetchJobs();
   }, []);
 
-  // 닉네임 중복 확인 디바운스 함수
   const debouncedNicknameCheck = useCallback(
     debounce(async nickname => {
       if (nickname.length < 2) {
@@ -62,8 +58,7 @@ export const LocalCreator = ({ onBack }) => {
       setNicknameStatus(prev => ({ ...prev, isChecking: true }));
 
       try {
-        const response = await fetch(`/api/users/check-nickname?nickname=${nickname}`);
-        const result = await response.json();
+        const result = await checkNickname(nickname);
         setNicknameStatus({
           message: result.message,
           isAvailable: result.available,
@@ -80,7 +75,6 @@ export const LocalCreator = ({ onBack }) => {
     []
   );
 
-  // 닉네임 변경 시 중복 확인
   useEffect(() => {
     const nickname = formData.nickname.trim();
     if (nickname && !validationErrors.nickname) {
@@ -94,13 +88,11 @@ export const LocalCreator = ({ onBack }) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
 
-    // 필드 터치 상태 업데이트
     setFieldStates(prev => ({
       ...prev,
       [id]: { ...prev[id], touched: true },
     }));
 
-    // 실시간 유효성 검사
     if (id !== 'confirmPassword') {
       const validation = validateField(id, value);
       setValidationErrors(prev => ({
@@ -108,7 +100,6 @@ export const LocalCreator = ({ onBack }) => {
         [id]: validation.isValid ? '' : validation.message,
       }));
     } else {
-      // 비밀번호 확인 검증
       if (formData.password && value && formData.password !== value) {
         setValidationErrors(prev => ({
           ...prev,
@@ -129,7 +120,6 @@ export const LocalCreator = ({ onBack }) => {
 
   const handleJobChange = value => {
     setFormData(prev => ({ ...prev, jobId: value }));
-    // 직업 선택 시 에러 메시지 제거
     setValidationErrors(prev => ({ ...prev, jobId: '' }));
     setFieldStates(prev => ({
       ...prev,
@@ -156,7 +146,6 @@ export const LocalCreator = ({ onBack }) => {
   };
 
   const checkEmailDuplicate = async () => {
-    // 이메일 유효성 검사 먼저 실행
     const emailValidation = validateField('email', formData.email);
     if (!emailValidation.isValid) {
       setValidationErrors(prev => ({
@@ -173,8 +162,7 @@ export const LocalCreator = ({ onBack }) => {
     setEmailStatus(prev => ({ ...prev, isChecking: true }));
 
     try {
-      const response = await fetch(`/api/users/check-email?email=${formData.email}`);
-      const result = await response.json();
+      const result = await checkEmail(formData.email);
       setEmailStatus({
         message: result.message,
         isAvailable: result.available,
@@ -196,17 +184,14 @@ export const LocalCreator = ({ onBack }) => {
   const handleSubmit = async e => {
     e.preventDefault();
 
-    // 모든 필드를 터치된 상태로 설정
     const allFieldStates = {};
     ['email', 'name', 'nickname', 'password', 'confirmPassword', 'jobId'].forEach(field => {
       allFieldStates[field] = { touched: true, focused: false };
     });
     setFieldStates(allFieldStates);
 
-    // 전체 폼 유효성 검사
     const errors = {};
 
-    // 각 필드 유효성 검사
     const emailValidation = validateField('email', formData.email);
     const nameValidation = validateField('name', formData.name);
     const nicknameValidation = validateField('nickname', formData.nickname);
@@ -218,7 +203,6 @@ export const LocalCreator = ({ onBack }) => {
     if (!passwordValidation.isValid) errors.password = passwordValidation.message;
     if (!formData.jobId) errors.jobId = '직업을 선택해주세요';
 
-    // 비밀번호 확인 검증
     if (formData.password !== formData.confirmPassword) {
       errors.confirmPassword = '비밀번호가 일치하지 않습니다';
     }
@@ -239,31 +223,28 @@ export const LocalCreator = ({ onBack }) => {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email.trim(),
-          username: formData.name.trim(),
-          nickname: formData.nickname.trim(),
-          password: formData.password,
-          role: 'CREATOR',
-          jobId: parseInt(formData.jobId),
-        }),
-      });
-      const result = await response.json();
+      const userData = {
+        email: formData.email.trim(),
+        username: formData.name.trim(),
+        nickname: formData.nickname.trim(),
+        password: formData.password,
+        role: 'CREATOR',
+        jobId: parseInt(formData.jobId),
+      };
+
+      const result = await signupUser(userData);
       alert(result.message);
-      if (response.ok) {
+      if (result) {
         window.location.href = '/login';
       }
     } catch (error) {
-      alert('회원가입 처리 중 오류가 발생했습니다.');
+      alert(`회원가입 실패: ${error.message}`);
+      console.error('Registration error:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // 필드별 에러 메시지 표시 여부 결정
   const shouldShowError = fieldId => {
     return fieldStates[fieldId]?.touched && validationErrors[fieldId];
   };

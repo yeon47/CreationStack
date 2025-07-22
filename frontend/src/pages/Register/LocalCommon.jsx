@@ -3,6 +3,7 @@ import { Card, CardContent } from '../../components/Member/Card';
 import { Input } from '../../components/Member/Input';
 import { SimpleLabel } from '../../components/Member/SimpleLabel';
 import { validateField, debounce } from '../../utils/validationUtils';
+import { checkNickname, signupUser, checkEmail } from '../../api/auth';
 import styles from './LocalCommon.module.css';
 
 import Eye from '../../components/Member/Eye';
@@ -19,33 +20,27 @@ export const LocalCommon = ({ onBack }) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 비밀번호 보이기/숨기기 상태
   const [passwordVisibility, setPasswordVisibility] = useState({
     password: false,
     confirmPassword: false,
   });
 
-  // 닉네임 중복 실시간 처리
   const [nicknameStatus, setNicknameStatus] = useState({
     message: '',
     isAvailable: null,
     isChecking: false,
   });
 
-  // 이메일 중복 처리
   const [emailStatus, setEmailStatus] = useState({
     message: '',
     isAvailable: null,
     isChecking: false,
   });
 
-  // 유효성 검사 에러
   const [validationErrors, setValidationErrors] = useState({});
 
-  // 필드별 상태 (포커스, 터치 여부)
   const [fieldStates, setFieldStates] = useState({});
 
-  // 닉네임 중복 확인 디바운스 함수
   const debouncedNicknameCheck = useCallback(
     debounce(async nickname => {
       if (nickname.length < 2) {
@@ -56,8 +51,7 @@ export const LocalCommon = ({ onBack }) => {
       setNicknameStatus(prev => ({ ...prev, isChecking: true }));
 
       try {
-        const response = await fetch(`/api/users/check-nickname?nickname=${nickname}`);
-        const result = await response.json();
+        const result = await checkNickname(nickname);
         setNicknameStatus({
           message: result.message,
           isAvailable: result.available,
@@ -75,7 +69,6 @@ export const LocalCommon = ({ onBack }) => {
     []
   );
 
-  // 닉네임 변경 시 중복 확인
   useEffect(() => {
     const nickname = formData.nickname.trim();
     if (nickname && !validationErrors.nickname) {
@@ -129,13 +122,11 @@ export const LocalCommon = ({ onBack }) => {
       [id]: value,
     }));
 
-    // 필드 터치 상태 업데이트
     setFieldStates(prev => ({
       ...prev,
       [id]: { ...prev[id], touched: true },
     }));
 
-    // 실시간 유효성 검사
     if (id !== 'confirmPassword') {
       const validation = validateField(id, value);
       setValidationErrors(prev => ({
@@ -143,7 +134,6 @@ export const LocalCommon = ({ onBack }) => {
         [id]: validation.isValid ? '' : validation.message,
       }));
     } else {
-      // 비밀번호 확인 검증
       if (formData.password && value && formData.password !== value) {
         setValidationErrors(prev => ({
           ...prev,
@@ -157,7 +147,6 @@ export const LocalCommon = ({ onBack }) => {
       }
     }
 
-    // 이메일 변경 시 중복 확인 상태 초기화
     if (id === 'email') {
       setEmailStatus({ message: '', isAvailable: null, isChecking: false });
     }
@@ -177,7 +166,6 @@ export const LocalCommon = ({ onBack }) => {
     }));
   };
 
-  // 비밀번호 보이기/숨기기 토글 핸들러
   const togglePasswordVisibility = fieldId => {
     setPasswordVisibility(prev => ({
       ...prev,
@@ -188,17 +176,14 @@ export const LocalCommon = ({ onBack }) => {
   const handleSubmit = async e => {
     e.preventDefault();
 
-    // 모든 필드를 터치된 상태로 설정
     const allFieldStates = {};
     formFields.forEach(field => {
       allFieldStates[field.id] = { touched: true, focused: false };
     });
     setFieldStates(allFieldStates);
 
-    // 전체 폼 유효성 검사
     const errors = {};
 
-    // 각 필드 유효성 검사
     const emailValidation = validateField('email', formData.email);
     const nameValidation = validateField('name', formData.name);
     const nicknameValidation = validateField('nickname', formData.nickname);
@@ -209,7 +194,6 @@ export const LocalCommon = ({ onBack }) => {
     if (!nicknameValidation.isValid) errors.nickname = nicknameValidation.message;
     if (!passwordValidation.isValid) errors.password = passwordValidation.message;
 
-    // 비밀번호 확인 검증
     if (formData.password !== formData.confirmPassword) {
       errors.confirmPassword = '비밀번호가 일치하지 않습니다';
     }
@@ -232,31 +216,20 @@ export const LocalCommon = ({ onBack }) => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email.trim(),
-          username: formData.name.trim(),
-          nickname: formData.nickname.trim(),
-          password: formData.password,
-          role: 'USER',
-        }),
-      });
+      const userData = {
+        email: formData.email.trim(),
+        username: formData.name.trim(),
+        nickname: formData.nickname.trim(),
+        password: formData.password,
+        role: 'USER',
+      };
 
-      if (response.ok) {
-        const result = await response.json();
-        console.log('result accesstoken: ', result.data.tokens.accessToken);
-        alert('회원가입이 완료되었습니다!');
-        window.location.href = '/login';
-      } else {
-        const error = await response.json();
-        alert(`회원가입 실패: ${error.message}`);
-      }
+      const result = await signupUser(userData);
+      console.log('result accesstoken: ', result.data.tokens.accessToken);
+      alert('회원가입이 완료되었습니다!');
+      window.location.href = '/login';
     } catch (error) {
-      alert('서버 오류가 발생했습니다.');
+      alert(`회원가입 실패: ${error.message}`);
       console.error('Registration error:', error);
     } finally {
       setIsSubmitting(false);
@@ -264,7 +237,6 @@ export const LocalCommon = ({ onBack }) => {
   };
 
   const checkEmailDuplicate = async () => {
-    // 이메일 유효성 검사 먼저 실행
     const emailValidation = validateField('email', formData.email);
     if (!emailValidation.isValid) {
       setValidationErrors(prev => ({
@@ -281,8 +253,7 @@ export const LocalCommon = ({ onBack }) => {
     setEmailStatus(prev => ({ ...prev, isChecking: true }));
 
     try {
-      const response = await fetch(`/api/users/check-email?email=${formData.email}`);
-      const result = await response.json();
+      const result = await checkEmail(formData.email);
       setEmailStatus({
         message: result.message,
         isAvailable: result.available,
@@ -302,7 +273,6 @@ export const LocalCommon = ({ onBack }) => {
     window.location.href = '/login';
   };
 
-  // 필드별 에러 메시지 표시 여부 결정
   const shouldShowError = fieldId => {
     return fieldStates[fieldId]?.touched && validationErrors[fieldId];
   };
