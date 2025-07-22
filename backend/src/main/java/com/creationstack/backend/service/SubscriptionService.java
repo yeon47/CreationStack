@@ -25,7 +25,6 @@ import com.creationstack.backend.repository.PaymentMethodRepository;
 import com.creationstack.backend.repository.PaymentRepository;
 import com.creationstack.backend.repository.SubscriptionRepository;
 import com.creationstack.backend.repository.SubscriptionStatusRepository;
-import com.creationstack.backend.repository.UserDetailRepository;
 import com.creationstack.backend.repository.UserRepository;
 
 import org.springframework.transaction.annotation.Transactional;
