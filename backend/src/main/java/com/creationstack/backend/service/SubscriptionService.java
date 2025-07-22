@@ -131,15 +131,11 @@ public class SubscriptionService {
                 subscription.setPaymentMethod(payment.getPaymentMethod());
 
                 // 기존 nextPaymentAt이 없을 수도 있으니 null check
-                subscription.setNextPaymentAt(subscription.getNextPaymentAt() == null ? subscription.getStartedAt().plusMonths(1) : subscription.getNextPaymentAt());
+                subscription.setNextPaymentAt(
+                                subscription.getNextPaymentAt() == null ? subscription.getStartedAt().plusMonths(1)
+                                                : subscription.getNextPaymentAt());
 
                 subscriptionRepository.save(subscription);
-
-                // 크리에이터의 구독자 수 증가
-                User creator = userRepository.findById(subscription.getCreatorId())
-                        .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "크리에이터를 찾을 수 없습니다."));
-                creator.setSubscriberCount(creator.getSubscriberCount() + 1);
-                userRepository.save(creator);
         }
 
         // 결제 실패 처리: 이전 구독이면 EXPIRED, 신규면 삭제
