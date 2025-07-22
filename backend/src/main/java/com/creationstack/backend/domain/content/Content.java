@@ -71,7 +71,7 @@ public class Content {
 
     //콘텐츠 좋아요
     @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Like> likes = new ArrayList<>();
+    private List<ContentLike> likes = new ArrayList<>();
 
     
     /**

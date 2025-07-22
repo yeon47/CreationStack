@@ -10,6 +10,11 @@ import ContentHeader from '../../components/ContentDetail/ContentHeader/ContentH
 import AuthorInfoCard from '../../components/ContentDetail/AuthorInfoCard/AuthorInfoCard';
 import ContentBody from '../../components/ContentDetail/ContentBody/ContentBody';
 import FileDownloadList from '../../components/ContentDetail/FileDownloadList/FileDownloadList';
+import LikeCommentBar from '../../components/ContentDetail/LikeCommentBar/LikeCommentBar';
+import RelatedContentList from '../../components/ContentDetail/RelatedContentList/RelatedContentList';
+import ReplyList from './ReplyList';
+import styles from './ContentDetailPage.module.css';
+import { toggleContentLike } from '../../api/contentAPI';
 import RelatedContentList from '../../components/ContentDetail/RelatedContentList/RelatedContentList';
 
 import styles from './ContentDetailPage.module.css'; // 페이지 CSS 임포트
@@ -19,26 +24,57 @@ export const ContentDetailPage = () => {
   const navigate = useNavigate();
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [likeCount, setLikeCount] = useState(content?.likeCount || 0);
+  const [isLiked, setIsLiked] = useState(null);
   const [error, setError] = useState(null);
 
   // 2. 콘텐츠 상세 정보 불러오기
-  useEffect(() => {
-    const fetchContent = async () => {
-      try {
-        setLoading(true);
-        const data = await getContentById(contentId);
-        setContent(data);
-      } catch (err) {
-        console.error('콘텐츠 상세 조회 실패:', err);
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+useEffect(() => {
+  const fetchContent = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`/api/content/${contentId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    fetchContent();
-  }, [contentId]);
+      const data = response.data;
+      setContent(data);
+      setLikeCount(data.likeCount || 0);
+      setIsLiked(data.liked !== undefined ? data.liked : false);
+    } catch (err) {
+      console.error('콘텐츠 상세 조회 실패:', err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  fetchContent();
+}, [contentId, token]);
+
+
+  // 좋아요 클릭 시 호출
+  const handleLikeClick = async () => {
+    try {
+      await toggleContentLike(contentId);
+      const response = await axios.get(`/api/content/${contentId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+      });
+
+      const updated = response.data;
+
+      setLikeCount(updated.likeCount);
+      setIsLiked(updated.isLiked ?? updated.liked);
+    } catch (error) {
+      console.error('좋아요 처리 실패:', error);
+    }
+  };
+
+  if (loading) return <div>로딩 중...</div>;
+  if (!content) return <div>콘텐츠를 불러올 수 없습니다.</div>;
+    
   // 3. 수정/삭제 버튼 핸들러 (이제 항상 보이지만, 백엔드에서 권한 확인)
   const handleEdit = () => {
     navigate(`/content-edit/${contentId}`); // 콘텐츠 수정 페이지로 이동
@@ -84,6 +120,18 @@ export const ContentDetailPage = () => {
         job={content.creatorJob || "직업 정보 없음"} // DTO에 없으면 기본값
         profileImageUrl={content.creatorProfileUrl}
       />
+      <ContentBody thumbnailUrl={content.thumbnailUrl} description={content.content} />
+      <FileDownloadList files={content.fileUrls} />
+
+      <LikeCommentBar
+        likeCount={likeCount}
+        commentCount={content.commentCount}
+        isLiked={isLiked}
+        onLikeClick={handleLikeClick}
+      />
+
+      <ReplyList contentId={contentId} />
+      <RelatedContentList creatorId={content.creatorId} />
 
       {/* 4. 본문내용 (마크다운 렌더링 적용) */}
       <ContentBody content={content.content} thumbnailUrl={content.thumbnailUrl} />

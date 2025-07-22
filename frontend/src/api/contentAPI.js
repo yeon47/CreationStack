@@ -163,3 +163,22 @@ export const checkContentAccess = async contentId => {
     },
   });
 };
+
+//컨텐츠 좋아요
+export async function toggleContentLike(contentId) {
+  try {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) throw new Error('로그인이 필요합니다.');
+
+    const response = await axios.post(`/api/content/${contentId}/like`, null, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`콘텐츠 ID ${contentId} 좋아요 토글 실패:`, error);
+    console.error('좋아요 처리 실패:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+}

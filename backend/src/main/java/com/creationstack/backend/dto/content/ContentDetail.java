@@ -26,5 +26,6 @@ public class ContentDetail {
     private long likeCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private boolean isLiked;
     private List<AttachmentResponse> attachments;
 }

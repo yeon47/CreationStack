@@ -23,9 +23,10 @@ public class ContentList  {
     private String thumbnailUrl;
     private Boolean isPaid;
     private int viewCount;
+    private boolean isLiked;
     private LocalDateTime createdAt;
     
-    public static ContentList from(Content content) {
+    public static ContentList from(Content content, boolean isLiked) {
         if (content == null) {
             System.out.println("❌ content is null");
             return null;
@@ -58,6 +59,7 @@ public class ContentList  {
             content.getThumbnailUrl(),
             content.getAccessType() == AccessType.SUBSCRIBER,
             content.getViewCount(),
+            isLiked,
             content.getCreatedAt()
         );
     }

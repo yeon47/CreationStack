@@ -123,22 +123,24 @@ public class ContentController {
     }
 
     // 콘텐츠 좋아요
-    // 좋아요 토글
     @PostMapping("/{contentId}/like")
     public ResponseEntity<String> toggleContentLike(
             @PathVariable Long contentId,
-            @RequestParam("userId") Long userId // ← requestParam으로 받음
+            Authentication authentication
     ) {
+        Long userId = (Long) authentication.getPrincipal(); 
         boolean isLiked = contentService.toggleLike(contentId, userId);
         return ResponseEntity.ok(isLiked ? "liked" : "unliked");
     }
 
+
     // 좋아요 콘텐츠 목록 조회-페이징
     @GetMapping("/liked")
     public ResponseEntity<?> getLikedContents(
-            @RequestParam("userId") Long userId,
+            Authentication authentication,
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
+        Long userId = (Long) authentication.getPrincipal(); // 또는 customUserDetails.getUserId()
         Page<ContentList> likedContents = contentService.getLikedContents(userId, pageable);
         return ResponseEntity.ok(likedContents);
     }

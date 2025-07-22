@@ -1,8 +1,10 @@
 import React from 'react';
 import styles from '../../styles/comment/likeContentItem.module.css';
+import { useNavigate } from 'react-router-dom';
 
 const LikeContentItem = ({ post, onUnlike, userId }) => {
   const formattedDate = new Date(post.createdAt).toLocaleDateString('ko-KR');
+  const navigate = useNavigate();
 
   const goToDetail = () => {
     navigate(`/content/${post.contentId}`);
