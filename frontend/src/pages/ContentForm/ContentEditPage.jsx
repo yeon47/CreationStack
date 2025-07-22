@@ -4,7 +4,7 @@ import { Editor } from '@toast-ui/react-editor';
 import '@toast-ui/editor/dist/toastui-editor.css';
 
 import { getContentById, updateContent } from '../../api/contentAPI'; // 기존 콘텐츠 로드 및 업데이트 API
-import { uploadEditorImage } from '../../api/imageApi';
+import { uploadEditorImage } from '../../api/imageAPI';
 import styles from './contentForm.module.css'; // contentForm.module.css 임포트
 
 const ContentEditPage = () => {
@@ -232,7 +232,7 @@ const ContentEditPage = () => {
       const result = await updateContent(contentId, formData); // updateContent API 호출
       console.log('콘텐츠 수정 성공:', result);
       alert('콘텐츠가 성공적으로 수정되었습니다!');
-      navigate(`/content/${contentId}`); // 수정 후 상세 페이지로 이동
+      navigate(`/content/${result.contentId}`); // 수정 후 상세 페이지로 이동
     } catch (error) {
       console.error('콘텐츠 수정 실패:', error);
       alert('콘텐츠 수정에 실패했습니다: ' + (error.message || '알 수 없는 오류'));
