@@ -12,8 +12,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-// 콘텐츠 정보를 클라이언트에게 전달하기 위한 DTO입니다.
-
+/**
+ * 콘텐츠 정보를 클라이언트에게 전달하기 위한 DTO입니다.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,7 +24,8 @@ public class ContentResponse {
         private Long contentId;
         private Long creatorId;
         private String creatorNickname; // 크리에이터 닉네임
-        private String creatorProfileUrl; // 크리에이터 프로필 이미지 URL //전효진이 추가함
+        private String creatorJob;      // 크리에이터 직업 정보 추가
+        private String creatorProfileUrl; // 크리에이터 프로필 이미지 URL
         private String title;
         private String content;
         private String thumbnailUrl;
@@ -38,46 +40,56 @@ public class ContentResponse {
 
         /**
          * Content 엔티티로부터 ContentResponse DTO를 생성하는 정적 팩토리 메서드입니다.
-         * 
+         *
          * @param content Content 엔티티
          * @return ContentResponse DTO
          */
-
         public static ContentResponse from(Content content) {
                 // 카테고리 매핑을 ContentCategoryResponse DTO로 변환
                 Set<ContentCategoryResponse> categoryResponses = content.getCategoryMappings().stream()
-                                .map(mapping -> ContentCategoryResponse.from(mapping.getCategory()))
-                                .collect(Collectors.toSet());
+                        .map(mapping -> ContentCategoryResponse.from(mapping.getCategory()))
+                        .collect(Collectors.toSet());
 
-                // 첨부파일을 AttachmentResponse DTO로 변환 (지연 로딩을 고려하여 프록시 객체 처리)
+                // 첨부파일을 AttachmentResponse DTO로 변환
                 List<AttachmentResponse> attachmentResponses = content.getAttachments() != null
-                                ? content.getAttachments().stream()
-                                                .map(AttachmentResponse::from)
-                                                .collect(Collectors.toList())
-                                : List.of(); // 첨부파일이 없을 경우 빈 리스트 반환
+                        ? content.getAttachments().stream()
+                        .map(AttachmentResponse::from)
+                        .collect(Collectors.toList())
+                        : List.of(); // 첨부파일이 없을 경우 빈 리스트 반환
+
+                // 크리에이터 정보 (닉네임, 직업, 프로필 URL) 안전하게 가져오기
+                String nickname = null;
+                String jobName = null;
+                String profileUrl = null;
+
+                if (content.getCreator() != null) {
+                        if (content.getCreator().getUserDetail() != null) {
+                                nickname = content.getCreator().getUserDetail().getNickname();
+                                profileUrl = content.getCreator().getUserDetail().getProfileImageUrl();
+                        }
+                        // Job 정보 추가
+                        if (content.getCreator().getJob() != null) {
+                                jobName = content.getCreator().getJob().getName();
+                        }
+                }
 
                 return ContentResponse.builder()
-                                .contentId(content.getContentId())
-                                .creatorId(content.getCreator().getUserId())
-                                .creatorNickname(content.getCreator().getUserDetail() != null
-                                                ? content.getCreator().getUserDetail().getNickname()
-                                                : null)
-                                .creatorProfileUrl(
-                                                content.getCreator().getUserDetail() != null
-                                                                ? content.getCreator().getUserDetail()
-                                                                                .getProfileImageUrl()
-                                                                : null) // 크리에이터 프로필 이미지 URL 추가 // 전효진이 추가함
-                                .title(content.getTitle())
-                                .content(content.getContent())
-                                .thumbnailUrl(content.getThumbnailUrl())
-                                .viewCount(content.getViewCount())
-                                .likeCount(content.getLikeCount())
-                                .commentCount(content.getCommentCount())
-                                .createdAt(content.getCreatedAt())
-                                .updatedAt(content.getUpdatedAt())
-                                .accessType(content.getAccessType())
-                                .categories(categoryResponses)
-                                .attachments(attachmentResponses)
-                                .build();
+                        .contentId(content.getContentId())
+                        .creatorId(content.getCreator().getUserId())
+                        .creatorNickname(nickname)
+                        .creatorJob(jobName) // 직업 정보 설정
+                        .creatorProfileUrl(profileUrl)
+                        .title(content.getTitle())
+                        .content(content.getContent())
+                        .thumbnailUrl(content.getThumbnailUrl())
+                        .viewCount(content.getViewCount())
+                        .likeCount(content.getLikeCount())
+                        .commentCount(content.getCommentCount())
+                        .createdAt(content.getCreatedAt())
+                        .updatedAt(content.getUpdatedAt())
+                        .accessType(content.getAccessType())
+                        .categories(categoryResponses)
+                        .attachments(attachmentResponses)
+                        .build();
         }
 }
