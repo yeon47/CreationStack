@@ -6,8 +6,6 @@ import styles from './CreatorMainPage.module.css';
 import { UserInfo } from '../../../components/MainPage/UserInfo/UserInfo';
 import { ContentCardList } from '../../../components/ContentCard/ContentCardList';
 
-
-
 // 샘플 콘텐츠
 // const dummyContents = [
 //   {
@@ -117,6 +115,8 @@ export const CreatorMainPage = () => {
           subscriberCount: creator.subscriberCount ?? 0,
           isSubscribed: creator.isSubscribed ?? false,
         }}
+        onUnsubscribeClick={() => setModalType('cancel')} // 구독중일 때만 호출됨
+        onNoticeClick={() => setModalType('suggest')}
       />
       <div className={styles.content}>
         <h1 className={styles.title}>콘텐츠 목록</h1>

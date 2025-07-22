@@ -52,7 +52,7 @@ export default function AppRoutes() {
         <Route path="/contents/:contentId" element={<ContentDetailPage />} />
         <Route path="/payments/summary/:creatorNickname" element={<PaymentPage />} />
         <Route path="/profile/edit" element={<ProfileEdit />} />
-        <Route path="/creator/notice" element={<CreatorNoticePage />} />
+        <Route path="/creator/notice/:nickname" element={<CreatorNoticePage />} />
       </Route>
 
       <Route path="/login" element={<LoginSection />} />

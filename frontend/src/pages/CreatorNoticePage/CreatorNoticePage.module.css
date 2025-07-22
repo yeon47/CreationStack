@@ -43,8 +43,8 @@
 }
 
 .bio {
-  font-size: 14px;
-  font-weight: 300;
+  font-size: 16px;
+  font-weight: 500;
   color: #64748b;
   max-width: 50%;
   margin-top: 10px;
@@ -79,4 +79,5 @@
 
 .write_button {
   background-color: #4682a9;
+  color: white;
 }

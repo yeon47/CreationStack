@@ -15,6 +15,11 @@ export const SubscriptionModal = ({ type, onClose, onConfirm }) => {
       description: "즉시 결제가 진행되며,\n구독이 다시 활성화됩니다.",
       confirmText: "구독 하기",
     },
+    suggest: {
+      title: "구독이 되지 않아 들어가실 수 없습니다.",
+      description: "크리에이터를 구독해주세요",
+      confirmText: "확인"
+    }
   };
 
   const { title, description, confirmText } = config[type];

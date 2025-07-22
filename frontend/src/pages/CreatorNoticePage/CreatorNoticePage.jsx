@@ -58,31 +58,19 @@ function CreatorNoticePage() {
         <NoticeBox
           date="2025-07-15"
           profileImage="https://c.animaapp.com/md45uvjzPxvxqT/img/profilebutton-1.png"
-          content={`Artificial Intelligence (AI) offers numerous advantages and has the potential to revolutionize
-various aspects of our lives. Here are some key advantages of AI:
-
-Automation: AI can automate repetitive and mundane tasks, saving time and effort for humans...
-(생략)`}
+          content={`안녕하세요, 여러분! 앞으로도 더 좋은 콘텐츠를 만들기 위해 꾸준히 노력하고 있습니다. 이번 주부터 새로운 프로젝트가 시작되어, 매주 특별한 이벤트와 콘텐츠가 업로드될 예정이니 많은 관심과 참여 부탁드려요. 여러분의 소중한 의견도 언제든지 환영합니다!`}
           time="16:46"
         />
         <NoticeBox
           date="2025-07-15"
           profileImage="https://c.animaapp.com/md45uvjzPxvxqT/img/profilebutton-1.png"
-          content={`Artificial Intelligence (AI) offers numerous advantages and has the potential to revolutionize
-various aspects of our lives. Here are some key advantages of AI:
-
-Automation: AI can automate repetitive and mundane tasks, saving time and effort for humans...
-(생략)`}
+          content={`항상 저를 응원해 주시는 팬 여러분께 진심으로 감사드립니다. 여러분과의 소통이 가장 큰 힘이 되기에, 공지방을 통해 여러분의 질문이나 건의사항에 최대한 빠르게 답변드릴 수 있도록 노력하겠습니다. 혹시 궁금한 점이나 요청사항이 있다면 주저하지 말고 말씀해 주세요!)`}
           time="16:46"
         />
         <NoticeBox
           date="2025-07-15"
           profileImage="https://c.animaapp.com/md45uvjzPxvxqT/img/profilebutton-1.png"
-          content={`Artificial Intelligence (AI) offers numerous advantages and has the potential to revolutionize
-various aspects of our lives. Here are some key advantages of AI:
-
-Automation: AI can automate repetitive and mundane tasks, saving time and effort for humans...
-(생략)`}
+          content={`여러분 덕분에 지금까지 올 수 있었습니다. 앞으로도 변함없이 좋은 콘텐츠와 즐거운 경험을 선사하기 위해 최선을 다할 것을 약속드립니다. 함께 성장하는 공간이 될 수 있도록 여러분의 지속적인 관심과 사랑 부탁드려요. 감사합니다!`}
           time="16:46"
         />
       </div>
