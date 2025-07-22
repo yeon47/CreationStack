@@ -7,19 +7,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import com.creationstack.backend.domain.user.User;
 import com.creationstack.backend.dto.comment.CommentCreateDto;
 import com.creationstack.backend.dto.comment.CommentResponseDto;
 import com.creationstack.backend.dto.comment.CommentUpdateDto;
+import com.creationstack.backend.repository.UserRepository;
 import com.creationstack.backend.service.CommentService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,58 +24,92 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/contents/{contentId}/comments")
 public class CommentController {
 
-	private final CommentService commentService;
+    private final CommentService commentService;
+    private final UserRepository userRepository;
 
-	// 댓글 작성
-	@PostMapping
-	public ResponseEntity<CommentResponseDto> createComment(
-	        @PathVariable("contentId") Long contentId,
-	        @RequestBody CommentCreateDto dto,
-	        Authentication authentication) {
-	   
-		Long userId = (Long) authentication.getPrincipal();
-	    dto.setContentId(contentId);
-	    dto.setUserId(userId); 
-	    return ResponseEntity.ok(commentService.createComment(dto));
-	}
+    //  로그인된 사용자 정보에서 userId 추출
+    private Long getUserIdFromAuth(Authentication authentication) {
+    	
+        Object principal = authentication.getPrincipal();
+        System.out.println(">> principal class: " + principal.getClass());
+        System.out.println(">> principal value: " + principal);
+        return (Long) principal;
+    }
 
-	// 댓글 목록 조회
-	@GetMapping
-	public ResponseEntity<List<CommentResponseDto>> getComments(@PathVariable("contentId") Long contentId) {
-		System.out.println("요청 contentId: " + contentId);
-		return ResponseEntity.ok(commentService.getCommentsByContentId(contentId));
-	}
+    // 댓글 목록 조회 
+    @GetMapping
+    public ResponseEntity<List<CommentResponseDto>> getComments(
+            @PathVariable("contentId") Long contentId,
+            Authentication authentication) {
 
-	// 댓글 수정
-	@PutMapping("/{commentId}")
-	public ResponseEntity<CommentResponseDto> updateComment(@PathVariable Long contentId, @PathVariable Long commentId,
-			@RequestBody CommentUpdateDto dto) {
-		return ResponseEntity.ok(commentService.updateComment(commentId, dto));
-	}
+    	Long userId = null;
+        if (authentication != null && authentication.isAuthenticated()) {
+            try {
+                userId = getUserIdFromAuth(authentication);
+            } catch (Exception ignored) {
+                userId = null;
+            }
+        }
 
-	// 댓글 삭제
-	@DeleteMapping("/{commentId}")
-	public ResponseEntity<Void> deleteComment(
-	        @PathVariable Long contentId,
-	        @PathVariable Long commentId,
-	        Authentication authentication) throws AccessDeniedException {
+        List<CommentResponseDto> comments = commentService.getCommentsByContentId(contentId, userId);
+        return ResponseEntity.ok(comments);
+    }
 
-	    Long userId = (Long) authentication.getPrincipal();
-	    commentService.deleteComment(commentId, userId);
-	    return ResponseEntity.ok().build();
-	}
-	
-	// 댓글 좋아요 
-	@PostMapping("/{commentId}/like")
-	public ResponseEntity<String> toggleLike(
-	        @PathVariable Long contentId,
-	        @PathVariable Long commentId,
-	        Authentication authentication) {
+    //  댓글 작성
+    @PostMapping
+    public ResponseEntity<CommentResponseDto> createComment(
+            @PathVariable("contentId") Long contentId,
+            @RequestBody CommentCreateDto dto,
+            Authentication authentication) {
 
-	    Long userId = (Long) authentication.getPrincipal();
-	    boolean isLiked = commentService.toggleLike(commentId, userId);
-	    String result = isLiked ? "liked" : "unliked";
-	    return ResponseEntity.ok(result);
-	}
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
+        Long userId = getUserIdFromAuth(authentication);
+        dto.setContentId(contentId);
+        dto.setUserId(userId);
+
+        CommentResponseDto created = commentService.createComment(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    // 댓글 수정
+    @PutMapping("/{commentId}")
+    public ResponseEntity<CommentResponseDto> updateComment(
+            @PathVariable Long contentId,
+            @PathVariable Long commentId,
+            @RequestBody CommentUpdateDto dto,
+            Authentication authentication) throws AccessDeniedException {
+
+        Long userId = getUserIdFromAuth(authentication);
+        dto.setUserId(userId);
+
+        CommentResponseDto updated = commentService.updateComment(commentId, dto);
+        return ResponseEntity.ok(updated);
+    }
+
+    //  댓글 삭제
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long contentId,
+            @PathVariable Long commentId,
+            Authentication authentication) throws AccessDeniedException {
+
+        Long userId = getUserIdFromAuth(authentication);
+        commentService.deleteComment(commentId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    // ✅ 댓글 좋아요 토글
+    @PostMapping("/{commentId}/like")
+    public ResponseEntity<String> toggleLike(
+            @PathVariable Long contentId,
+            @PathVariable Long commentId,
+            Authentication authentication) {
+
+        Long userId = getUserIdFromAuth(authentication);
+        boolean isLiked = commentService.toggleLike(commentId, userId);
+        return ResponseEntity.ok(isLiked ? "liked" : "unliked");
+    }
 }

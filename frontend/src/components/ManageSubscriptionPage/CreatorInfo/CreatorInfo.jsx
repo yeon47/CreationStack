@@ -4,10 +4,13 @@ import styles from './CreatorInfo.module.css';
 
 import { StatusButton } from '../StatusButton/StatusButton';
 import { SubscriptionModal } from '../SubscriptionModal/SubscriptionModal';
+import { cancelSubscription } from '../../../api/subscription';
 
 // 사용자 구독 목록에서 크리에이터 정보
-export const CreatorInfo = ({ className, creatorNickname, profileImage, subsCount, bio, userStatus, date }) => {
+export const CreatorInfo = ({ subscriptionId, className, creatorNickname, profileImage, subsCount, bio, userStatus, date }) => {
   // 상태별 메시지 + 버튼 정의
+  const [status, setStatus] = useState(userStatus);
+
   const formatDate = isoString => {
     if (!isoString) return '';
     const date = new Date(isoString);
@@ -23,15 +26,16 @@ export const CreatorInfo = ({ className, creatorNickname, profileImage, subsCoun
     EXPIRED: { message: '유효기간이 만료되어, 구독 해지되었습니다.' },
   };
 
-  const status = statusConfig[userStatus] || {};
+  const statusInfo = statusConfig[status] || {};
+
   const [modalType, setModalType] = useState(null);
   const navigate = useNavigate();
 
   const handleStatusClick = e => {
     e.stopPropagation(); // 부모 div 클릭 막기
     console.log('버튼 클릭됨');
-    if (userStatus === 'ACTIVE') setModalType('cancel');
-    else if (userStatus === 'CANCELLED' || userStatus === 'EXPIRED') setModalType('resume');
+    if (status === 'ACTIVE') setModalType('cancel');
+    else if (status === 'CANCELLED' || status === 'EXPIRED') setModalType('resume');
   };
 
   const handleClickCreator = () => {
@@ -39,13 +43,28 @@ export const CreatorInfo = ({ className, creatorNickname, profileImage, subsCoun
   };
 
   const handleConfirm = async () => {
+    const token = localStorage.getItem('accessToken');
+
     if (modalType === 'resume') {
       navigate(`/payments/summary/${creatorNickname}`);
       return;
     }
 
-    // 해지일 경우 처리
-    setModalType(null);
+    if (modalType === 'cancel') {
+      console.log('구독 해지 요청 subscriptionId', subscriptionId);
+      try {
+        // 구독 해지 API 호출
+        await cancelSubscription(subscriptionId, token);
+
+        // TODO: 해지 후 UI 상태 갱신 (예: 새 상태 요청 or 상태 변수 변경)
+        console.log('구독 해지 성공');
+        setStatus('CANCELLED');
+      } catch (err) {
+        console.error('구독 해지 실패', err);
+      } finally {
+        setModalType(null);
+      }
+    }
   };
 
   return (
@@ -59,21 +78,15 @@ export const CreatorInfo = ({ className, creatorNickname, profileImage, subsCoun
           <div className={styles['creator-name']}>{creatorNickname}</div>
           <div className={styles['subscriber-count']}>구독자 수 : {subsCount} 명</div>
           <p className={styles['p']}>{bio}</p>
-          <div className={styles['status-message']}>{status.message}</div>
+          <div className={styles['status-message']}>{statusInfo.message}</div>
         </div>
 
         <div className={styles['button-area']}>
-          <StatusButton status={userStatus} className={styles['button']} onClick={handleStatusClick} />
+          <StatusButton status={status} className={styles['button']} onClick={handleStatusClick} />
         </div>
       </div>
 
-      {modalType && (
-        <SubscriptionModal
-          type={modalType}
-          onClose={() => setModalType(null)}
-          onConfirm={handleConfirm}
-        />
-      )}
+      {modalType && <SubscriptionModal type={modalType} onClose={() => setModalType(null)} onConfirm={handleConfirm} />}
     </>
   );
 };

@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
 import styles from './ContentCard.module.css';
-import { Link } from 'react-router-dom';
 import SubsIcon from '../../assets/img/subs_icon.svg';
 import { UnauthorizedModal } from '../UnauthorizedModal';
 import { checkContentAccess } from '../../api/contentAPI';

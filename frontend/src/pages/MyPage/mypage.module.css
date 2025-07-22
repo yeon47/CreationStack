@@ -8,8 +8,7 @@
 
 .myCreatorPage .teamSectionWrapper {
   background-color: #ffffff;
-  height: 1024px;
-  width: 1440px;
+  width: 100%;
 }
 
 .myCreatorPage .teamSection {
@@ -20,7 +19,7 @@
   left: 29px;
   position: relative;
   top: 6px;
-  width: 1393px;
+  width: 100%;
 }
 
 .myCreatorPage .navbarCreatorInstance {

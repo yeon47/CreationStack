@@ -43,10 +43,10 @@ import lombok.extern.slf4j.Slf4j;
  * 콘텐츠 관련 비즈니스 로직을 처리하는 서비스 클래스입니다.
  * 콘텐츠 생성, 조회, 수정, 삭제 기능을 제공합니다.
  */
-@Slf4j // 로깅을 위한 Lombok 어노테이션
+@Slf4j
 @RequiredArgsConstructor // final 필드에 대한 생성자를 자동으로 생성하여 의존성 주입
-@Service // Spring 서비스 컴포넌트임을 나타냄
-@Transactional(readOnly = true) // 기본적으로 읽기 전용 트랜잭션 적용
+@Service
+@Transactional(readOnly = true)
 public class ContentService {
 
     private final ContentRepository contentRepository;
@@ -59,10 +59,10 @@ public class ContentService {
 
     // 콘텐츠 생성
     @Transactional // 쓰기 작업이므로 트랜잭션 적용
-    public ContentResponse createContent(ContentCreateRequest request, Long creatorId) {
-        // 1. 크리에이터(User) 조회
-        User creator = userRepository.findById(creatorId)
-                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "크리에이터를 찾을 수 없습니다. ID: " + creatorId));
+    public ContentResponse createContent(ContentCreateRequest request, Long userId) {
+        //1. 유저 확인
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "크리에이터를 찾을 수 없습니다. ID: " + userId));
 
         // 2. 썸네일 이미지 처리
         String thumbnailUrl = null;
@@ -74,10 +74,9 @@ public class ContentService {
                 throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "썸네일 업로드에 실패했습니다.", e);
             }
         }
-
         // 3. Content 엔티티 생성
         Content content = Content.builder()
-                .creator(creator)
+                .creator(user)
                 .title(request.getTitle())
                 .content(request.getContent())
                 .thumbnailUrl(thumbnailUrl) // 실제 S3 URL 사용
@@ -141,20 +140,18 @@ public class ContentService {
         return ContentResponse.from(savedContent);
     }
 
-    // 특정 콘텐츠 조회
+    // 특정 콘텐츠 조회 (콘텐츠 상세보기)
     @Transactional // 조회수 증가로 인해 쓰기 트랜잭션 필요
     public ContentResponse getContentById(Long contentId, Long userId) {
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "콘텐츠를 찾을 수 없습니다. ID: " + contentId));
 
-        // 구독자 전용일 경우, 권한 확인
+        // 구독자 전용 컨텐츠일 경우, 권한 확인
         if (content.getAccessType() == AccessType.SUBSCRIBER) {
             log.info("구독자 전용 콘텐츠 조회");
-            Long creatorId = content.getCreator().getUserId();
+            boolean isSubscribed = subscriptionService.isActiveSubscriber(content.getCreator().getUserId(), userId);
 
-            boolean isSubscribed = subscriptionService.isActiveSubscriber(creatorId, userId);
-
-            if (!isSubscribed && !creatorId.equals(userId)) {
+            if (!isSubscribed && !content.getCreator().getUserId().equals(userId)) {
                 log.info("구독자 아님 X => 접근 불가");
                 throw new CustomException(HttpStatus.FORBIDDEN, "구독자가 아니므로 콘텐츠 접근 불가.");
             } 
@@ -186,12 +183,12 @@ public class ContentService {
 
     // 콘텐츠 수정
     @Transactional // 쓰기 작업이므로 트랜잭션 적용
-    public ContentResponse updateContent(Long contentId, ContentUpdateRequest request, Long creatorId) {
+    public ContentResponse updateContent(Long contentId, ContentUpdateRequest request, Long userId) {
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "콘텐츠를 찾을 수 없습니다. ID: " + contentId));
 
         // 1. 권한 확인: 콘텐츠 작성자와 수정 요청자가 동일한지 확인
-        if (!content.getCreator().getUserId().equals(creatorId)) {
+        if (!content.getCreator().getUserId().equals(userId)) {
             throw new CustomException(HttpStatus.FORBIDDEN, "콘텐츠를 수정할 권한이 없습니다.");
         }
 
@@ -303,12 +300,12 @@ public class ContentService {
 
     // 콘텐츠 삭제
     @Transactional // 쓰기 작업이므로 트랜잭션 적용
-    public void deleteContent(Long contentId, Long creatorId) {
+    public void deleteContent(Long contentId, Long userId) {
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "콘텐츠를 찾을 수 없습니다. ID: " + contentId));
 
         // 1. 권한 확인: 콘텐츠 작성자와 삭제 요청자가 동일한지 확인
-        if (!content.getCreator().getUserId().equals(creatorId)) {
+        if (!content.getCreator().getUserId().equals(userId)) {
             throw new CustomException(HttpStatus.FORBIDDEN, "콘텐츠를 삭제할 권한이 없습니다.");
         }
 

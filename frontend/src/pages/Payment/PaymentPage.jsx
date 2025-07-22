@@ -1,12 +1,12 @@
 // PaymentPage.jsx
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams  } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import SubscriptionDetails from '../../components/Payment/SubscriptionDetails';
 import PaymentModal from '../../components/Payment/PaymentModal';
 import WarningModal from '../../components/Payment/WarningModal';
 import { registerBillingKey, savePaymentMethod, readAllPaymentMethod, getUserInfo } from '../../api/payment';
 import { getPublicCreatorProfile } from '../../api/profile';
-import logo from '../../assets/img/logo.svg'
+import logo from '../../assets/img/logo.svg';
 
 import styles from './PaymentPage.module.css';
 
@@ -45,10 +45,13 @@ function PaymentPage() {
   const { creatorNickname } = useParams();
   const [creator, setCreator] = useState(null);
 
-  useEffect( () => {
+  useEffect(() => {
+    console.log(creatorNickname);
     const fetchCreator = async () => {
+      const accessToken = localStorage.getItem('accessToken');
       try {
-        const res = await getPublicCreatorProfile(creatorNickname);
+        const res = await getPublicCreatorProfile(creatorNickname, accessToken);
+        console.log('API 응답 확인:', res);
         setCreator({
           id: res.data.userId,
           name: res.data.nickname,
@@ -60,13 +63,12 @@ function PaymentPage() {
     };
 
     if (creatorNickname) fetchCreator();
-  },[creatorNickname]);
+  }, [creatorNickname]);
 
   if (!creator) return <div>크리에이터 정보를 찾을 수 없습니다.</div>;
 
-
   const subscriptionDetails = [
-    { label: '구독 상품', value: creator.nickname}+'정기 구독권',
+    { label: '구독 상품', value: creator.nickname } + '정기 구독권',
     { label: '가격', value: '₩4,900/월', highlight: true },
     { label: '총 결제 금액', value: '₩4,900', bold: true },
   ];
@@ -97,7 +99,7 @@ function PaymentPage() {
         userInfoResponse.data.username,
         userInfoResponse.data.email
       );
-      const saveResponse = await savePaymentMethod(issueResponse.billingKey,accessToken);
+      const saveResponse = await savePaymentMethod(issueResponse.billingKey, accessToken);
 
       // 카드 객체에서 username 제외
       const { username, ...cardWithoutUsername } = saveResponse;
@@ -117,9 +119,9 @@ function PaymentPage() {
 
   // 결제 성공 시 결제완료 페이지 이동
   const handlePaymentSuccess = () => {
-navigate('/payments/success', {
-  state: { creator },
-});
+    navigate('/payments/success', {
+      state: { creator },
+    });
   };
 
   // 결제 실패 시 결제 실패 모달창 호출
@@ -130,8 +132,8 @@ navigate('/payments/success', {
   };
 
   const handlePaymentMethod = () => {
-    navigate("/payments");
-  }
+    navigate('/payments');
+  };
 
   return (
     <div className={styles.summary_container}>

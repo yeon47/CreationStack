@@ -1,11 +1,12 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './CreatorCardList.css';
 
 export const CreatorCardList = ({ contents = [], className }) => {
   return (
     <div className={`creator-card-list ${className}`}>
       {contents.map(creator => (
-        <div className="creator-card-item" key={creator?.id}>
+        <Link to={`/creator-main/${creator?.nickname}`} key={creator?.id} className="creator-card-item">
           <div className="container-section">
             <div
               className="profile-image"
@@ -26,7 +27,7 @@ export const CreatorCardList = ({ contents = [], className }) => {
               </div>
             </div>
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   );

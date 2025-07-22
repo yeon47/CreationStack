@@ -2,15 +2,16 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { getMyProfile } from '../api/user';
 import styles from '../styles/layout.module.css';
 import logo from '../assets/img/logo.svg';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { searchUnified } from '../api/search';
 import { logoutUser } from '../api/auth';
 
 export const NavbarCreator = () => {
   const [searchValue, setSearchValue] = useState('');
-  const [activeMenu, setActiveMenu] = useState('홈');
+  const [activeMenu, setActiveMenu] = useState('');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const profileDropdownRef = useRef(null);
   const isLoggedIn = !!localStorage.getItem('accessToken');
   const [profileImageUrl, setProfileImageUrl] = useState('https://c.animaapp.com/md5nv2zm9suaL3/img/profileimage.png');
@@ -35,6 +36,19 @@ export const NavbarCreator = () => {
     }
     return null;
   }, [isLoggedIn]);
+
+  // URL 경로에 따라 activeMenu 설정
+  useEffect(() => {
+    if (location.pathname === '/') {
+      setActiveMenu('홈');
+    } else if (location.pathname.startsWith('/creators')) {
+      setActiveMenu('크리에이터');
+    } else if (location.pathname.startsWith('/contents')) {
+      setActiveMenu('컨텐츠');
+    } else {
+      setActiveMenu(''); // 다른 경로일 경우 active 상태 해제
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     if (isLoggedIn) {
