@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import './CreatorSection.css';
 
 export const CreatorSection = ({ creators = [] }) => {
+  console.log(creators);
   const navigate = useNavigate();
   const handleMoreClick = () => {
     navigate('/creators');
