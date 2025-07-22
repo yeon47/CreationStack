@@ -168,14 +168,21 @@ public class ContentService {
     }
 
     // 콘텐츠 목록 조회
-    public List<ContentResponse> getContentsByCreator(Long creatorId) {
-        // 크리에이터 존재 여부 확인 (선택 사항: 콘텐츠가 없으면 빈 리스트 반환)
-        if (!userRepository.existsById(creatorId)) { // existsById 사용
+    public List<ContentResponse> getContentsByCreator(Long creatorId, Long excludeContentId) {
+        if (!userRepository.existsById(creatorId)) {
             throw new CustomException(HttpStatus.NOT_FOUND, "크리에이터를 찾을 수 없습니다. ID: " + creatorId);
         }
 
-        List<Content> contents = contentRepository.findByCreator_UserId(creatorId);
-        log.info("크리에이터 ID {} 의 콘텐츠 {}개 조회", creatorId, contents.size());
+        List<Content> contents;
+        if (excludeContentId != null) {
+            // 특정 contentId를 제외하고 조회
+            contents = contentRepository.findByCreator_UserIdAndContentIdNot(creatorId, excludeContentId);
+            log.info("크리에이터 ID {} 의 콘텐츠 (제외 ID: {}) {}개 조회", creatorId, excludeContentId, contents.size());
+        } else {
+            // 모든 콘텐츠 조회
+            contents = contentRepository.findByCreator_UserId(creatorId);
+            log.info("크리에이터 ID {} 의 콘텐츠 {}개 조회", creatorId, contents.size());
+        }
         return contents.stream()
                 .map(ContentResponse::from)
                 .collect(Collectors.toList());
@@ -319,6 +326,19 @@ public class ContentService {
         log.info("콘텐츠 삭제 완료: {}", contentId);
     }
 
+    // 특정 크리에이터의 조회수 TOP N 콘텐츠를 조회합니다.
+    public List<ContentResponse> getTopViewedContents(Long creatorId, int limit) {
+        if (!userRepository.existsById(creatorId)) {
+            throw new CustomException(HttpStatus.NOT_FOUND, "크리에이터를 찾을 수 없습니다. ID: " + creatorId);
+        }
+        // 몇개 컨텐츠 조회할지 메서드 이름에 직접 명시하여 동적으로 처리가능
+        List<Content> topContents = contentRepository.findTop3ByCreator_UserIdOrderByViewCountDesc(creatorId);
+        log.info("크리에이터 ID {} 의 조회수 TOP {} 콘텐츠 {}개 조회", creatorId, limit, topContents.size());
+        return topContents.stream()
+                .map(ContentResponse::from)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public void initializeCategories(Set<String> categoryNames) {
         categoryNames.forEach(name -> {
@@ -393,17 +413,5 @@ public class ContentService {
         return likes.map(like -> ContentList.from(like.getContent()));
     }
 
-    // 특정 크리에이터의 조회수 TOP N 콘텐츠를 조회합니다.
-    public List<ContentResponse> getTopViewedContents(Long creatorId, int limit) {
-        if (!userRepository.existsById(creatorId)) {
-            throw new CustomException(HttpStatus.NOT_FOUND, "크리에이터를 찾을 수 없습니다. ID: " + creatorId);
-        }
-        // 몇개 컨텐츠 조회할지 메서드 이름에 직접 명시하여 동적으로 처리가능
-        List<Content> topContents = contentRepository.findTop3ByCreator_UserIdOrderByViewCountDesc(creatorId);
-        log.info("크리에이터 ID {} 의 조회수 TOP {} 콘텐츠 {}개 조회", creatorId, limit, topContents.size());
-        return topContents.stream()
-                .map(ContentResponse::from)
-                .collect(Collectors.toList());
-    }
 
 }

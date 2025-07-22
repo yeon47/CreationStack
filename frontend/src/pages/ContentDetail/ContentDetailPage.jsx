@@ -1,63 +1,111 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+
+// API 함수 임포트
+import { getContentById, deleteContent, getContentsByCreator as fetchRelatedContents } from '../../api/contentAPI';
 
 // 컴포넌트 임포트
 import ContentHeader from '../../components/ContentDetail/ContentHeader/ContentHeader';
 import AuthorInfoCard from '../../components/ContentDetail/AuthorInfoCard/AuthorInfoCard';
 import ContentBody from '../../components/ContentDetail/ContentBody/ContentBody';
 import FileDownloadList from '../../components/ContentDetail/FileDownloadList/FileDownloadList';
-import LikeCommentBar from '../../components/ContentDetail/LikeCommentBar/LikeCommentBar';
-import CommentSection from '../../components/ContentDetail/CommentSection/CommentSection';
 import RelatedContentList from '../../components/ContentDetail/RelatedContentList/RelatedContentList';
 
-import styles from './ContentDetailPage.module.css';
+import styles from './ContentDetailPage.module.css'; // 페이지 CSS 임포트
 
-/* 권한 확인용으로 임의 작성한 페이지 입니다. */
 export const ContentDetailPage = () => {
   const { contentId } = useParams();
-  console.log('[상세 페이지] contentId:', contentId);
+  const navigate = useNavigate();
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const token = localStorage.getItem('accessToken');
-
+  // 2. 콘텐츠 상세 정보 불러오기
   useEffect(() => {
-    axios
-      .get(`/api/content/${contentId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then(res => {
-        setContent(res.data);
-      })
-      .catch(err => {
+    const fetchContent = async () => {
+      try {
+        setLoading(true);
+        const data = await getContentById(contentId);
+        setContent(data);
+      } catch (err) {
         console.error('콘텐츠 상세 조회 실패:', err);
-      })
-      .finally(() => {
+        setError(err);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchContent();
   }, [contentId]);
 
-  if (loading) return <div>로딩 중...</div>;
-  if (!content) return <div>콘텐츠를 불러올 수 없습니다.</div>;
+  // 3. 수정/삭제 버튼 핸들러 (이제 항상 보이지만, 백엔드에서 권한 확인)
+  const handleEdit = () => {
+    navigate(`/content-edit/${contentId}`); // 콘텐츠 수정 페이지로 이동
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm('정말로 이 콘텐츠를 삭제하시겠습니까?')) {
+      try {
+        // creatorId는 백엔드에서 @AuthenticationPrincipal로 가져오므로 프론트에서 전달하지 않습니다.
+        await deleteContent(contentId);
+        alert('콘텐츠가 성공적으로 삭제되었습니다.');
+        navigate('/creator-management'); // 삭제 후 크리에이터 관리 페이지로 이동
+      } catch (err) {
+        console.error('콘텐츠 삭제 실패:', err);
+        alert('콘텐츠 삭제에 실패했습니다: ' + (err.message || '알 수 없는 오류'));
+      }
+    }
+  };
+
+  if (loading) return <div className={styles.loadingMessage}>콘텐츠를 불러오는 중...</div>;
+  if (error) return <div className={styles.errorMessage}>콘텐츠를 불러오는데 실패했습니다: {error.message}</div>;
+  if (!content) return <div className={styles.noContentMessage}>콘텐츠를 찾을 수 없습니다.</div>;
 
   console.log('content 정보', content);
+
   return (
     <div className={styles.pageWrapper}>
-      <ContentHeader title={content.title} categories={content.categories} createdAt={content.createdAt} />
+      {/* 1. 제목, 구독자전용여부, 카테고리, 작성일시, 수정/삭제 버튼 */}
+      <ContentHeader
+        title={content.title}
+        categories={content.categories}
+        createdAt={content.createdAt}
+        accessType={content.accessType}
+        isAuthor={true} // 백엔드에서 권한 확인하므로 항상 true
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+
+      {/* 3. 크리에이터 페이지로 이동 버튼 (프로필 이미지 + 닉네임 + 직업) */}
       <AuthorInfoCard
-        nickname={content.creatorNickname}
-        job={content.creatorJob}
+        creatorId={content.creatorId}
+        nickname={content.creatorNickname} // DTO에서 creatorNickname으로 변경됨
+        job={content.creatorJob || "직업 정보 없음"} // DTO에 없으면 기본값
         profileImageUrl={content.creatorProfileUrl}
       />
-      <ContentBody thumbnailUrl={content.thumbnailUrl} description={content.content} />
-      <FileDownloadList files={content.fileUrls} />
-      <LikeCommentBar likeCount={content.likeCount} commentCount={content.commentCount} />
-      <CommentSection contentId={contentId} />
-      <RelatedContentList creatorId={content.creatorId} />
+
+      {/* 4. 본문내용 (마크다운 렌더링 적용) */}
+      <ContentBody content={content.content} thumbnailUrl={content.thumbnailUrl} />
+
+      {/* 5. 첨부파일 헤딩 텍스트 + 6. 첨부파일 목록 */}
+      {content.attachments && content.attachments.length > 0 && (
+        <>
+          <h3 className={styles.attachmentHeading}>첨부파일</h3>
+          <FileDownloadList files={content.attachments.map(att => ({
+            url: att.fileUrl,
+            name: att.originalFileName
+          }))} />
+        </>
+      )}
+
+      {/* 8. <내닉네임>의 다른 콘텐츠 \n 내 컨텐츠 목록 표출 */}
+      {/* RelatedContentList 컴포넌트 추가 */}
+      <RelatedContentList
+        creatorId={content.creatorId}
+        creatorNickname={content.creatorNickname}
+        currentContentId={content.contentId} // 현재 콘텐츠 ID를 prop으로 전달
+      />
     </div>
   );
 };

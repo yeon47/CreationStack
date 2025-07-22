@@ -7,8 +7,6 @@ import { MyContent } from './component/MyContent';
 import styles from './CreatorManagementPage.module.css'; // 페이지 전체 스타일
 
 const CreatorManagementPage = () => {
-  // 테스트용 하드 코딩
-  const creatorId = 2; // 예시 ID
 
   const token = localStorage.getItem('accessToken');
   const [creator, setCreator] = useState(null);
@@ -43,8 +41,8 @@ const CreatorManagementPage = () => {
           newsubscriberCount: creator.newSubsCount ?? 0,
         }}
       />
-      <PopularContent creatorId={creatorId} />
-      <MyContent creatorId={creatorId} />
+      <PopularContent/>
+      <MyContent />
     </div>
   );
 };
