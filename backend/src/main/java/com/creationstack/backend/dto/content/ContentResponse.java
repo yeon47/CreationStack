@@ -33,6 +33,7 @@ public class ContentResponse {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private AccessType accessType;
+        private boolean isLiked;
         private Set<ContentCategoryResponse> categories; // 카테고리 목록
         private List<AttachmentResponse> attachments; // 첨부파일 목록
 
@@ -44,6 +45,10 @@ public class ContentResponse {
          */
 
         public static ContentResponse from(Content content) {
+        	return from(content, false);
+        }
+        
+        public static ContentResponse from(Content content, boolean isLiked) {
                 // 카테고리 매핑을 ContentCategoryResponse DTO로 변환
                 Set<ContentCategoryResponse> categoryResponses = content.getCategoryMappings().stream()
                                 .map(mapping -> ContentCategoryResponse.from(mapping.getCategory()))
@@ -57,7 +62,7 @@ public class ContentResponse {
                                 : List.of(); // 첨부파일이 없을 경우 빈 리스트 반환
 
                 return ContentResponse.builder()
-                                .contentId(content.getContentId())
+                               .contentId(content.getContentId())
                                 .creatorId(content.getCreator().getUserId())
                                 .creatorNickname(content.getCreator().getUserDetail() != null
                                                 ? content.getCreator().getUserDetail().getNickname()
@@ -78,6 +83,7 @@ public class ContentResponse {
                                 .accessType(content.getAccessType())
                                 .categories(categoryResponses)
                                 .attachments(attachmentResponses)
+                                .isLiked(isLiked)
                                 .build();
         }
 }

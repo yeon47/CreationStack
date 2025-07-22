@@ -26,7 +26,8 @@ const CommentItem = ({
   const isReplying =
     replyTargetId === `reply-${comment.commentId}` && editingTargetId !== `comment-${comment.commentId}`;
 
-  const isOwner = comment.userId === userId;
+  const isOwner = Number(comment.userId) === Number(userId);
+
   const isLiked = comment.liked === true;
   const likeCount = comment.likeCount || 0;
 

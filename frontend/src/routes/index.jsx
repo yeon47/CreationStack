@@ -14,7 +14,6 @@ import { MyPage } from '../pages/MyPage/MyPage';
 import { SubscriptionManage } from '../pages/ManageSubscriptionPage/SubscriptionManage';
 import { UserMainPage } from '../pages/MainPage/UserMainPage/UserMainPage';
 import MainLayout from '../layouts/mainLayout';
-import ReplyTestPage from '../pages/ContentDetail/ReplyTestPage';
 import FavoriteContent from '../pages/FavoriteContent/FavoriteContentPage';
 import { CreatorMainPage } from '../pages/MainPage/CreatorMainPage/CreatorMainPage';
 import CreatorManagementPage from '../pages/CreatorManagement/CreatorManagementPage';
@@ -36,7 +35,6 @@ export default function AppRoutes() {
         <Route path="/payments" element={<PaymentMethodManagementPage />} />
         <Route path="/payments/summary" element={<PaymentPage />} />
         <Route path="/payments/success" element={<PaymentSuccessPage />} />
-        <Route path="/reply-test" element={<ReplyTestPage />} />
         <Route path="/favorites" element={<FavoriteContent />} />
         <Route path="/creator-management" element={<CreatorManagementPage />} />
         <Route path="/content-form" element={<ContentFormPage />} />

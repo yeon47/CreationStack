@@ -14,6 +14,10 @@ async function requestApi(apiCall) {
 
         const refreshResponse = await axios.post(`${BASE_URL}/api/auth/refresh`, { refreshToken });
         const newAccessToken = refreshResponse.data.data.accessToken;
+        const myProfile = await axios.get(`${BASE_URL}/api/user/me`, {
+          headers: { Authorization: `Bearer ${newAccessToken}` },
+        });
+        localStorage.setItem('userId', myProfile.data.data.userId);
 
         localStorage.setItem('accessToken', newAccessToken);
         console.log('Token refreshed. Retrying original request...');

@@ -26,16 +26,12 @@ public class CommentController {
 
     private final CommentService commentService;
     private final UserRepository userRepository;
-
-    //  로그인된 사용자 정보에서 userId 추출
+   
     private Long getUserIdFromAuth(Authentication authentication) {
-    	
-        Object principal = authentication.getPrincipal();
-        System.out.println(">> principal class: " + principal.getClass());
-        System.out.println(">> principal value: " + principal);
-        return (Long) principal;
+    	 Object principal = authentication.getPrincipal();  
+        return (Long) authentication.getPrincipal(); 
     }
-
+    
     // 댓글 목록 조회 
     @GetMapping
     public ResponseEntity<List<CommentResponseDto>> getComments(
@@ -101,7 +97,7 @@ public class CommentController {
         return ResponseEntity.ok().build();
     }
 
-    // ✅ 댓글 좋아요 토글
+    // 댓글 좋아요 토글
     @PostMapping("/{commentId}/like")
     public ResponseEntity<String> toggleLike(
             @PathVariable Long contentId,

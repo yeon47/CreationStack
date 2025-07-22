@@ -9,10 +9,10 @@ import AuthorInfoCard from '../../components/ContentDetail/AuthorInfoCard/Author
 import ContentBody from '../../components/ContentDetail/ContentBody/ContentBody';
 import FileDownloadList from '../../components/ContentDetail/FileDownloadList/FileDownloadList';
 import LikeCommentBar from '../../components/ContentDetail/LikeCommentBar/LikeCommentBar';
-import CommentSection from '../../components/ContentDetail/CommentSection/CommentSection';
 import RelatedContentList from '../../components/ContentDetail/RelatedContentList/RelatedContentList';
-
+import ReplyList from './ReplyList';
 import styles from './ContentDetailPage.module.css';
+import { toggleContentLike } from '../../api/contentAPI';
 
 /* 권한 확인용으로 임의 작성한 페이지 입니다. */
 export const ContentDetailPage = () => {
@@ -20,6 +20,8 @@ export const ContentDetailPage = () => {
   console.log('[상세 페이지] contentId:', contentId);
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [likeCount, setLikeCount] = useState(content?.likeCount || 0);
+  const [isLiked, setIsLiked] = useState(null);
 
   const token = localStorage.getItem('accessToken');
 
@@ -31,7 +33,15 @@ export const ContentDetailPage = () => {
         },
       })
       .then(res => {
-        setContent(res.data);
+        const data = res.data;
+        setContent(data);
+        setLikeCount(data.likeCount || 0);
+
+        if (data.liked !== undefined) {
+          setIsLiked(data.liked);
+        } else {
+          setIsLiked(false);
+        }
       })
       .catch(err => {
         console.error('콘텐츠 상세 조회 실패:', err);
@@ -41,10 +51,28 @@ export const ContentDetailPage = () => {
       });
   }, [contentId]);
 
+  // 좋아요 클릭 시 호출
+  const handleLikeClick = async () => {
+    try {
+      await toggleContentLike(contentId);
+      const response = await axios.get(`/api/content/${contentId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+      });
+
+      const updated = response.data;
+
+      setLikeCount(updated.likeCount);
+      setIsLiked(updated.isLiked ?? updated.liked);
+    } catch (error) {
+      console.error('좋아요 처리 실패:', error);
+    }
+  };
+
   if (loading) return <div>로딩 중...</div>;
   if (!content) return <div>콘텐츠를 불러올 수 없습니다.</div>;
 
   console.log('content 정보', content);
+
   return (
     <div className={styles.pageWrapper}>
       <ContentHeader title={content.title} categories={content.categories} createdAt={content.createdAt} />
@@ -55,8 +83,15 @@ export const ContentDetailPage = () => {
       />
       <ContentBody thumbnailUrl={content.thumbnailUrl} description={content.content} />
       <FileDownloadList files={content.fileUrls} />
-      <LikeCommentBar likeCount={content.likeCount} commentCount={content.commentCount} />
-      <CommentSection contentId={contentId} />
+
+      <LikeCommentBar
+        likeCount={likeCount}
+        commentCount={content.commentCount}
+        isLiked={isLiked}
+        onLikeClick={handleLikeClick}
+      />
+
+      <ReplyList contentId={contentId} />
       <RelatedContentList creatorId={content.creatorId} />
     </div>
   );

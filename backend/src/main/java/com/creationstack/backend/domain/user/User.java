@@ -7,7 +7,7 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.creationstack.backend.domain.content.Like;
+import com.creationstack.backend.domain.content.ContentLike;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -76,7 +76,7 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     @Builder.Default
-    private List<Like> likes = new ArrayList<>();
+    private List<ContentLike> likes = new ArrayList<>();
 
     public enum UserRole {
         USER, CREATOR

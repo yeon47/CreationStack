@@ -8,9 +8,9 @@ const likeListApi = axios.create({
 
 // 인터셉터: 토큰 자동 설정
 likeListApi.interceptors.request.use(config => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const accessToken = localStorage.getItem('accessToken');
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
   }
   return config;
 });

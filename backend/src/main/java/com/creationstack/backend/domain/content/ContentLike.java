@@ -7,14 +7,12 @@ import com.creationstack.backend.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 @Entity
-@Table(name = "`like`", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "content_id"})
-})
+@Table(name = "`like`")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Like {
+public class ContentLike {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
