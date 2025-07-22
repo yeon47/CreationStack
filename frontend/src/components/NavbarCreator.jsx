@@ -9,7 +9,7 @@ import { logoutUser } from '../api/auth';
 export const NavbarCreator = () => {
   const [searchValue, setSearchValue] = useState('');
   const [activeMenu, setActiveMenu] = useState('홈');
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false); // 프로필 드롭다운 상태
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const profileDropdownRef = useRef(null);
   const isLoggedIn = !!localStorage.getItem('accessToken');
@@ -41,21 +41,55 @@ export const NavbarCreator = () => {
       const fetchProfileImage = async () => {
         try {
           const response = await getMyProfile();
+          const userData = response.data.data;
+          const imageUrl = userData.profileImageUrl;
 
-          const url = response.data.data.profileImageUrl;
-
-          if (url) {
-            setProfileImageUrl(url);
+          if (imageUrl && imageUrl.trim() !== '') {
+            // 상대 경로인지 절대 경로인지 확인
+            if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+              setProfileImageUrl(imageUrl);
+            } else {
+              // 상대 경로인 경우 서버 URL 추가
+              setProfileImageUrl(`http://localhost:8080${imageUrl}`);
+            }
           } else {
+            // 프로필 이미지가 없는 경우 기본 이미지 사용
             setProfileImageUrl('https://c.animaapp.com/md5nv2zm9suaL3/img/profileimage.png');
           }
         } catch (error) {
-          setProfileImageUrl(`http://localhost:8080${url}`);
+          console.error('Failed to fetch profile image:', error);
+          // 에러 발생 시 기본 이미지 사용
+          setProfileImageUrl('https://c.animaapp.com/md5nv2zm9suaL3/img/profileimage.png');
         }
       };
       fetchProfileImage();
     }
   }, [isLoggedIn]);
+
+  // 프로필 이미지 업데이트 이벤트 리스너
+  useEffect(() => {
+    const handleProfileImageUpdate = event => {
+      const newImageUrl = event.detail.profileImageUrl;
+
+      if (newImageUrl && newImageUrl.trim() !== '') {
+        // 상대 경로인지 절대 경로인지 확인
+        if (newImageUrl.startsWith('http://') || newImageUrl.startsWith('https://')) {
+          setProfileImageUrl(newImageUrl);
+        } else {
+          // 상대 경로인 경우 서버 URL 추가
+          setProfileImageUrl(`http://localhost:8080${newImageUrl}`);
+        }
+      }
+    };
+
+    // 이벤트 리스너 등록
+    window.addEventListener('profileImageUpdated', handleProfileImageUpdate);
+
+    // 컴포넌트 언마운트 시 이벤트 리스너 제거
+    return () => {
+      window.removeEventListener('profileImageUpdated', handleProfileImageUpdate);
+    };
+  }, []);
 
   const handleLogout = async () => {
     setIsProfileDropdownOpen(false);

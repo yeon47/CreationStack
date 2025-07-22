@@ -48,6 +48,19 @@ export const ProfileEdit = () => {
     }
   };
 
+  // 프로필 이미지 업데이트 이벤트 발생 함수
+  const triggerProfileImageUpdate = newImageUrl => {
+    // localStorage에 새 이미지 URL 저장 (임시)
+    localStorage.setItem('profileImageUrl', newImageUrl);
+
+    // 커스텀 이벤트 발생
+    window.dispatchEvent(
+      new CustomEvent('profileImageUpdated', {
+        detail: { profileImageUrl: newImageUrl },
+      })
+    );
+  };
+
   const userPlatform = getPlatformFromToken();
   const isKakaoUser = userPlatform === 'KAKAO';
 
@@ -131,8 +144,14 @@ export const ProfileEdit = () => {
       });
       const newImageUrl = response.data.imageUrl;
 
+      // 로컬 상태 업데이트
       setFormData(prev => ({ ...prev, profileImageUrl: newImageUrl }));
       setUser(prev => ({ ...prev, profileImageUrl: newImageUrl }));
+
+      // 네비바 및 다른 컴포넌트에 프로필 이미지 업데이트 알림
+      triggerProfileImageUpdate(newImageUrl);
+
+      console.log('프로필 이미지가 업데이트되었습니다:', newImageUrl);
     } catch (error) {
       console.error('Image upload failed:', error);
       const errorMessage = error.response?.data?.message || '이미지 업로드에 실패했습니다.';
@@ -200,6 +219,12 @@ export const ProfileEdit = () => {
         : formData;
 
       await updateMyProfile(submitData);
+
+      // 프로필 업데이트 성공 시 네비바에도 알림
+      if (formData.profileImageUrl) {
+        triggerProfileImageUpdate(formData.profileImageUrl);
+      }
+
       alert('프로필이 성공적으로 수정되었습니다.');
       navigate('/mypage');
     } catch (error) {
