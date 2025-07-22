@@ -135,6 +135,10 @@ function PaymentPage() {
     navigate('/payments');
   };
 
+    const handleCreatorPage = () => {
+navigate(`/creator-main/${creatorNickname}`, { replace: true });
+  }
+
   return (
     <div className={styles.summary_container}>
       <div className={styles.card}>
@@ -181,7 +185,7 @@ function PaymentPage() {
 
           <button className={styles.backButton}>
             <span className={styles.icon}>←</span>
-            <span>이전으로</span>
+            <span onClick={handleCreatorPage}>이전으로</span>
           </button>
         </div>
       </div>

@@ -111,7 +111,6 @@ const PaymentModal = ({ isOpen, onClose, cardData, creator, onSuccess, onFailure
                   onClick={() => setSelectedCard(card)}>
                   <div className={styles.cardContent}>
                     <div className={styles.cardName}>{card.cardName}</div>
-                    <div className={styles.cardBrand}>{card.cardBrand}</div>
                     <div className={styles.cardNumber}>{card.cardNumber}</div>
                   </div>
                 </div>
@@ -123,7 +122,7 @@ const PaymentModal = ({ isOpen, onClose, cardData, creator, onSuccess, onFailure
           <div className={styles.selectedCardInfo}>
             <p className={styles.selectedLabel}>선택된 카드</p>
             {selectedCard ? (
-              <div className={styles.selectedCardBox}>
+              <div className={`${styles.selectedCardBox} ${selectedCard ? styles.active : ''}`}>
                 <div className={styles.selectedCardName}>{selectedCard.cardName}</div>
                 <div className={styles.selectedCardNumber}>**** **** **** {selectedCard.cardNumber.slice(-4)}</div>
               </div>

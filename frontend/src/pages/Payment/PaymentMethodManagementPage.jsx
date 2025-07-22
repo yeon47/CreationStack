@@ -77,7 +77,6 @@ function PaymentMethodManagementPage() {
       const accessToken = localStorage.getItem('accessToken');
       // 빌링키 발급 위한 현재 로그인한 사용자의 정보 조회
       const userInfoResponse = await getUserInfo(accessToken);
-      alert(userInfoResponse.data.username);
       // 빌링키 발급
       const issueResponse = await registerBillingKey(
         storeId,
