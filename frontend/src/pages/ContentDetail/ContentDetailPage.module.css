@@ -1,0 +1,12 @@
+.pageWrapper {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 48px 20px;
+}
+
+.statusText {
+  text-align: center;
+  padding: 100px;
+  font-size: 18px;
+  color: #888;
+}

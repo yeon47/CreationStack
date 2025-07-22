@@ -48,6 +48,7 @@ export default function AppRoutes() {
         <Route path="/contents" element={<ContentSearchPage />} />
         <Route path="/search" element={<UnifiedSearchPage />} />
         <Route path="/contents/:contentId" element={<ContentDetailPage />} />
+        <Route path="/content/:contentId" element={<ContentDetailPage />} />
         <Route path="/payments/summary/:creatorNickname" element={<PaymentPage />} />
         <Route path="/profile/edit" element={<ProfileEdit />} />
         <Route path="/creator/notice" element={<CreatorNoticePage />} />

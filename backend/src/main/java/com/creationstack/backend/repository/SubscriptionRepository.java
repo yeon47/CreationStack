@@ -12,7 +12,6 @@ import org.springframework.data.repository.query.Param;
 import com.creationstack.backend.domain.payment.PaymentMethod;
 import com.creationstack.backend.domain.subscription.Subscription;
 import com.creationstack.backend.domain.subscription.SubscriptionStatus;
-import com.creationstack.backend.domain.subscription.SubscriptionStatusName;
 import com.creationstack.backend.dto.Subscription.UserSubscriptionDto;
 import com.creationstack.backend.dto.member.PublicProfileResponse;
 
@@ -48,12 +47,7 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
                 ud.nickname,
                 ud.profileImageUrl,
                 ud.bio,
-                (
-                    SELECT COUNT(sub2)
-                    FROM Subscription sub2
-                    WHERE sub2.creatorId = s.creatorId
-                        AND sub2.status.name = 'ACTIVE'
-                ),
+                0L, 
                 ss.name,
                 s.startedAt,
                 s.nextPaymentAt,
@@ -71,12 +65,7 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
                 SELECT new com.creationstack.backend.dto.member.PublicProfileResponse(
                     u.userId, ud.nickname, u.role, j.name,
                     ud.bio, ud.profileImageUrl, u.isActive,
-                    (
-                        SELECT COUNT(s2)
-                        FROM Subscription s2
-                        JOIN s2.status s2status
-                        WHERE s2.creatorId = u.userId AND s2status.name = 'ACTIVE'
-                    )
+                    0L
                 )
                 FROM Subscription s
                 JOIN s.status st
@@ -90,5 +79,13 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
                 AND st.name = 'ACTIVE'
             """)
     List<PublicProfileResponse> findSubscribedCreatorsByNickname(@Param("nickname") String nickname);
+
+    @Query("""
+        SELECT s.creatorId, COUNT(s)
+        FROM Subscription s
+        WHERE s.creatorId IN :creatorIds AND s.status.name = 'ACTIVE'
+        GROUP BY s.creatorId
+    """)
+    List<Object[]> countActiveSubscriptionsByCreatorIds(@Param("creatorIds") List<Long> creatorIds);
 
 }
