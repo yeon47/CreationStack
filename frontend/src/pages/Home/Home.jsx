@@ -2,13 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { BannerSection } from '../../components/Home/BannerSection/BannerSection';
 import { ContentSection } from '../../components/Home/ContentSection/ContentSection';
 import { CreatorSection } from '../../components/Home/CreatorSection/CreatorSection';
+import { CreatorListSection } from '../../components/Search/SearchCreator/CreatorListSection/CreatorListSection';
 import { searchUnified } from '../../api/search';
+import { searchCreator } from '../../api/search';
 import './Home.css';
 
 export const Home = () => {
   const [creators, setCreators] = useState([]);
   const [contents, setContents] = useState([]);
+  const keyword =''  
 
+  // 컨텐츠 가져오기
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
@@ -17,17 +21,6 @@ export const Home = () => {
         });
 
         if (result) {
-          if (result.creators) {
-            const mappedCreators = result.creators.map(item => ({
-              name: item.creator.nickname,
-              job: item.creator.job,
-              description: item.creator.bio,
-              profileImageUrl: item.creator.profileImageUrl,
-              subscriberCount: item.creator.subscriberCount,
-            }));
-            setCreators(mappedCreators.slice(0, 3)); // 3개만 표시;
-          }
-          
           if (result.contents) {
             const mappedContents = result.contents.map(item => ({
               // contentId, thumbnailUrl, creatorNickname, title, likes, isPaid, categoryNames
@@ -51,12 +44,44 @@ export const Home = () => {
     fetchHomeData();
   }, []);
 
+  useEffect(() => {
+    const fetchCreators = async () => {
+      try {
+        const query = { page: 0 };
+        if (keyword) {
+          query.keyword = keyword;
+        }
+
+        const result = await searchCreator(query);
+        if (!result || !result.contents) {
+          setCreators([]);
+          return;
+        }
+
+        const mapped = result.contents.map(item => ({
+          id: item.contentId,
+          name: item.creator.nickname, // nickname을 name으로 매핑
+          job: item.creator.job,
+          description: item.creator.bio, // bio를 description으로 매핑
+          profileImageUrl: item.creator.profileImageUrl,
+          subscriberCount: item.creator.subscriberCount,
+        }));
+        setCreators(mapped.slice(0, 3)); // 3개만 표시
+      } catch (error) {
+        console.error('Failed to fetch creators:', error);
+      }
+    };
+
+    fetchCreators();
+  }, [keyword]);
+
   return (
     <div className="home-page" data-model-id="89:971">
       <div className="home-section-wrapper">
         <div className="home-section">
-          <BannerSection />
-          <CreatorSection creators={creators} />
+          <div className="bannerSection">
+  <img src="/assets/BannerSection.png" alt="배너" style={{ width: '100%', height: 'auto' }} /></div>
+          <CreatorListSection creators={creators} />
           <ContentSection contents={contents} />
         </div>
       </div>
