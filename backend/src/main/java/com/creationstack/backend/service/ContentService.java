@@ -38,7 +38,6 @@ import com.creationstack.backend.repository.content.ContentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-
 /**
  * 콘텐츠 관련 비즈니스 로직을 처리하는 서비스 클래스입니다.
  * 콘텐츠 생성, 조회, 수정, 삭제 기능을 제공합니다.
@@ -61,7 +60,7 @@ public class ContentService {
     // 콘텐츠 생성
     @Transactional // 쓰기 작업이므로 트랜잭션 적용
     public ContentResponse createContent(ContentCreateRequest request, Long userId) {
-        //1. 유저 확인
+        // 1. 유저 확인
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "크리에이터를 찾을 수 없습니다. ID: " + userId));
 
@@ -147,7 +146,7 @@ public class ContentService {
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "콘텐츠를 찾을 수 없습니다. ID: " + contentId));
 
-        // 구독자 전용 컨텐츠일 경우, 권한 확인
+        // 구독자 전용 콘텐츠일 경우, 권한 확인
         if (content.getAccessType() == AccessType.SUBSCRIBER) {
             log.info("구독자 전용 콘텐츠 조회");
             boolean isSubscribed = subscriptionService.isActiveSubscriber(content.getCreator().getUserId(), userId);
@@ -155,28 +154,27 @@ public class ContentService {
             if (!isSubscribed && !content.getCreator().getUserId().equals(userId)) {
                 log.info("구독자 아님 X => 접근 불가");
                 throw new CustomException(HttpStatus.FORBIDDEN, "구독자가 아니므로 콘텐츠 접근 불가.");
-            } 
+            }
         }
 
         log.info("조회 성공");
-                content.incrementViewCount(); // 조회수 증가
-                // contentRepository.save(content); // @Transactional 어노테이션이 있으면 변경 감지(Dirty
-                // Checking)로 자동 저장됨
+        content.incrementViewCount(); // 조회수 증가
+        // contentRepository.save(content); // @Transactional 어노테이션이 있으면 변경 감지(Dirty
+        // Checking)로 자동 저장됨
 
-                log.info("콘텐츠 조회 및 조회수 증가: Content ID = {}", contentId);
+        log.info("콘텐츠 조회 및 조회수 증가: Content ID = {}", contentId);
 
-                boolean isLiked = false;
-                if (userId != null) {
-                    User user = userRepository.findById(userId)
-                            .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다. ID: " + userId));
+        boolean isLiked = false;
+        if (userId != null) {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다. ID: " + userId));
 
-                    isLiked = contentLikeRepository.findByUserAndContent(user, content)
-                                    .filter(ContentLike::getIsActive)
-                                    .isPresent();
-                }
+            isLiked = contentLikeRepository.findByUserAndContent(user, content)
+                    .filter(ContentLike::getIsActive)
+                    .isPresent();
+        }
 
-                
-                return ContentResponse.from(content, isLiked);
+        return ContentResponse.from(content, isLiked);
     }
 
     // 콘텐츠 목록 조회
@@ -343,7 +341,7 @@ public class ContentService {
         if (!userRepository.existsById(creatorId)) {
             throw new CustomException(HttpStatus.NOT_FOUND, "크리에이터를 찾을 수 없습니다. ID: " + creatorId);
         }
-        // 몇개 컨텐츠 조회할지 메서드 이름에 직접 명시하여 동적으로 처리가능
+        // 몇개 콘텐츠 조회할지 메서드 이름에 직접 명시하여 동적으로 처리가능
         List<Content> topContents = contentRepository.findTop3ByCreator_UserIdOrderByViewCountDesc(creatorId);
         log.info("크리에이터 ID {} 의 조회수 TOP {} 콘텐츠 {}개 조회", creatorId, limit, topContents.size());
         return topContents.stream()
@@ -376,7 +374,6 @@ public class ContentService {
                 .filter(ContentLike::getIsActive)
                 .isPresent();
 
-        
         if (existingLike.isPresent()) {
             ContentLike like = existingLike.get();
             boolean wasActive = like.getIsActive();
@@ -414,12 +411,11 @@ public class ContentService {
 
         for (ContentLike like : likes) {
             System.out.println("LIKE ID: " + like.getLikeId());
-            System.out.println("CONTENT: " + like.getContent()); 
+            System.out.println("CONTENT: " + like.getContent());
         }
 
         return likes.map(like -> ContentList.from(like.getContent(), true));
 
     }
-
 
 }

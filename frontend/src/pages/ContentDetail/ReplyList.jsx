@@ -4,7 +4,7 @@ import CommentItem from '../../components/Comment/CommentItem';
 import styles from '../../styles/comment/replyList.module.css';
 import btnstyles from '../../styles/comment/commentBtn.module.css';
 
-const ReplyList = ({ contentId }) => {
+const ReplyList = ({ contentId, onCommentCountChange }) => {
   const [comments, setComments] = useState([]);
   const [editingTargetId, setEditingTargetId] = useState(null);
   const [editContent, setEditContent] = useState('');
@@ -14,7 +14,6 @@ const ReplyList = ({ contentId }) => {
   const [loading, setLoading] = useState(false);
 
   const userId = Number(localStorage.getItem('userId'));
-  console.log(userId);
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('accessToken');
@@ -32,6 +31,11 @@ const ReplyList = ({ contentId }) => {
       setLoading(true);
       const res = await axios.get(`/api/contents/${contentId}/comments`, getAuthHeaders());
       setComments(res.data);
+
+      const topLevelCount = res.data.filter(c => !c.parentCommentId).length;
+      if (onCommentCountChange) {
+        onCommentCountChange(topLevelCount);
+      }
     } catch (err) {
       alert('댓글 불러오기 실패');
     } finally {
@@ -39,12 +43,21 @@ const ReplyList = ({ contentId }) => {
     }
   };
 
+  const safeFetchComments = async () => {
+    const scrollY = window.scrollY;
+    await fetchComments(); // 기존 댓글 목록 불러오기
+    setTimeout(() => {
+      window.scrollTo({ top: scrollY });
+    }, 0); // DOM 렌더링 후에 스크롤 복원
+  };
+
   useEffect(() => {
     if (contentId) fetchComments();
   }, [contentId]);
 
   // 댓글 등록
-  const handleNewComment = async () => {
+  const handleNewComment = async e => {
+    e.preventDefault();
     if (!newComment.trim() || !userId) return alert('댓글 내용을 입력해주세요');
 
     const token = localStorage.getItem('accessToken');
@@ -65,7 +78,7 @@ const ReplyList = ({ contentId }) => {
         }
       );
       setNewComment('');
-      fetchComments();
+      await safeFetchComments();
     } catch (err) {
       console.error('댓글 등록 오류:', err);
       alert('댓글 등록 실패');
@@ -95,16 +108,18 @@ const ReplyList = ({ contentId }) => {
         return copy;
       });
       setReplyTargetId(null);
-      fetchComments();
+      await safeFetchComments();
     } catch (err) {
       console.error('답글 등록 오류:', err);
       alert('답글 등록 실패');
     }
   };
 
+  // 수정
   const handleEditSubmit = async commentId => {
     if (!editContent.trim()) return;
     if (!window.confirm('댓글을 수정하시겠습니까?')) return;
+
     try {
       await axios.put(
         `/api/contents/${contentId}/comments/${commentId}`,
@@ -115,12 +130,13 @@ const ReplyList = ({ contentId }) => {
       );
       setEditingTargetId(null);
       setEditContent('');
-      fetchComments();
+      await safeFetchComments();
     } catch {
       alert('수정 실패');
     }
   };
 
+  //좋아요
   const handleLike = async commentId => {
     try {
       const token = localStorage.getItem('accessToken');
@@ -130,7 +146,7 @@ const ReplyList = ({ contentId }) => {
         },
       });
 
-      await fetchComments();
+      await safeFetchComments();
     } catch (error) {
       alert('좋아요 처리 실패');
       console.error(error);
@@ -138,14 +154,16 @@ const ReplyList = ({ contentId }) => {
     }
   };
 
+  //삭제
   const handleDelete = async commentId => {
     if (!window.confirm('삭제할까요?')) return;
+
     try {
       const res = await axios.delete(
         `/api/contents/${contentId}/comments/${commentId}?userId=${userId}`,
         getAuthHeaders()
       );
-      fetchComments();
+      await safeFetchComments();
     } catch (err) {
       alert('삭제 실패');
     }
@@ -170,7 +188,7 @@ const ReplyList = ({ contentId }) => {
           rows="4"
         />
         <div className={styles.newCommentActions}>
-          <button onClick={handleNewComment} className={btnstyles.btnSubmit}>
+          <button type="button" onClick={handleNewComment} className={btnstyles.btnSubmit}>
             댓글 작성
           </button>
         </div>
@@ -180,6 +198,7 @@ const ReplyList = ({ contentId }) => {
         {/*댓글목록*/}
         {comments
           .filter(c => !c.parentCommentId && c.commentId !== undefined)
+          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
           .map(comment => (
             <div key={`comment-${comment.commentId}`} className={styles.commentItem}>
               <CommentItem
@@ -221,6 +240,7 @@ const ReplyList = ({ contentId }) => {
               {/*답글목록*/}
               {comments
                 .filter(reply => reply.parentCommentId === comment.commentId && reply.commentId !== undefined)
+                .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
                 .map(reply => (
                   <div key={`reply-${reply.commentId}`} className={styles.replies}>
                     <CommentItem

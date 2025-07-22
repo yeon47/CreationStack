@@ -16,11 +16,10 @@ likeListApi.interceptors.request.use(config => {
 });
 
 // 좋아요한 콘텐츠 목록 조회
-export const fetchLikedContents = async (page, userId) => {
+export const fetchLikedContents = async page => {
   const response = await likeListApi.get('/api/content/liked', {
     params: {
       page,
-      userId,
     },
   });
   return response.data;

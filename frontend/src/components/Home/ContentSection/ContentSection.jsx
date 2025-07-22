@@ -10,15 +10,12 @@ export const ContentSection = ({ contents = [] }) => {
     <div className="content-search-wrapper">
       <div className="content-search">
         <div className="section-header">
-          <h2 className="section-title">최신 컨텐츠</h2>
+          <h2 className="section-title">최신 콘텐츠</h2>
         </div>
         <div className="heading-and-content">
           <div className={gridStyles.grid}>
             {contents.map(content => (
-              <ContentCard 
-                  key={content.contentId} 
-                  {...content} 
-                  isPaid={content.accessType === 'SUBSCRIBER'} />
+              <ContentCard key={content.contentId} {...content} isPaid={content.accessType === 'SUBSCRIBER'} />
             ))}
           </div>
         </div>

@@ -115,7 +115,7 @@ export const UnifiedSearchPage = () => {
             <div className="content-search">
               <SearchResultHeader
                 className="design-component-instance-node"
-                text="컨텐츠 검색 결과"
+                text="콘텐츠 검색 결과"
                 onMoreClick={() =>
                   navigate(
                     `/contents?keyword=${encodeURIComponent(keyword)}&sort=${filter.sort}` +
