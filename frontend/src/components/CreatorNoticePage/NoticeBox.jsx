@@ -6,7 +6,7 @@ import { toggleReaction, getReactions } from '@/api/notice.js';
 const NoticeBox = ({ date, profileImage, content, time, noticeId, token, initialReactions, userReactedEmoji }) => {
   const [reactions, setReactions] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
-  const [setUserEmoji] = useState(userReactedEmoji || null);
+  const [userEmoji, setUserEmoji] = useState(userReactedEmoji || null);
 
   useEffect(() => {
     setReactions(initialReactions || []);
