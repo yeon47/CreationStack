@@ -23,6 +23,7 @@ const ContentFormPage = () => {
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState(null); // 썸네일 미리보기 URL 상태 추가
   const [isDragging, setIsDragging] = useState(false); // 드래그 중인지 여부
   const [isImageUploading, setIsImageUploading] = useState(false); // 이미지 업로드 중 상태 추가
+  
 
   // 드롭다운 외부 클릭 감지를 위한 ref
   const dropdownRef = useRef(null);
@@ -122,23 +123,7 @@ const ContentFormPage = () => {
     if (file && file.type.startsWith('image/')) {
       setThumbnailFile(file);
     } else {
-      console.warn('이미지 파일만 업로드할 수 있습니다.', file);
-      setThumbnailFile(null); // 이미지 파일이 아니면 썸네일 상태를 null로 명확히 설정
-    }
-    // 파일 입력 필드 값 초기화 (동일 파일 재선택 가능하게 하거나, 상태 초기화 보장)
-    if (thumbnailInputRef.current) {
-      thumbnailInputRef.current.value = '';
-    }
-  };
-
-  const handleRemoveThumbnail = () => {
-    // 썸네일 상태 초기화
-    setThumbnailFile(null);
-    setThumbnailPreviewUrl(null); // 혹시 useEffect 타이밍 안 맞을 경우를 대비해서 명시적 해제
-
-    // input 요소도 초기화 (동일 파일 다시 선택 가능하게)
-    if (thumbnailInputRef.current) {
-      thumbnailInputRef.current.value = '';
+      console.warn('이미지 파일만 업로드할 수 있습니다.');
     }
   };
 
@@ -237,19 +222,18 @@ const ContentFormPage = () => {
     }
 
     // 첨부 파일 추가 (수정된 부분)
-    if (attachedFiles.length > 0) {
-      // 첨부 파일이 있을 때만 FormData에 추가
-      attachedFiles.forEach(item => {
-        if (item.file) {
-          formData.append('attachmentFiles', item.file);
-        } else {
-          console.warn('Attached file item is missing the actual file object:', item);
-        }
+    if (attachedFiles.length > 0) { // 첨부 파일이 있을 때만 FormData에 추가
+      attachedFiles.forEach(file => {
+        formData.append('attachmentFiles', file.file); // 실제 파일 객체 append
       });
     }
 
+    // creatorId (임시로 하드코딩, 실제로는 로그인 사용자 정보에서 가져와야 함)
+    const creatorId = 2; // 예시: 로그인된 사용자의 ID
+
     try {
-      const result = await createContent(formData);
+      // 분리된 API 함수 호출
+      const result = await createContent(formData, creatorId);
       console.log('콘텐츠 저장 성공:', result);
       alert('콘텐츠가 성공적으로 저장되었습니다!');
       // 저장 성공 후 폼 초기화 또는 다른 페이지로 이동
