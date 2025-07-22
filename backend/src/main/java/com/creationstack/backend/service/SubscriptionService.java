@@ -2,6 +2,8 @@ package com.creationstack.backend.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,7 +15,6 @@ import com.creationstack.backend.domain.subscription.Subscription;
 import com.creationstack.backend.domain.subscription.SubscriptionStatus;
 import com.creationstack.backend.domain.subscription.SubscriptionStatusName;
 import com.creationstack.backend.domain.user.User;
-import com.creationstack.backend.domain.user.UserDetail;
 import com.creationstack.backend.dto.Subscription.SubscriptionRequestDto;
 import com.creationstack.backend.dto.Subscription.SubscriptionResponseDto;
 import com.creationstack.backend.dto.Subscription.UserSubscriptionDto;
@@ -24,7 +25,6 @@ import com.creationstack.backend.repository.PaymentMethodRepository;
 import com.creationstack.backend.repository.PaymentRepository;
 import com.creationstack.backend.repository.SubscriptionRepository;
 import com.creationstack.backend.repository.SubscriptionStatusRepository;
-import com.creationstack.backend.repository.UserDetailRepository;
 import com.creationstack.backend.repository.UserRepository;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +42,6 @@ public class SubscriptionService {
         private final PaymentMethodRepository paymentMethodRepository;
         private final PaymentRepository paymentRepository;
         private final UserRepository userRepository;
-        private final UserDetailRepository userDetailRepository;
 
         // 구독 생성 (PENDING 상태)
         @Transactional
@@ -132,11 +131,15 @@ public class SubscriptionService {
                 subscription.setPaymentMethod(payment.getPaymentMethod());
 
                 // 기존 nextPaymentAt이 없을 수도 있으니 null check
-                subscription.setNextPaymentAt(
-                                subscription.getNextPaymentAt() == null ? subscription.getStartedAt().plusMonths(1)
-                                                : subscription.getNextPaymentAt());
+                subscription.setNextPaymentAt(subscription.getNextPaymentAt() == null ? subscription.getStartedAt().plusMonths(1) : subscription.getNextPaymentAt());
 
                 subscriptionRepository.save(subscription);
+
+                // 크리에이터의 구독자 수 증가
+                User creator = userRepository.findById(subscription.getCreatorId())
+                        .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "크리에이터를 찾을 수 없습니다."));
+                creator.setSubscriberCount(creator.getSubscriberCount() + 1);
+                userRepository.save(creator);
         }
 
         // 결제 실패 처리: 이전 구독이면 EXPIRED, 신규면 삭제
@@ -178,8 +181,17 @@ public class SubscriptionService {
         public List<UserSubscriptionDto> getMySubscriptions(Long userId) {
                 List<UserSubscriptionDto> list = subscriptionRepository.findAllBySubscriberId(userId);
 
-                log.info("구독 전체 수: {}", list.size());
-                for (UserSubscriptionDto dto : list) {
+                if (list.isEmpty()) {
+                        return list;
+                }
+
+                List<Long> creatorIds = list.stream().map(UserSubscriptionDto::getCreatorId).distinct().toList();
+                List<Object[]> counts = subscriptionRepository.countActiveSubscriptionsByCreatorIds(creatorIds);
+                Map<Long, Long> subsCountMap = counts.stream()
+                                .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+
+                list.forEach(dto -> {
+                        dto.setSubsCount(subsCountMap.getOrDefault(dto.getCreatorId(), 0L));
                         dto.setMessage(switch (dto.getStatusName()) {
                                 case "ACTIVE" -> "다음 결제 예정일: " + format(dto.getNextPaymentAt());
                                 case "CANCELLED" -> "만료 예정일: " + format(dto.getNextPaymentAt());
@@ -187,8 +199,7 @@ public class SubscriptionService {
                                 case "PENDING" -> "결제 대기 중입니다.";
                                 default -> "";
                         });
-                        log.info("구독 ID: {}, 상태: {}, 크리에이터 ID: {}", dto.getSubscriptionId(), dto.getStatusName(), dto.getCreatorId());
-                }
+                });
 
                 return list;
         }
@@ -200,14 +211,20 @@ public class SubscriptionService {
         // 사용자가 구독한 크리에이터 목록 조회
         @Transactional(readOnly = true)
         public List<PublicProfileResponse> getSubscribedCreators(String nickname) {
-                try {
-                        List<PublicProfileResponse> list = subscriptionRepository
-                                        .findSubscribedCreatorsByNickname(nickname);
+                List<PublicProfileResponse> list = subscriptionRepository.findSubscribedCreatorsByNickname(nickname);
+
+                if (list.isEmpty()) {
                         return list;
-                } catch (Exception e) {
-                        log.error("구독 조회 실패", e); // 여기서 반드시 스택트레이스 확인
-                        throw e;
                 }
+
+                List<Long> creatorIds = list.stream().map(PublicProfileResponse::getUserId).distinct().toList();
+                List<Object[]> counts = subscriptionRepository.countActiveSubscriptionsByCreatorIds(creatorIds);
+                Map<Long, Long> subsCountMap = counts.stream()
+                                .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+
+                list.forEach(dto -> dto.setSubsCount(subsCountMap.getOrDefault(dto.getUserId(), 0L)));
+
+                return list;
         }
 
         @Transactional
@@ -224,6 +241,12 @@ public class SubscriptionService {
                                                 "CANCELLED 상태 정보를 찾을 수 없습니다."));
 
                 subscription.setStatus(cancelledStatus);
+
+                // 크리에이터의 구독자 수 감소
+                User creator = userRepository.findById(subscription.getCreatorId())
+                        .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "크리에이터를 찾을 수 없습니다."));
+                creator.setSubscriberCount(Math.max(0, creator.getSubscriberCount() - 1));
+                userRepository.save(creator);
         }
 
 }

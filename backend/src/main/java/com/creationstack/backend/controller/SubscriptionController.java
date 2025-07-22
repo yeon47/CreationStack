@@ -3,10 +3,8 @@ package com.creationstack.backend.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,14 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.creationstack.backend.domain.user.UserDetail;
 import com.creationstack.backend.dto.Subscription.ActivateSubscriptionRequestDto;
 import com.creationstack.backend.dto.Subscription.SubscriptionRequestDto;
 import com.creationstack.backend.dto.Subscription.SubscriptionResponseDto;
 import com.creationstack.backend.dto.Subscription.UserSubscriptionDto;
 import com.creationstack.backend.dto.member.PublicProfileResponse;
-import com.creationstack.backend.exception.CustomException;
-import com.creationstack.backend.repository.UserDetailRepository;
 import com.creationstack.backend.service.SubscriptionService;
 
 import lombok.RequiredArgsConstructor;
@@ -42,7 +37,7 @@ public class SubscriptionController {
             Authentication authentication,
             // @RequestBody User user,
             @RequestBody SubscriptionRequestDto request) {
-        Long subscriberId = Long.parseLong(authentication.getName()); // userId from JWT
+        Long subscriberId = (Long) authentication.getPrincipal();
 
         // Long subscriberId = user.getUserId();
         // 구독 생성 요청subscriberId
@@ -71,7 +66,7 @@ public class SubscriptionController {
     // 사용자 구독 목록 조회
     @GetMapping("/users/me/subscriptions")
     public ResponseEntity<Map<String, Object>> getMySubscriptions(Authentication authentication) {
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = (Long) authentication.getPrincipal();
         List<UserSubscriptionDto> subscriptions = subscriptionService.getMySubscriptions(userId);
         return ResponseEntity.ok(Map.of("subscriptions", subscriptions));
     }
@@ -79,16 +74,14 @@ public class SubscriptionController {
     // 사용자가 구독한 크리에이터 목록 조회
     @GetMapping("/users/{nickname}/subscriptions")
     public ResponseEntity<Map<String, Object>> getSubscribedCreators(@PathVariable String nickname) {
-        log.info("크리에이터 목록 조회 시작");
         List<PublicProfileResponse> subscriptions = subscriptionService.getSubscribedCreators(nickname);
-        log.info("creators: {}", subscriptions);
         return ResponseEntity.ok(Map.of("subscriptions", subscriptions));
     }
 
     // 구독 해지 (CANCELLED로 변경)
     @PatchMapping("/subscriptions/{subscriptionId}")
     public ResponseEntity<?> cancelSubscription(@PathVariable Long subscriptionId, Authentication authentication) {
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = (Long) authentication.getPrincipal();
         subscriptionService.cancelSubscription(subscriptionId, userId);
 
         return ResponseEntity.ok(Map.of(
