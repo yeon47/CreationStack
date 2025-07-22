@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { getMyProfile } from '../api/user'; // ✅ getMyProfile import 추가
 import styles from '../styles/layout.module.css';
 import logo from '../assets/img/logo.svg';
-import { useNavigate, Link } from 'react-router-dom'; // Link 임포트
+import { useNavigate, Link } from 'react-router-dom';
 import { searchUnified } from '../api/search';
 
 export const NavbarCreator = () => {
@@ -12,7 +12,7 @@ export const NavbarCreator = () => {
   const navigate = useNavigate();
   const profileDropdownRef = useRef(null);
   const isLoggedIn = !!localStorage.getItem('accessToken');
-  const [profileImageUrl, setProfileImageUrl] = useState('../../public/avatar/default_avatar.jpg');
+  const [profileImageUrl, setProfileImageUrl] = useState('https://c.animaapp.com/md5nv2zm9suaL3/img/profileimage.png');
 
   const getRoleFromToken = token => {
     try {
@@ -46,7 +46,7 @@ export const NavbarCreator = () => {
           if (url) {
             setProfileImageUrl(url);
           } else {
-            setProfileImageUrl('../../public/avatar/default_avatar.jpg');
+            setProfileImageUrl('https://c.animaapp.com/md5nv2zm9suaL3/img/profileimage.png');
           }
         } catch (error) {
           setProfileImageUrl(`http://localhost:8080${url}`);
