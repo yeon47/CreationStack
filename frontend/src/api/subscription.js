@@ -13,7 +13,7 @@ export const getMySubscriptions = async () => {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-
+    console.log(response.data.subscriptions);
     return response.data.subscriptions;
   } catch (err) {
     console.log('구독 목록 조회 실패: '. err);
@@ -35,11 +35,30 @@ export const getSubscribedCreators = async () => {
 };
 
 // 구독 해지
-export const cancelSubscription = async (subscriptionId, accessToken) => {
-  const res = await axios.patch(`/api/subscriptions/${subscriptionId}`, null, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  return res.data;
+export const cancelSubscription = async (subscriptionId) => {
+  try {
+    const accessToken = localStorage.getItem('accessToken');
+    const response = await axios.patch(`/api/subscriptions/${subscriptionId}`, null, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    return response.data;
+  } catch (err) {
+    console.log('구독 해지 실패: '. err);
+    throw err;
+  }
+};
+
+
+// 구독한 크리에이터 목록 조회
+export const getSubscriptionsByNickname = async (nickname) => {
+  try {
+    const response = await axios.get(`/api/users/${encodeURIComponent(nickname)}/subscriptions`);
+    return response.data;
+  } catch (error) {
+    console.error('구독한 크리에이터 목록 조회 실패:', error);
+    throw error;
+  }
 };

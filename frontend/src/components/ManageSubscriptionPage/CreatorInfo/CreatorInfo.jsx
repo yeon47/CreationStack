@@ -43,7 +43,6 @@ export const CreatorInfo = ({ subscriptionId, className, creatorNickname, profil
   };
 
   const handleConfirm = async () => {
-    const token = localStorage.getItem('accessToken');
 
     if (modalType === 'resume') {
       navigate(`/payments/summary/${creatorNickname}`);
@@ -54,7 +53,7 @@ export const CreatorInfo = ({ subscriptionId, className, creatorNickname, profil
       console.log('구독 해지 요청 subscriptionId', subscriptionId);
       try {
         // 구독 해지 API 호출
-        await cancelSubscription(subscriptionId, token);
+        await cancelSubscription(subscriptionId);
 
         // TODO: 해지 후 UI 상태 갱신 (예: 새 상태 요청 or 상태 변수 변경)
         console.log('구독 해지 성공');
