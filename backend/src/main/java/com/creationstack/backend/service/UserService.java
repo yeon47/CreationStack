@@ -76,14 +76,21 @@ public class UserService {
 
                 UserDetail userDetail = user.getUserDetail();
 
-                String currentPassword = request.getCurrentPassword();
-                if (currentPassword == null || currentPassword.isEmpty()) {
-                        throw new IllegalArgumentException("프로필을 수정하려면 현재 비밀번호를 입력해야 합니다.");
-                }
-                if (!passwordEncoder.matches(currentPassword, userDetail.getPassword())) {
-                        throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+                // 카카오 사용자인지 확인
+                boolean isKakaoUser = userDetail.getPlatform() == UserDetail.Platform.KAKAO;
+
+                // LOCAL 사용자만 비밀번호 검증
+                if (!isKakaoUser) {
+                        String currentPassword = request.getCurrentPassword();
+                        if (currentPassword == null || currentPassword.isEmpty()) {
+                                throw new IllegalArgumentException("프로필을 수정하려면 현재 비밀번호를 입력해야 합니다.");
+                        }
+                        if (!passwordEncoder.matches(currentPassword, userDetail.getPassword())) {
+                                throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+                        }
                 }
 
+                // 프로필 정보 업데이트
                 if (request.getNickname() != null && !request.getNickname().isEmpty()) {
                         userDetail.setNickname(request.getNickname());
                 }
@@ -99,9 +106,12 @@ public class UserService {
                         userDetail.setProfileImageUrl(request.getProfileImageUrl());
                 }
 
-                String newPassword = request.getNewPassword();
-                if (newPassword != null && !newPassword.isEmpty()) {
-                        userDetail.setPassword(passwordEncoder.encode(newPassword));
+                // LOCAL 사용자만 비밀번호 변경 가능
+                if (!isKakaoUser) {
+                        String newPassword = request.getNewPassword();
+                        if (newPassword != null && !newPassword.isEmpty()) {
+                                userDetail.setPassword(passwordEncoder.encode(newPassword));
+                        }
                 }
 
                 userRepository.save(user);

@@ -29,6 +29,28 @@ export const ProfileEdit = () => {
   const [nicknameStatus, setNicknameStatus] = useState({ message: '', isAvailable: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef(null);
+
+  // JWT 토큰에서 platform 정보 추출
+  const getPlatformFromToken = () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return null;
+
+      const payloadBase64 = token.split('.')[1];
+      if (!payloadBase64) return null;
+
+      const jsonPayload = atob(payloadBase64);
+      const decodedPayload = JSON.parse(jsonPayload);
+      return decodedPayload.platform;
+    } catch (error) {
+      console.error('Failed to decode platform from token:', error);
+      return null;
+    }
+  };
+
+  const userPlatform = getPlatformFromToken();
+  const isKakaoUser = userPlatform === 'KAKAO';
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -42,6 +64,7 @@ export const ProfileEdit = () => {
           bio: userData.bio,
           profileImageUrl: userData.profileImageUrl,
         }));
+        setOriginalNickname(userData.nickname);
 
         if (userData.role === 'CREATOR') {
           const jobsResponse = await getJobs();
@@ -58,6 +81,11 @@ export const ProfileEdit = () => {
     const { name, value } = e.target;
     const newFormData = { ...formData, [name]: value };
     setFormData(newFormData);
+
+    // 닉네임 변경 시 중복 확인 상태 초기화
+    if (name === 'nickname' && value !== originalNickname) {
+      setNicknameStatus({ message: '', isAvailable: null });
+    }
 
     const ruleName = name === 'newPassword' ? 'password' : name;
     const validation = validateField(ruleName, value);
@@ -118,24 +146,34 @@ export const ProfileEdit = () => {
     const errors = {};
     let formIsValid = true;
 
-    ['nickname', 'currentPassword'].forEach(field => {
-      const validation = validateField(field, formData[field]);
-      if (!validation.isValid) {
-        errors[field] = validation.message;
+    // 닉네임 유효성 검사
+    const nicknameValidation = validateField('nickname', formData.nickname);
+    if (!nicknameValidation.isValid) {
+      errors.nickname = nicknameValidation.message;
+      formIsValid = false;
+    }
+
+    // LOCAL 사용자만 비밀번호 관련 검사
+    if (!isKakaoUser) {
+      // 현재 비밀번호는 필수
+      const currentPasswordValidation = validateField('password', formData.currentPassword);
+      if (!currentPasswordValidation.isValid) {
+        errors.currentPassword = currentPasswordValidation.message;
         formIsValid = false;
       }
-    });
 
-    if (formData.newPassword) {
-      const newPasswordValidation = validateField('password', formData.newPassword);
-      if (!newPasswordValidation.isValid) {
-        errors.newPassword = newPasswordValidation.message;
-        formIsValid = false;
-      }
+      // 새 비밀번호가 입력된 경우에만 검사
+      if (formData.newPassword) {
+        const newPasswordValidation = validateField('password', formData.newPassword);
+        if (!newPasswordValidation.isValid) {
+          errors.newPassword = newPasswordValidation.message;
+          formIsValid = false;
+        }
 
-      if (formData.newPassword !== formData.confirmPassword) {
-        errors.confirmPassword = '비밀번호가 일치하지 않습니다';
-        formIsValid = false;
+        if (formData.newPassword !== formData.confirmPassword) {
+          errors.confirmPassword = '비밀번호가 일치하지 않습니다';
+          formIsValid = false;
+        }
       }
     }
 
@@ -151,7 +189,17 @@ export const ProfileEdit = () => {
 
     setIsSubmitting(true);
     try {
-      await updateMyProfile(formData);
+      // KAKAO 사용자의 경우 비밀번호 관련 데이터 제외
+      const submitData = isKakaoUser
+        ? {
+            nickname: formData.nickname,
+            jobId: formData.jobId,
+            bio: formData.bio,
+            profileImageUrl: formData.profileImageUrl,
+          }
+        : formData;
+
+      await updateMyProfile(submitData);
       alert('프로필이 성공적으로 수정되었습니다.');
       navigate('/mypage');
     } catch (error) {
@@ -198,7 +246,10 @@ export const ProfileEdit = () => {
           </div>
           <div className={styles.userInfo}>
             <div className={styles.userName}>{user.username}</div>
-            <div className={styles.userEmail}>{user.email}</div>
+            <div className={styles.userEmail}>
+              {user.email}
+              {isKakaoUser && <span className={styles.platformBadge}>카카오 연동</span>}
+            </div>
           </div>
         </section>
 
@@ -241,60 +292,77 @@ export const ProfileEdit = () => {
               </div>
             )}
 
-            <div className={styles.formField}>
-              <Label htmlFor="newPassword">새 비밀번호</Label>
-              <Input
-                id="newPassword"
-                name="newPassword"
-                type="password"
-                value={formData.newPassword}
-                onChange={handleInputChange}
-                placeholder="대소문자, 숫자, 특수문자를 포함한 8-20자로 입력"
-                className={styles.input}
-              />
-              {validationErrors.newPassword && (
-                <span className={`${styles.statusMessage} ${styles.unavailable}`}>{validationErrors.newPassword}</span>
-              )}
-            </div>
+            {/* LOCAL 사용자에게만 비밀번호 필드 표시 */}
+            {!isKakaoUser && (
+              <>
+                <div className={styles.formField}>
+                  <Label htmlFor="newPassword">새 비밀번호</Label>
+                  <Input
+                    id="newPassword"
+                    name="newPassword"
+                    type="password"
+                    value={formData.newPassword}
+                    onChange={handleInputChange}
+                    placeholder="대소문자, 숫자, 특수문자를 포함한 8-20자로 입력"
+                    className={styles.input}
+                  />
+                  {validationErrors.newPassword && (
+                    <span className={`${styles.statusMessage} ${styles.unavailable}`}>
+                      {validationErrors.newPassword}
+                    </span>
+                  )}
+                </div>
 
-            <div className={styles.formField}>
-              <Label htmlFor="confirmPassword">새 비밀번호 확인</Label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                placeholder="새 비밀번호를 다시 입력해주세요"
-                className={styles.input}
-              />
-              {validationErrors.confirmPassword && (
-                <span className={`${styles.statusMessage} ${styles.unavailable}`}>
-                  {validationErrors.confirmPassword}
-                </span>
-              )}
-            </div>
+                <div className={styles.formField}>
+                  <Label htmlFor="confirmPassword">새 비밀번호 확인</Label>
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    placeholder="새 비밀번호를 다시 입력해주세요"
+                    className={styles.input}
+                  />
+                  {validationErrors.confirmPassword && (
+                    <span className={`${styles.statusMessage} ${styles.unavailable}`}>
+                      {validationErrors.confirmPassword}
+                    </span>
+                  )}
+                </div>
 
-            <div className={styles.formField}>
-              <Label htmlFor="currentPassword">
-                현재 비밀번호
-                <span className={styles.required}>*</span>
-              </Label>
-              <Input
-                id="currentPassword"
-                name="currentPassword"
-                type="password"
-                value={formData.currentPassword}
-                onChange={handleInputChange}
-                placeholder="정보 수정을 위해 현재 비밀번호 입력"
-                className={styles.input}
-              />
-              {validationErrors.currentPassword && (
-                <span className={`${styles.statusMessage} ${styles.unavailable}`}>
-                  {validationErrors.currentPassword}
-                </span>
-              )}
-            </div>
+                <div className={styles.formField}>
+                  <Label htmlFor="currentPassword">
+                    현재 비밀번호
+                    <span className={styles.required}>*</span>
+                  </Label>
+                  <Input
+                    id="currentPassword"
+                    name="currentPassword"
+                    type="password"
+                    value={formData.currentPassword}
+                    onChange={handleInputChange}
+                    placeholder="정보 수정을 위해 현재 비밀번호 입력"
+                    className={styles.input}
+                  />
+                  {validationErrors.currentPassword && (
+                    <span className={`${styles.statusMessage} ${styles.unavailable}`}>
+                      {validationErrors.currentPassword}
+                    </span>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* KAKAO 사용자에게 안내 메시지 표시 */}
+            {isKakaoUser && (
+              <div className={styles.formField}>
+                <div className={styles.kakaoNotice}>
+                  <p>카카오 계정으로 로그인하신 경우 비밀번호 변경이 불가능합니다.</p>
+                  <p>비밀번호는 카카오에서 관리됩니다.</p>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className={`${styles.formField} ${styles.fullWidth}`}>
@@ -312,8 +380,8 @@ export const ProfileEdit = () => {
           </div>
 
           <div className={styles.buttonSection}>
-            <Button type="submit" className={styles.submitButton}>
-              프로필 수정
+            <Button type="submit" className={styles.submitButton} disabled={isSubmitting}>
+              {isSubmitting ? '수정 중...' : '프로필 수정'}
             </Button>
           </div>
         </form>
