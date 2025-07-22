@@ -15,31 +15,24 @@ import RelatedContentList from '../../components/ContentDetail/RelatedContentLis
 import ReplyList from './ReplyList';
 import styles from './ContentDetailPage.module.css';
 import { toggleContentLike } from '../../api/contentAPI';
-import RelatedContentList from '../../components/ContentDetail/RelatedContentList/RelatedContentList';
-
-import styles from './ContentDetailPage.module.css'; // 페이지 CSS 임포트
 
 export const ContentDetailPage = () => {
   const { contentId } = useParams();
   const navigate = useNavigate();
+
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [likeCount, setLikeCount] = useState(content?.likeCount || 0);
   const [isLiked, setIsLiked] = useState(null);
   const [error, setError] = useState(null);
 
-  // 2. 콘텐츠 상세 정보 불러오기
+  // 1. 콘텐츠 상세 정보 불러오기
 useEffect(() => {
   const fetchContent = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/content/${contentId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const data = await getContentById(contentId);
 
-      const data = response.data;
       setContent(data);
       setLikeCount(data.likeCount || 0);
       setIsLiked(data.liked !== undefined ? data.liked : false);
@@ -52,7 +45,8 @@ useEffect(() => {
   };
 
   fetchContent();
-}, [contentId, token]);
+}, [contentId]);
+
 
 
   // 좋아요 클릭 시 호출
@@ -71,9 +65,6 @@ useEffect(() => {
       console.error('좋아요 처리 실패:', error);
     }
   };
-
-  if (loading) return <div>로딩 중...</div>;
-  if (!content) return <div>콘텐츠를 불러올 수 없습니다.</div>;
     
   // 3. 수정/삭제 버튼 핸들러 (이제 항상 보이지만, 백엔드에서 권한 확인)
   const handleEdit = () => {
@@ -83,7 +74,6 @@ useEffect(() => {
   const handleDelete = async () => {
     if (window.confirm('정말로 이 콘텐츠를 삭제하시겠습니까?')) {
       try {
-        // creatorId는 백엔드에서 @AuthenticationPrincipal로 가져오므로 프론트에서 전달하지 않습니다.
         await deleteContent(contentId);
         alert('콘텐츠가 성공적으로 삭제되었습니다.');
         navigate('/creator-management'); // 삭제 후 크리에이터 관리 페이지로 이동
@@ -120,18 +110,10 @@ useEffect(() => {
         job={content.creatorJob || "직업 정보 없음"} // DTO에 없으면 기본값
         profileImageUrl={content.creatorProfileUrl}
       />
-      <ContentBody thumbnailUrl={content.thumbnailUrl} description={content.content} />
-      <FileDownloadList files={content.fileUrls} />
+      {/* <ContentBody thumbnailUrl={content.thumbnailUrl} description={content.content} />
+      <FileDownloadList files={content.fileUrls} /> */}
 
-      <LikeCommentBar
-        likeCount={likeCount}
-        commentCount={content.commentCount}
-        isLiked={isLiked}
-        onLikeClick={handleLikeClick}
-      />
-
-      <ReplyList contentId={contentId} />
-      <RelatedContentList creatorId={content.creatorId} />
+     
 
       {/* 4. 본문내용 (마크다운 렌더링 적용) */}
       <ContentBody content={content.content} thumbnailUrl={content.thumbnailUrl} />
@@ -147,6 +129,15 @@ useEffect(() => {
         </>
       )}
 
+      <LikeCommentBar
+        likeCount={likeCount}
+        commentCount={content.commentCount}
+        isLiked={isLiked}
+        onLikeClick={handleLikeClick}
+      />
+
+      <ReplyList contentId={contentId} />
+      
       {/* 8. <내닉네임>의 다른 콘텐츠 \n 내 컨텐츠 목록 표출 */}
       {/* RelatedContentList 컴포넌트 추가 */}
       <RelatedContentList
