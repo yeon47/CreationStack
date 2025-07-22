@@ -98,7 +98,7 @@ export const MyPage = () => {
                 <div className={`${styles.baseTextStyles} ${styles.label2}`}>구독 관리</div>
               </Link>
               <Link to="/favorites" className={styles.labelWrapper}>
-                <div className={`${styles.baseTextStyles} ${styles.label2}`}>좋아요한 컨텐츠 목록</div>
+                <div className={`${styles.baseTextStyles} ${styles.label2}`}>좋아요한 콘텐츠 목록</div>
               </Link>
               <Link to="/payments" className={styles.labelWrapper}>
                 <div className={`${styles.baseTextStyles} ${styles.label2}`}>결제수단 관리</div>

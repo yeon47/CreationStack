@@ -22,6 +22,7 @@ public interface ContentLikeRepository extends JpaRepository<ContentLike, Long> 
 
     List<ContentLike> findByUserOrderByCreatedAtDesc(User user); 
     
-    @Query("SELECT l FROM ContentLike l WHERE l.user.userId = :userId AND l.isActive = true")
+    @Query("SELECT l FROM ContentLike l WHERE l.user.userId = :userId AND l.isActive = true ORDER BY l.createdAt DESC")
     Page<ContentLike> findByUserIdAndIsActiveTrue(@Param("userId") Long userId, Pageable pageable);
+
 }

@@ -31,6 +31,11 @@ const CommentItem = ({
   const isLiked = comment.liked === true;
   const likeCount = comment.likeCount || 0;
 
+  console.log(`[Comment ${comment.commentId}]`);
+  console.log('userId (local):', userId);
+  console.log('comment.userId:', comment.userId);
+  console.log('isOwner:', isOwner);
+
   return (
     <div className={`${styles.commentItem} ${isReply ? styles.reply : ''}`}>
       <div className={styles.avatar}>
@@ -51,10 +56,10 @@ const CommentItem = ({
           <div className={styles.editForm}>
             <textarea value={editContent} onChange={onEditChange} rows="4" className={styles.editTextarea} />
             <div className={styles.editActions}>
-              <button onClick={() => onEditSubmit(comment.commentId)} className={btnstyles.btnSubmit}>
+              <button type="button" onClick={() => onEditSubmit(comment.commentId)} className={btnstyles.btnSubmit}>
                 수정
               </button>
-              <button onClick={() => onEditCancel(comment.commentId)} className={styles.cancelBtn}>
+              <button type="button" onClick={() => onEditCancel(comment.commentId)} className={styles.cancelBtn}>
                 취소
               </button>
             </div>
@@ -72,6 +77,7 @@ const CommentItem = ({
           <div className={styles.commentFooter}>
             {/* 좋아요 버튼 */}
             <button
+              type="button"
               key={`like-${comment.commentId}-${isLiked}`} // key로 강제 리렌더링 유도
               onClick={() => onLike(comment.commentId)}
               className={`${styles.actionButton} ${isLiked ? styles.liked : ''}`}>
@@ -80,7 +86,7 @@ const CommentItem = ({
 
             {/* 답글 버튼 */}
             {!isReply && (
-              <button onClick={() => onReplyToggle(comment.commentId)} className={styles.actionButton}>
+              <button type="button" onClick={() => onReplyToggle(comment.commentId)} className={styles.actionButton}>
                 답글
               </button>
             )}
@@ -88,10 +94,10 @@ const CommentItem = ({
             {/* 수정/삭제 버튼 (작성자만) */}
             {isOwner && (
               <>
-                <button onClick={() => onEditStart(comment)} className={styles.actionButton}>
+                <button type="button" onClick={() => onEditStart(comment)} className={styles.actionButton}>
                   수정
                 </button>
-                <button onClick={() => onDelete(comment.commentId)} className={styles.actionButton}>
+                <button type="button" onClick={() => onDelete(comment.commentId)} className={styles.actionButton}>
                   삭제
                 </button>
               </>
@@ -110,10 +116,10 @@ const CommentItem = ({
               className={styles.editTextarea}
             />
             <div className={styles.editActions}>
-              <button onClick={() => onReplySubmit(comment.commentId)} className={btnstyles.btnSubmit}>
+              <button type="button" onClick={() => onReplySubmit(comment.commentId)} className={btnstyles.btnSubmit}>
                 답글 작성
               </button>
-              <button onClick={() => onReplyCancel(comment.commentId)} className={styles.cancelBtn}>
+              <button type="button" onClick={() => onReplyCancel(comment.commentId)} className={styles.cancelBtn}>
                 취소
               </button>
             </div>

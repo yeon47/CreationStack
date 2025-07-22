@@ -1,19 +1,12 @@
-import React from "react";
-import "./SearchingWrapper.css";
+import React from 'react';
+import './SearchingWrapper.css';
 
-export const SearchingWrapper = ({
-  className,
-  inputValue,
-  setInputValue,
-  setKeyword,
-  setPage,
-  
-}) => {
+export const SearchingWrapper = ({ className, inputValue, setInputValue, setKeyword, setPage }) => {
   return (
     <div className={`searching-wrapper ${className}`}>
       <div className="heading-and">
         <div className="heading-wrapper">
-          <div className="heading">찾고싶은 컨텐츠가 있으신가요?</div>
+          <div className="heading">찾고싶은 콘텐츠가 있으신가요?</div>
         </div>
 
         <p className="our-philosophy-is">

@@ -60,9 +60,9 @@ export const ContentFilterModal = ({ onClose, onApply }) => {
           </div>
         </div>
 
-        {/* 컨텐츠 공개 범위 */}
+        {/* 콘텐츠 공개 범위 */}
         <div className="content-filtering">
-          <div className="text-wrapper">컨텐츠</div>
+          <div className="text-wrapper">콘텐츠</div>
 
           <div className="frame">
             {['전체 공개', '구독자 전용'].map(item => (
