@@ -11,7 +11,7 @@ import PaymentPage from '../pages/Payment/PaymentPage';
 import PaymentSuccessPage from '../pages/Payment/PaymentSuccessPage';
 
 import ContentFormPage from '../pages/ContentForm/ContentFormPage';
-import ContentEditPage from "../pages/ContentForm/ContentEditPage";
+import ContentEditPage from '../pages/ContentForm/ContentEditPage';
 import { ContentDetailPage } from '../pages/ContentDetail/ContentDetailPage';
 
 import { MyPage } from '../pages/MyPage/MyPage';
@@ -51,7 +51,7 @@ export default function AppRoutes() {
         <Route path="/content-edit/:contentId" element={<ContentEditPage />} /> {/* 콘텐츠 수정 페이지 라우트 */}
         <Route path="/payments/summary/:creatorNickname" element={<PaymentPage />} />
         <Route path="/profile/edit" element={<ProfileEdit />} />
-        <Route path="/creator/notice" element={<CreatorNoticePage />} />
+        <Route path="/creator/notice/:nickname" element={<CreatorNoticePage />} />
       </Route>
 
       <Route path="/login" element={<LoginSection />} />

@@ -76,6 +76,7 @@ export const CreatorMainPage = () => {
           isSubscribed: creator.subscribed ?? false,
         }}
         onUnsubscribeClick={() => setModalType('cancel')} // 구독중일 때만 호출됨
+        onNoticeClick={() => setModalType('suggest')}
       />
       <div className={styles.content}>
         <h1 className={styles.title}>콘텐츠 목록</h1>
@@ -83,11 +84,7 @@ export const CreatorMainPage = () => {
       </div>
 
       {modalType && (
-        <SubscriptionModal
-          type={modalType}
-          onClose={() => setModalType(null)}
-          onConfirm={handleSubscriptionChange}
-        />
+        <SubscriptionModal type={modalType} onClose={() => setModalType(null)} onConfirm={handleSubscriptionChange} />
       )}
     </div>
   );
