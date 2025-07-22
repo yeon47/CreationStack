@@ -140,16 +140,21 @@
   padding: 16px;
 }
 
+.selectedCardBox.active {
+  border: 2px solid #4682a9; /* 강조 테두리 */
+  transform: scale(1.03);
+  box-shadow: 0 0 12px rgba(70, 130, 169, 0.5);
+}
 .selectedCardName {
   font-size: 16px;
   font-weight: 700;
-  color: #9b9b9b;
+  color: #585858;
 }
 
 .selectedCardNumber {
   font-size: 14px;
   font-weight: 400;
-  color: #60656e;
+  color: #585858;
 }
 
 .bottomButton {

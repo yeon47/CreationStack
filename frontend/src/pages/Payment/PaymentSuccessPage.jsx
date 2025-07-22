@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import SubscriptionDetails from '../../components/Payment/SubscriptionDetails';
 import styles from './PaymentPage.module.css';
+import { useNavigate } from 'react-router-dom';
 
 function PaymentSuccessPage() {
   const location = useLocation();
   const { creator } = location.state || {};
+  const navigate = useNavigate();
 
   const subscriptionDetails = [
     { label: '구독 상품', value: creator.name+' 정기 구독권' },
@@ -14,6 +16,10 @@ function PaymentSuccessPage() {
   ];
 
   const benefits = ['독점 콘텐츠 제공', '광고 제거', '라이브 방송 참여'];
+
+  const handleCreatorPage = () => {
+navigate(`/creator-main/${creator.name}`, { replace: true });
+  }
 
   return (
     <div className={styles.summary_container}>
@@ -39,7 +45,7 @@ function PaymentSuccessPage() {
           {/* Action Buttons */}
           <button className={styles.backButton}>
             <span className={styles.icon}>←</span>
-            <span>이전으로</span>
+            <span onClick={handleCreatorPage}>이전으로</span>
           </button>
         </div>
       </div>
