@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { BannerSection } from '../../components/Home/BannerSection/BannerSection';
 import { ContentSection } from '../../components/Home/ContentSection/ContentSection';
-import { CreatorSection } from '../../components/Home/CreatorSection/CreatorSection';
-import { CreatorListSection } from '../../components/Search/SearchCreator/CreatorListSection/CreatorListSection';
+import { CreatorListSection2 } from '../../components/Search/SearchCreator/CreatorListSection/CreatorListSection2';
 import { searchUnified } from '../../api/search';
 import { searchCreator } from '../../api/search';
 import './Home.css';
@@ -81,7 +79,7 @@ export const Home = () => {
         <div className="home-section">
           <div className="bannerSection">
   <img src="/assets/BannerSection.png" alt="배너" style={{ width: '100%', height: 'auto' }} /></div>
-          <CreatorListSection creators={creators} />
+          <CreatorListSection2 creators={creators} />
           <ContentSection contents={contents} />
         </div>
       </div>
