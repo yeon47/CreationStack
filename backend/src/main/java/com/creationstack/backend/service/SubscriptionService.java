@@ -2,6 +2,8 @@ package com.creationstack.backend.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,7 +15,6 @@ import com.creationstack.backend.domain.subscription.Subscription;
 import com.creationstack.backend.domain.subscription.SubscriptionStatus;
 import com.creationstack.backend.domain.subscription.SubscriptionStatusName;
 import com.creationstack.backend.domain.user.User;
-import com.creationstack.backend.domain.user.UserDetail;
 import com.creationstack.backend.dto.Subscription.SubscriptionRequestDto;
 import com.creationstack.backend.dto.Subscription.SubscriptionResponseDto;
 import com.creationstack.backend.dto.Subscription.UserSubscriptionDto;
@@ -42,7 +43,6 @@ public class SubscriptionService {
         private final PaymentMethodRepository paymentMethodRepository;
         private final PaymentRepository paymentRepository;
         private final UserRepository userRepository;
-        private final UserDetailRepository userDetailRepository;
 
         // 구독 생성 (PENDING 상태)
         @Transactional
@@ -178,8 +178,17 @@ public class SubscriptionService {
         public List<UserSubscriptionDto> getMySubscriptions(Long userId) {
                 List<UserSubscriptionDto> list = subscriptionRepository.findAllBySubscriberId(userId);
 
-                log.info("구독 전체 수: {}", list.size());
-                for (UserSubscriptionDto dto : list) {
+                if (list.isEmpty()) {
+                        return list;
+                }
+
+                List<Long> creatorIds = list.stream().map(UserSubscriptionDto::getCreatorId).distinct().toList();
+                List<Object[]> counts = subscriptionRepository.countActiveSubscriptionsByCreatorIds(creatorIds);
+                Map<Long, Long> subsCountMap = counts.stream()
+                                .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+
+                list.forEach(dto -> {
+                        dto.setSubsCount(subsCountMap.getOrDefault(dto.getCreatorId(), 0L));
                         dto.setMessage(switch (dto.getStatusName()) {
                                 case "ACTIVE" -> "다음 결제 예정일: " + format(dto.getNextPaymentAt());
                                 case "CANCELLED" -> "만료 예정일: " + format(dto.getNextPaymentAt());
@@ -187,8 +196,7 @@ public class SubscriptionService {
                                 case "PENDING" -> "결제 대기 중입니다.";
                                 default -> "";
                         });
-                        log.info("구독 ID: {}, 상태: {}, 크리에이터 ID: {}", dto.getSubscriptionId(), dto.getStatusName(), dto.getCreatorId());
-                }
+                });
 
                 return list;
         }
@@ -200,14 +208,20 @@ public class SubscriptionService {
         // 사용자가 구독한 크리에이터 목록 조회
         @Transactional(readOnly = true)
         public List<PublicProfileResponse> getSubscribedCreators(String nickname) {
-                try {
-                        List<PublicProfileResponse> list = subscriptionRepository
-                                        .findSubscribedCreatorsByNickname(nickname);
+                List<PublicProfileResponse> list = subscriptionRepository.findSubscribedCreatorsByNickname(nickname);
+
+                if (list.isEmpty()) {
                         return list;
-                } catch (Exception e) {
-                        log.error("구독 조회 실패", e); // 여기서 반드시 스택트레이스 확인
-                        throw e;
                 }
+
+                List<Long> creatorIds = list.stream().map(PublicProfileResponse::getUserId).distinct().toList();
+                List<Object[]> counts = subscriptionRepository.countActiveSubscriptionsByCreatorIds(creatorIds);
+                Map<Long, Long> subsCountMap = counts.stream()
+                                .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+
+                list.forEach(dto -> dto.setSubsCount(subsCountMap.getOrDefault(dto.getUserId(), 0L)));
+
+                return list;
         }
 
         @Transactional
