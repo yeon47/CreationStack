@@ -108,7 +108,7 @@ export const deletePaymentMethod = async (paymentMethodId, reason, accessToken) 
 export const getUserInfo = async accessToken => {
   // 현재 로그인한 사용자 정보 조회
   try {
-    const response = await axios.get('http://localhost:8080/api/user/profile', {
+    const response = await axios.get('http://localhost:8080/api/user/me', {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,

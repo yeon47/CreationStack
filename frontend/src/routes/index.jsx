@@ -9,7 +9,11 @@ import { ProfileEdit } from '../pages/ProfileSettings/ProfileEdit';
 import PaymentMethodManagementPage from '../pages/Payment/PaymentMethodManagementPage';
 import PaymentPage from '../pages/Payment/PaymentPage';
 import PaymentSuccessPage from '../pages/Payment/PaymentSuccessPage';
+
 import ContentFormPage from '../pages/ContentForm/ContentFormPage';
+import ContentEditPage from "../pages/ContentForm/ContentEditPage";
+import { ContentDetailPage } from '../pages/ContentDetail/ContentDetailPage';
+
 import { MyPage } from '../pages/MyPage/MyPage';
 import { SubscriptionManage } from '../pages/ManageSubscriptionPage/SubscriptionManage';
 import { UserMainPage } from '../pages/MainPage/UserMainPage/UserMainPage';
@@ -22,8 +26,6 @@ import CreatorNoticePage from '../pages/CreatorNoticePage/CreatorNoticePage';
 import { CreatorSearchPage } from '../pages/CreatorSearchPage/CreatorSearchPage';
 import { ContentSearchPage } from '../pages/ContentSearchPage/ContentSearchPage';
 import { UnifiedSearchPage } from '../pages/UnifiedSearchPage/UnifiedSearchPage';
-
-import { ContentDetailPage } from '../pages/ContentDetail/ContentDetailPage';
 import { Home } from '../pages/Home/Home';
 
 export default function AppRoutes() {
@@ -45,8 +47,8 @@ export default function AppRoutes() {
         <Route path="/creators" element={<CreatorSearchPage />} />
         <Route path="/contents" element={<ContentSearchPage />} />
         <Route path="/search" element={<UnifiedSearchPage />} />
-        <Route path="/contents/:contentId" element={<ContentDetailPage />} />
-        <Route path="/content/:contentId" element={<ContentDetailPage />} />
+        <Route path="/content/:contentId" element={<ContentDetailPage />} /> {/* 콘텐츠 상세 페이지 라우트 */}
+        <Route path="/content-edit/:contentId" element={<ContentEditPage />} /> {/* 콘텐츠 수정 페이지 라우트 */}
         <Route path="/payments/summary/:creatorNickname" element={<PaymentPage />} />
         <Route path="/profile/edit" element={<ProfileEdit />} />
         <Route path="/creator/notice" element={<CreatorNoticePage />} />

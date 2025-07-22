@@ -7,7 +7,7 @@ import {
   savePaymentMethod,
   readAllPaymentMethod,
   deletePaymentMethod,
-  getUserInfo,
+  getUserInfo
 } from '../../api/payment';
 
 function PaymentMethodManagementPage() {

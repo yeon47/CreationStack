@@ -7,6 +7,7 @@ import com.creationstack.backend.dto.content.ContentUpdateRequest;
 import com.creationstack.backend.service.ContentService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,14 +47,14 @@ public class ContentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // 내 콘텐츠 목록 조회 (로그인 사용자 기준)
+    // 로그인된 사용자의 내 콘텐츠 목록 조회 (로그인 사용자 기준)
     @GetMapping("/my")
     public ResponseEntity<List<ContentResponse>> getMyContents(Authentication authentication) {
         Long userId = (Long) authentication.getPrincipal();  // JWT 필터에서 설정된 userId
-        List<ContentResponse> contents = contentService.getContentsByCreator(userId);
+        List<ContentResponse> contents = contentService.getContentsByCreator(userId,null);
         return ResponseEntity.ok(contents);
     }
-    // 내 조회수 top3 콘텐츠 조회
+    // 로그인된 사용자의 내 조회수 top3 콘텐츠 조회
     @GetMapping("/my/top-viewed")
     public ResponseEntity<List<ContentResponse>> getMyTopViewedContents(Authentication authentication) {
         Long userId = (Long) authentication.getPrincipal();
@@ -62,6 +63,8 @@ public class ContentController {
         return ResponseEntity.ok(topContents);
     }
 
+
+
     // 특정 콘텐츠 조회
     @GetMapping("/{contentId}")
     public ResponseEntity<ContentResponse> getContentById(
@@ -69,8 +72,9 @@ public class ContentController {
             @Nullable Authentication authentication
     ) {
         log.info("콘텐츠 조회 요청 수신: Content ID={}", contentId);
-
+        // 비로그인 사용자도 조회 가능
         Long userId = null;
+        // 만약 로그인한 사용자라면 id 가져오기
         if (authentication != null && authentication.isAuthenticated()
                 && !"anonymousUser".equals(authentication.getPrincipal())) {
             userId = (Long) authentication.getPrincipal();
@@ -83,10 +87,11 @@ public class ContentController {
     // 특정 크리에이터의 콘텐츠 목록 조회
     @GetMapping("/creator/{creatorId}")
     public ResponseEntity<List<ContentResponse>> getContentsByCreator(
-            @PathVariable Long creatorId
+            @PathVariable Long creatorId,
+            @RequestParam(value = "excludeContentId", required = false) Long excludeContentId
     ) {
-        log.info("크리에이터 ID {} 의 콘텐츠 목록 조회 요청 수신", creatorId);
-        List<ContentResponse> responses = contentService.getContentsByCreator(creatorId);
+        log.info("크리에이터 ID {} 의 콘텐츠 목록 조회 요청 수신 (제외할 콘텐츠 ID: {})", creatorId, excludeContentId);
+        List<ContentResponse> responses = contentService.getContentsByCreator(creatorId, excludeContentId);
         return ResponseEntity.ok(responses);
     }
 

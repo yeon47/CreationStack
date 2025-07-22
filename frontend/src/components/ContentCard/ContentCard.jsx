@@ -13,7 +13,7 @@ export const ContentCard = ({ contentId, thumbnailUrl, creatorNickname, title, l
   const handleCardClick = async () => {
     try {
       await checkContentAccess(contentId);
-      navigate(`/contents/${contentId}`);
+      navigate(`/content/${contentId}`);
     } catch (err) {
       if (err.response?.status === 403) {
         setShowModal(true);
