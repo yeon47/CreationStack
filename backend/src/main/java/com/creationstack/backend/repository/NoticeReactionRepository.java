@@ -16,8 +16,14 @@ public interface NoticeReactionRepository extends JpaRepository<NoticeReaction, 
 
     Optional<NoticeReaction> findByNoticeAndUser(Notice notice, User user);
 
+    List<NoticeReaction> findByNotice(Notice notice);
+
+    Long countByNoticeAndEmoji(Notice notice, String emoji);
+
+    void deleteByNotice(Notice notice);
+
     @Query("SELECT new com.creationstack.backend.dto.notice.NoticeReactionDto(r.emoji, COUNT(r)) " +
-    	       "FROM NoticeReaction r WHERE r.notice = :notice GROUP BY r.emoji")
-    	List<NoticeReactionDto> findGroupedByEmoji(@Param("notice") Notice notice);
+            "FROM NoticeReaction r WHERE r.notice = :notice GROUP BY r.emoji")
+    List<NoticeReactionDto> findGroupedByEmoji(@Param("notice") Notice notice);
 
 }
