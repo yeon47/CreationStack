@@ -118,3 +118,17 @@
   bottom: 40px;
   z-index: 10;
 }
+
+.emojiButton {
+  color: black;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 4px 8px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.emojiButton.active {
+  border-color: #4682a9;
+  background-color: #f0f8ff;
+}

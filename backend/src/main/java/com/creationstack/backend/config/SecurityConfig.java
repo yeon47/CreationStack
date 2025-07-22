@@ -62,9 +62,10 @@ public class SecurityConfig {
                                     "/api/contents/*/comments",  // 댓글 목록 조회
                                     "/api/contents/*/comments/*", // 댓글 수정,삭제,대댓글
                                     "/api/contents/*/comments/*/like", // 댓글 좋아요
+                                    "/api/users/*/subscriptions",
                                     "/api/subscriptions/**",
-                                    "/api/users/*/subscriptions"
-                            )
+                                    "/api/notices/**" // 공지방
+                                    )
                             .permitAll()
                             
                             // /api/user/** 경로는 인증 필요 (기존 설정 유지)

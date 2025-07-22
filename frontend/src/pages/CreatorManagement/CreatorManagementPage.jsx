@@ -41,8 +41,8 @@ const CreatorManagementPage = () => {
         creator={{
           subscriberCount: creator.subsCount ?? 0,
           newsubscriberCount: creator.newSubsCount ?? 0,
-        }} 
-        />
+        }}
+      />
       <PopularContent creatorId={creatorId} />
       <MyContent creatorId={creatorId} />
     </div>
