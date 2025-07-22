@@ -7,6 +7,7 @@ import com.creationstack.backend.domain.payment.PaymentMethod;
 
 import com.creationstack.backend.domain.payment.PaymentStatus;
 import com.creationstack.backend.domain.subscription.Subscription;
+import com.creationstack.backend.domain.subscription.SubscriptionStatus;
 import com.creationstack.backend.domain.subscription.SubscriptionStatusName;
 import com.creationstack.backend.domain.user.User;
 import com.creationstack.backend.dto.Payment.AmountDto;
@@ -20,7 +21,7 @@ import com.creationstack.backend.dto.Payment.PortOnePaymentRequestDto;
 import com.creationstack.backend.exception.CustomException;
 import com.creationstack.backend.repository.PaymentRepository;
 import com.creationstack.backend.repository.SubscriptionRepository;
-import com.creationstack.backend.repository.UserDetailRepository;
+import com.creationstack.backend.repository.SubscriptionStatusRepository;
 import com.creationstack.backend.repository.UserRepository;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -43,8 +44,10 @@ public class PaymentService {
   private final PortOneClient portOneClient;
   private final UserRepository userRepository;
   private final SubscriptionRepository subscriptionRepository;
+  private final SubscriptionStatusRepository subscriptionStatusRepository;
 
   // 구독 요청 시 결제 진행 (최초 결제)
+  @Transactional
   public BillingKeyPaymentResponseDto processingBillingKeyPay(BillingKeyPaymentRequestDto req) {
     // 결제수단과 연결된 빌링키
     PaymentMethod paymentMethod = paymentMethodService.getPaymentMethodForBillingKey(req.getPaymentMethodId());
@@ -58,11 +61,16 @@ public class PaymentService {
     );
     CustomerDto customer = new CustomerDto(subscriberId+"",user.getUserDetail().getEmail(),new Name(user.getUserDetail().getUsername()));
 
-    Subscription subscription = subscriptionRepository.findById(req.getSubscriptionId()).orElse(null);
+    Subscription subscription = subscriptionRepository.findById(req.getSubscriptionId()).orElseThrow(
+        () -> new CustomException(HttpStatus.NOT_FOUND, "구독 정보를 찾을 수 없습니다.")
+    );
 
-    assert subscription != null;
-    if(!subscription.getStatus().getName().equals(SubscriptionStatusName.PENDING)){
-      throw new CustomException(HttpStatus.NOT_FOUND,"구독 내역이 생성되지 않았습니다.");
+    // 구독 상태가 PENDING, CANCELLED, EXPIRED 중 하나인지 확인
+    String currentStatus = subscription.getStatus().getName();
+    if (!(currentStatus.equals(SubscriptionStatusName.PENDING) ||
+          currentStatus.equals(SubscriptionStatusName.CANCELLED) ||
+          currentStatus.equals(SubscriptionStatusName.EXPIRED))) {
+      throw new CustomException(HttpStatus.BAD_REQUEST, "유효하지 않은 구독 상태입니다: " + currentStatus);
     }
 
     // 결제 내역 생성
@@ -97,11 +105,27 @@ public class PaymentService {
     payment.setSuccessAt(localDateTime);
     payment.setPaymentStatus(PaymentStatus.SUCCESS);
 
-    // 저장된 결제내역
-    Payment savePayment = paymentRepository.save(payment);
+    // 구독 상태를 ACTIVE로 변경
+    SubscriptionStatus activeStatus = subscriptionStatusRepository.findByName(SubscriptionStatusName.ACTIVE)
+        .orElseThrow(() -> new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "ACTIVE 상태 정보를 찾을 수 없습니다."));
+    subscription.setStatus(activeStatus);
+    subscription.setLastPaymentAt(localDateTime);
+    subscription.setNextPaymentAt(subscription.getStartedAt().plusMonths(1));
+
+    // 크리에이터의 구독자 수 증가 (이전에 ACTIVE가 아니었던 경우에만)
+    if (!currentStatus.equals(SubscriptionStatusName.ACTIVE)) {
+      User creator = userRepository.findById(subscription.getCreatorId())
+          .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "크리에이터를 찾을 수 없습니다."));
+      creator.setSubscriberCount(creator.getSubscriberCount() + 1);
+      userRepository.save(creator);
+    }
+
+    // 저장된 결제내역 및 구독 정보
+    paymentRepository.save(payment);
+    subscriptionRepository.save(subscription);
 
     BillingKeyPaymentResponseDto responseDto = new BillingKeyPaymentResponseDto(
-        subscription.getSubscriptionId(), savePayment.getPaymentId());
+        subscription.getSubscriptionId(), payment.getPaymentId());
 
     return responseDto;
   }
