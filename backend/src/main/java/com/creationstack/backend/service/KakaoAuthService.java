@@ -1,20 +1,11 @@
 package com.creationstack.backend.service;
 
-import com.creationstack.backend.auth.JwtUtil;
-import com.creationstack.backend.domain.user.User;
-import com.creationstack.backend.domain.user.UserDetail;
-import com.creationstack.backend.domain.user.UserDetail.Platform;
-import com.creationstack.backend.dto.member.KakaoAuthResponse; // 새로 만들 DTO
-import com.creationstack.backend.repository.UserDetailRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpMethod; // 새로 만들 DTO
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +13,17 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Optional;
+import com.creationstack.backend.auth.JwtUtil;
+import com.creationstack.backend.domain.user.User;
+import com.creationstack.backend.domain.user.UserDetail;
+import com.creationstack.backend.dto.member.KakaoAuthResponse;
+import com.creationstack.backend.repository.UserDetailRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -69,8 +70,12 @@ public class KakaoAuthService {
             User user = userDetailOptional.get().getUser();
 
             // 우리 서비스의 JWT 토큰 생성
-            String accessToken = jwtUtil.generateAccessToken(user.getUserId(), user.getUserDetail().getEmail(),
-                    user.getRole().name(), user.getUserDetail().getNickname());
+            String accessToken = jwtUtil.generateAccessToken(
+                    user.getUserId(),
+                    user.getUserDetail().getEmail(),
+                    user.getRole().name(),
+                    user.getUserDetail().getNickname(),
+                    user.getUserDetail().getPlatform().name());
             String refreshToken = jwtUtil.generateRefreshToken(user.getUserId());
             authService.saveRefreshToken(user.getUserId(), refreshToken);
 

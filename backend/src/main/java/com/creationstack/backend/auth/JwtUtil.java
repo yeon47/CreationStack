@@ -37,19 +37,20 @@ public class JwtUtil {
     }
 
     // Access Token 생성
-    public String generateAccessToken(Long userId, String email, String role, String nickname) {
+    public String generateAccessToken(Long userId, String email, String role, String nickname, String platform) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("email", email);
         claims.put("role", role);
         claims.put("nickname", nickname);
+        claims.put("platform", platform);
 
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(email)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
-                .signWith(accessTokenKey, SignatureAlgorithm.HS512) // ← HS256에서 HS512로 변경
+                .signWith(accessTokenKey, SignatureAlgorithm.HS512)
                 .compact();
     }
 
@@ -64,20 +65,6 @@ public class JwtUtil {
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
                 .signWith(refreshTokenKey, SignatureAlgorithm.HS512) // ← HS256에서 HS512로 변경
-                .compact();
-    }
-
-    // 토큰 생성
-    private String createToken(Map<String, Object> claims, String subject, long expiration, SecretKey key) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expiration);
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(key)
                 .compact();
     }
 
@@ -146,6 +133,12 @@ public class JwtUtil {
                 .getBody();
     }
 
+    // 토큰에서 platform 추출 메서드 추가
+    public String getPlatformFromToken(String token) {
+        Claims claims = getClaimsFromToken(token, accessTokenKey);
+        return claims.get("platform", String.class);
+    }
+
     // Access Token 만료 시간 반환 (초 단위)
     public long getAccessTokenExpirationInSeconds() {
         return accessTokenExpiration / 1000;
@@ -155,4 +148,5 @@ public class JwtUtil {
     public long getRefreshTokenExpirationInSeconds() {
         return refreshTokenExpiration / 1000;
     }
+
 }
