@@ -1,0 +1,28 @@
+.headerWrapper {
+  margin-bottom: 32px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.categories {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.category {
+  background-color: #eef2ff;
+  color: #3730a3;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+}
+
+.date {
+  font-size: 14px;
+  color: #6b7280;
+}
