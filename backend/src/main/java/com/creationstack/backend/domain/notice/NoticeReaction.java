@@ -23,6 +23,7 @@ public class NoticeReaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "notice_reaction_id")
     private Long noticeReactionId;
 
     @ManyToOne(fetch = FetchType.LAZY)

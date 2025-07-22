@@ -3,26 +3,26 @@ import styles from './NoticeBox.module.css';
 import Picker from '@emoji-mart/react';
 import { toggleReaction, getReactions } from '@/api/notice.js';
 
-const NoticeBox = ({ date, profileImage, content, time, noticeId, token, initialReactions, userReactedEmoji }) => {
+const NoticeBox = ({ notice }) => {
   const [reactions, setReactions] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
-  const [userEmoji, setUserEmoji] = useState(userReactedEmoji || null);
+  const [userEmoji, setUserEmoji] = useState(notice.userReactedEmoji || null);
+  const [noticeId, setNoticeId] = useState(notice.noticeId || null);
 
   useEffect(() => {
-    setReactions(initialReactions || []);
-    setUserEmoji(userReactedEmoji || null);
-  }, [initialReactions, userReactedEmoji]);
+    console.log(notice);
+    setReactions(notice.initialReactions || []);
+    setUserEmoji(notice.userReactedEmoji || null);
+  }, [notice.initialReactions, notice.userReactedEmoji]);
 
   const handleEmojiClick = async emoji => {
     try {
-      await toggleReaction(noticeId, emoji, token);
+      await toggleReaction(noticeId, emoji);
 
-      // 사용자 반응 상태에 따라 토글 처리
       setUserEmoji(prev => (prev === emoji ? null : emoji));
 
-      // 최신 리액션 목록 받아와서 갱신
-      const updated = await getReactions(noticeId, token);
-      return Response.data;
+      const updated = await getReactions(noticeId);
+      setReactions(updated.data); // ✅ 리액션 리스트 갱신
     } catch (error) {
       console.error('이모지 토글 실패:', error);
     }
@@ -36,16 +36,16 @@ const NoticeBox = ({ date, profileImage, content, time, noticeId, token, initial
   return (
     <div className={styles.notice}>
       <div className={styles.date}>
-        <p>{date}</p>
+        <p>{new Date().toLocaleDateString('ko-KR')}</p>
       </div>
       <div className={styles.post_container}>
         <div className={styles.creator_img}>
-          <img src={profileImage} alt="작성자 이미지" />
+          <img src={notice.profileImage} alt="작성자 이미지" />
         </div>
         <div className={styles.post_card}>
           <div className={styles.post_content_container}>
             <div className={styles.post_box}>
-              <p className={styles.text}>{content}</p>
+              <p className={styles.text}>{notice.content}</p>
             </div>
             <div className={styles.button_container}>
               <button className={styles.edit_button}>수정</button>
@@ -53,7 +53,7 @@ const NoticeBox = ({ date, profileImage, content, time, noticeId, token, initial
             </div>
           </div>
           <div className={styles.post_footer}>
-            <div className={styles.time}>{time}</div>
+            <div className={styles.time}>{notice.time}</div>
             <div className={styles.reaction}>
               {Array.isArray(reactions) &&
                 reactions.map((reaction, index) => (

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import com.creationstack.backend.domain.notice.Notice;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NoticeReactionService {
 
 	private final NoticeRepository noticeRepository;
@@ -59,12 +61,13 @@ public class NoticeReactionService {
 	    List<NoticeReactionDto> reactions = reactionRepository.findGroupedByEmoji(notice);
 
 	    Optional<NoticeReaction> myReactionOpt = reactionRepository.findByNoticeAndUser(notice, user);
+			log.info("myReactionOpt = {}", myReactionOpt);
 	    String myEmoji = myReactionOpt.map(NoticeReaction::getEmoji).orElse(null);
 
 	    for (NoticeReactionDto dto : reactions) {
 	        dto.setReacted(dto.getEmoji().equals(myEmoji));
 	    }
-
+		log.info("reactions: {}", reactions.size());
 	    return reactions;
 	}
 
