@@ -90,7 +90,8 @@ export const KakaoCommon = ({ onBack, kakaoInfo }) => {
 
       const result = await signupUser(requestBody);
 
-      if (response.ok) {
+      if (result.success) {
+        // response.ok → result.success 변경
         alert('카카오 계정으로 회원가입이 완료되었습니다!');
 
         if (result.data?.tokens) {
