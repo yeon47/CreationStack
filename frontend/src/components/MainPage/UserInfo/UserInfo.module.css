@@ -14,12 +14,15 @@
 }
 
 .nicknameWrapper {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  position: relative;
+  display: block;
+  width: fit-content;
+  margin: 0 auto;
 }
 
 .nickname {
+  display: block;
+  text-align: center;
   font-size: 40px;
   font-weight: 400;
   color: #292929;
@@ -46,6 +49,10 @@
 }
 
 .creatorBadge {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translate(6px, -50%);
   width: 30px;
   height: 30px;
   vertical-align: middle;

@@ -26,7 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/auth")  
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {
