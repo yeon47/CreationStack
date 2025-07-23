@@ -1,14 +1,28 @@
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-
 import styles from './ContentCard.module.css';
 import SubsIcon from '../../assets/img/subs_icon.svg';
 import { UnauthorizedModal } from '../UnauthorizedModal';
 import { checkContentAccess } from '../../api/contentAPI';
+import { useEffect, useState } from 'react';
+import { getMyProfile } from '../../api/user';
 
 export const ContentCard = ({ contentId, thumbnailUrl, creatorNickname, title, likes, isPaid, categoryNames = [] }) => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
+  const [nickname, setNickname] = useState('');
+
+  // 로그인한 사용자 정보 로딩
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await getMyProfile();
+        setNickname(res.data.nickname);
+      } catch (error) {
+        console.error('로그인 사용자 정보 불러오기 실패', error);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const handleCardClick = async () => {
     try {
@@ -48,9 +62,7 @@ export const ContentCard = ({ contentId, thumbnailUrl, creatorNickname, title, l
       </div>
 
       {showModal && creatorNickname && (
-        <UnauthorizedModal
-        open={true} creatorNickname={creatorNickname}
-        onClose={() => setShowModal(false)} />
+        <UnauthorizedModal open={true} creatorNickname={creatorNickname} onClose={() => setShowModal(false)} />
       )}
     </>
   );

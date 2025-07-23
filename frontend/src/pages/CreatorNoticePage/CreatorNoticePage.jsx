@@ -27,7 +27,7 @@ function CreatorNoticePage() {
   const fetchLoginUser = async () => {
     try {
       const res = await getMyProfile();
-      setLoginUser(res.data);
+      setLoginUser(res.data.data);
     } catch (err) {
       console.error('로그인 사용자 정보 불러오기 실패', err);
     }
@@ -140,15 +140,27 @@ function CreatorNoticePage() {
       </div>
 
       {/*notice section*/}
-      <div className={styles.separator}></div>
-
       <div className={styles.notice_container}>
-        {notices.map(notice => {
+        {notices.map((notice, index) => {
           const createdAt = new Date(notice.createdAt);
-          const date = createdAt.toISOString().split('T')[0];
-          const time = createdAt.toTimeString().substring(0, 5);
+          const currentDate = createdAt.toISOString().split('T')[0];
 
-          return <NoticeBox key={notice.noticeId} notice={notice} creator={creator} />;
+          const prevNotice = index > 0 ? notices[index - 1] : null;
+          const prevDate = prevNotice ? new Date(prevNotice.createdAt).toISOString().split('T')[0] : null;
+
+          const showDate = currentDate !== prevDate;
+          console.log('creator:', creator);
+          console.log('loginUser:', loginUser);
+
+          return (
+            <NoticeBox
+              key={notice.noticeId}
+              notice={notice}
+              creator={creator}
+              loginUser={loginUser}
+              showDate={showDate}
+            />
+          );
         })}
       </div>
     </div>

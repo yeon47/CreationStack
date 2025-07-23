@@ -15,6 +15,7 @@ import RelatedContentList from '../../components/ContentDetail/RelatedContentLis
 import ReplyList from './ReplyList';
 import styles from './ContentDetailPage.module.css';
 import { toggleContentLike } from '../../api/contentAPI';
+import { getMyProfile } from '../../api/user';
 
 export const ContentDetailPage = () => {
   const { contentId } = useParams();
@@ -26,6 +27,8 @@ export const ContentDetailPage = () => {
   const [isLiked, setIsLiked] = useState(null);
   const [error, setError] = useState(null);
   const [commentCount, setCommentCount] = useState(0);
+  const [loginUser, setLoginUser] = useState(null);
+  const [isAuthor, setIsAuthor] = useState(false);
 
   // 1. 콘텐츠 상세 정보 불러오기
   useEffect(() => {
@@ -37,6 +40,11 @@ export const ContentDetailPage = () => {
         setLikeCount(data.likeCount || 0);
         setIsLiked(data.liked !== undefined ? data.liked : false);
         setCommentCount(data.commentCount || 0);
+
+        const userRes = await getMyProfile();
+        setLoginUser(userRes.data);
+
+        setIsAuthor(userRes.data.userId === data.creatorId);
       } catch (err) {
         console.error('콘텐츠 상세 조회 실패:', err);
         setError(err);
@@ -97,7 +105,7 @@ export const ContentDetailPage = () => {
         categories={content.categories}
         createdAt={content.createdAt}
         accessType={content.accessType}
-        isAuthor={true} // 백엔드에서 권한 확인하므로 항상 true
+        isAuthor={isAuthor}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
