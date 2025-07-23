@@ -51,7 +51,6 @@ public class PaymentService {
   public BillingKeyPaymentResponseDto processingBillingKeyPay(BillingKeyPaymentRequestDto req) {
     // 결제수단과 연결된 빌링키
     PaymentMethod paymentMethod = paymentMethodService.getPaymentMethodForBillingKey(req.getPaymentMethodId());
-    log.info("[processingBillingKeyPay] paymentMethodService.getPaymentMethodForBillingKey: {}", paymentMethod);
 
     // 구매하는 사용자 정보 가져와 구매자 객체 생성
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -94,7 +93,6 @@ public class PaymentService {
 
     // 결제 요청
     PortOneBillingResponseDto response = portOneClient.processingBillingKeyPay(requestBody);
-    log.info("[processingBillingKeyPay] portOneClient.processingBillingKeyPay: {}", response);
 
     String rawDateTime = response.getResponse().get("payment").get("paidAt").asText();
     Instant instant = Instant.parse(rawDateTime);
@@ -133,7 +131,6 @@ public class PaymentService {
   //정기 결제 진행 + 결제 내역 생성
   @Transactional
   public void processAutoBilling(Subscription subscription, User user) {
-    log.info("[processAutoBilling] subscription: {}", subscription);
 
     // 연결된 결제 수단 & 구매자 조회. 구매자 조회 안되면 정기결제 실패
     PaymentMethod paymentMethod = subscription.getPaymentMethod();
@@ -150,7 +147,6 @@ public class PaymentService {
         .currency("KRW")
         .productType("DIGITAL")
         .build();
-    log.info("[AutoBilling] 결제 대상 구독 : {}", req);
 
     // 결제 내역 생성
     Payment payment = Payment.builder()

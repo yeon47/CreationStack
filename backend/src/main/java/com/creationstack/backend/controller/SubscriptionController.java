@@ -51,7 +51,6 @@ public class SubscriptionController {
     public ResponseEntity<String> activateSubscription(
             @PathVariable Long subscriptionId,
             @RequestBody ActivateSubscriptionRequestDto dto) {
-        log.info("구독 활성화 시작");
         subscriptionService.activateSubscription(subscriptionId, dto.getPaymentId());
         return ResponseEntity.ok("구독이 활성화되었습니다.");
     }

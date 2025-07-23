@@ -3,14 +3,12 @@ import axios from 'axios';
 
 export const getPublicCreatorProfile = async (nickname, accessToken) => {
   try {
-    console.log(nickname);
     const response = await axios.get(`http://localhost:8080/api/user/public/${encodeURIComponent(nickname)}`, {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    console.log(response.data);
     return response;
   } catch (error) {
     return error;
@@ -18,7 +16,6 @@ export const getPublicCreatorProfile = async (nickname, accessToken) => {
 };
 
 export const getPublicUserProfile = async nickname => {
-  console.log(nickname);
   try {
     const token = localStorage.getItem('accessToken');
     const headers = {

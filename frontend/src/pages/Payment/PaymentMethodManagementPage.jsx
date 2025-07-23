@@ -84,7 +84,6 @@ function PaymentMethodManagementPage() {
         userInfoResponse.data.username,
         userInfoResponse.data.email
       );
-      console.log("issueResponse", issueResponse);
 
       // 포트원에서 실패 응답을 반환한 경우 (성공했더라도 내부적으로 실패 코드 전달 가능)
       if (
@@ -96,7 +95,6 @@ function PaymentMethodManagementPage() {
       }
 
       // 발급된 빌링키 이용한 결제수단 조회 (빌링키 발급단계에서 이루어진 결제수단 조회)
-      console.log('accessToken before savePaymentMethod:', accessToken);
       const saveResponse = await savePaymentMethod(issueResponse.billingKey, accessToken);
 
       // 회원이 추가한 결제수단을 cards에 저장

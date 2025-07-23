@@ -44,7 +44,6 @@ public class PortOneClient {
 
   public PortOneClient(@Value("${portone.apisecret}") String API_SECRET) {
     this.API_SECRET = API_SECRET;
-    log.info("[PortOneClient] Loaded API_SECRET: {}", API_SECRET);
   }
 
   @Value("${portone.hostname}")
@@ -68,14 +67,11 @@ public JsonNode getBillingKeyInfo(String billingKey) {
 
     while (retry < maxRetries) {
         try {
-            log.info("[PortOneClient] getBillingKeyInfo 요청 URL: {}", requestUrl);
-            log.info("[PortOneClient] getBillingKeyInfo 요청 헤더: {}", headers);
 
             ResponseEntity<String> response =
                 restTemplate.exchange(requestUrl, HttpMethod.GET, entity, String.class);
 
             log.info("[PortOneClient] 응답 상태 코드: {}", response.getStatusCode());
-            log.info("[PortOneClient] 응답 본문: {}", response.getBody());
 
             if (response.getStatusCode() != HttpStatus.OK) {
                 throw new CustomException(HttpStatus.resolve(response.getStatusCode().value()),
@@ -131,17 +127,14 @@ public JsonNode getBillingKeyInfo(String billingKey) {
     HttpHeaders headers = new HttpHeaders();
     headers.set("Authorization", "PortOne " + API_SECRET);
     headers.setContentType(MediaType.APPLICATION_JSON);
-    log.info("[PortOneClient] requestBody:{}", requestBody.getBillingKey());
     requestBody.setStoreId(STORE_ID);
 
     HttpEntity<PortOnePaymentRequestDto> entity = new HttpEntity<>(requestBody, headers);
-     log.info("[PortOneClient] entity:{}", entity);
 
      // 요청 전송
     ResponseEntity<String> response =
         restTemplate.exchange(requestUrl, HttpMethod.POST, entity, String.class);
 
-    log.info("[PortOneClient] response:{}", response);
     try {
       return PortOneBillingResponseDto.builder().portOnePaymentId(portOnePaymentId)
           .response(objectMapper.readTree(response.getBody())).build();
@@ -188,7 +181,6 @@ public JsonNode deleteBillingKey(DeletePaymentMethodRequestDto req, String billi
                 requestUrl, HttpMethod.DELETE, entity, String.class);
 
         log.info("[PortOneClient] deleteBillingKey 응답 수신 상태: {}", response.getStatusCode());
-        log.debug("[PortOneClient] deleteBillingKey 응답 바디: {}", response.getBody());
 
         return objectMapper.readTree(response.getBody());
 

@@ -13,7 +13,6 @@ export const getMySubscriptions = async () => {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    console.log(response.data.subscriptions);
     return response.data.subscriptions;
   } catch (err) {
     console.log('구독 목록 조회 실패: '. err);

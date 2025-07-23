@@ -46,7 +46,7 @@ function PaymentPage() {
   const [creator, setCreator] = useState(null);
 
   useEffect(() => {
-    console.log(creatorNickname);
+    console.log(creatorNickname + "크리에이터에 대한 구독");
     const fetchCreator = async () => {
       const accessToken = localStorage.getItem('accessToken');
       try {

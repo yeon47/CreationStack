@@ -22,7 +22,6 @@ export const CreatorMainPage = () => {
   const fetchMyInfo = async () => {
     try {
       const res = await getMyProfile();
-      console.log('✅ getMyProfile 응답:', res.data);
       setMyUserId(res.data.data.userId);
     } catch (err) {
       console.error('내 정보 불러오기 실패', err);
@@ -35,7 +34,7 @@ export const CreatorMainPage = () => {
 
   useEffect(() => {
     if (myUserId !== null) {
-      console.log('✅ 내 userId 상태 업데이트됨:', myUserId);
+      console.log('내 userId 상태 업데이트됨');
     }
   }, [myUserId]);
 

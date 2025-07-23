@@ -32,6 +32,8 @@ function getCardCompanyLogo(company) {
     case 'Toss Bank':
     case '토스뱅크':
       return '/img/card_logo/toss_logo.png';
+    case '카카오뱅크카드':
+      return '/img/card_logo/kakao_logo.png';
     default:
       return '/img/default_card_logo.png';
   }

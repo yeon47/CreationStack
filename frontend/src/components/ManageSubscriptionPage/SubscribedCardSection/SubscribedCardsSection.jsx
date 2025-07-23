@@ -15,7 +15,6 @@ export const SubscribedCardsSection = () => {
     const fetchSubscriptions = async () => {
       try {
         const subs = await getMySubscriptions();
-        console.log("subs: ",subs);
 
         const mapped = subs
         .filter(sub => sub.statusName !== 'PENDING')

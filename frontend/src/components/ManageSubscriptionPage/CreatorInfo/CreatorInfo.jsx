@@ -33,7 +33,6 @@ export const CreatorInfo = ({ subscriptionId, className, creatorNickname, profil
 
   const handleStatusClick = e => {
     e.stopPropagation(); // 부모 div 클릭 막기
-    console.log('버튼 클릭됨');
     if (status === 'ACTIVE') setModalType('cancel');
     else if (status === 'CANCELLED' || status === 'EXPIRED') setModalType('resume');
   };
@@ -50,7 +49,6 @@ export const CreatorInfo = ({ subscriptionId, className, creatorNickname, profil
     }
 
     if (modalType === 'cancel') {
-      console.log('구독 해지 요청 subscriptionId', subscriptionId);
       try {
         // 구독 해지 API 호출
         await cancelSubscription(subscriptionId);
