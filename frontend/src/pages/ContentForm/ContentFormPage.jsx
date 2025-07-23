@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './contentForm.module.css'; // contentForm.module.css 임포트
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 // Toast UI Editor imports
 import { Editor } from '@toast-ui/react-editor';
 import '@toast-ui/editor/dist/toastui-editor.css'; // Editor's default style
@@ -10,7 +10,6 @@ import { createContent } from '../../api/contentAPI'; // 경로에 맞게 수정
 import { uploadEditorImage } from '../../api/imageAPI'; // 경로에 맞게 수정
 
 const ContentFormPage = () => {
-  const { contentId } = useParams(); // URL에서 contentId를 가져옴
   const navigate = useNavigate();
 
   const [title, setTitle] = useState('');
@@ -23,6 +22,7 @@ const ContentFormPage = () => {
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState(null); // 썸네일 미리보기 URL 상태 추가
   const [isDragging, setIsDragging] = useState(false); // 드래그 중인지 여부
   const [isImageUploading, setIsImageUploading] = useState(false); // 이미지 업로드 중 상태 추가
+  
 
   // 드롭다운 외부 클릭 감지를 위한 ref
   const dropdownRef = useRef(null);
@@ -253,7 +253,7 @@ const ContentFormPage = () => {
       console.log('콘텐츠 저장 성공:', result);
       alert('콘텐츠가 성공적으로 저장되었습니다!');
       // 저장 성공 후 폼 초기화 또는 다른 페이지로 이동
-      navigate(`/content/${contentId}`); // 저장 후 상세 페이지로 이동
+      navigate(`/content/${result.contentId}`); // 저장 후 상세 페이지로 이동
     } catch (error) {
       console.error('콘텐츠 저장 실패:', error);
       alert('콘텐츠 저장에 실패했습니다: ' + error.message);

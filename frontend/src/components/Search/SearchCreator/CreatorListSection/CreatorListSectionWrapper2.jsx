@@ -1,8 +1,8 @@
 import React from "react";
-import { SearchCreatorCardList } from "../SearchCreatorCardList";
+import { SearchCreatorCardList2 } from "../SearchCreatorCardList2";
 import "./CreatorListSectionWrapper.css";
 
-export const CreatorListSectionWrapper = ({ className, creators = [] }) => {
+export const CreatorListSectionWrapper2 = ({ className, creators = [] }) => {
   if (creators.length === 0) {
     return (
       <div className={`creator-list-section-wrapper ${className}`}>
@@ -13,7 +13,7 @@ export const CreatorListSectionWrapper = ({ className, creators = [] }) => {
   
   return (
     <div className={`creator-list-section-wrapper ${className}`}>
-      <SearchCreatorCardList contents={creators} />
+      <SearchCreatorCardList2 contents={creators} />
     </div>
   );
 };

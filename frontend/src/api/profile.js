@@ -18,6 +18,7 @@ export const getPublicCreatorProfile = async (nickname, accessToken) => {
 };
 
 export const getPublicUserProfile = async nickname => {
+  console.log(nickname);
   try {
     const token = localStorage.getItem('accessToken');
     const headers = {
@@ -26,8 +27,9 @@ export const getPublicUserProfile = async nickname => {
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
-    const response = await axios.get(`/api/user/public/${encodeURIComponent(nickname)}`, { headers });
-    console.log(response);
+
+    const response = await axios.get(`/api/user/public/${nickname}`, { headers });
+
     return response.data;
   } catch (error) {
     console.error('공개 프로필 조회 실패:', error);
