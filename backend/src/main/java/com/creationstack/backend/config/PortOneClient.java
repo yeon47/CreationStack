@@ -1,5 +1,6 @@
 package com.creationstack.backend.config;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
@@ -12,7 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriUtils;
 
 import com.creationstack.backend.dto.Payment.DeletePaymentMethodRequestDto;
 import com.creationstack.backend.dto.Payment.PortOneBillingResponseDto;
@@ -169,30 +172,41 @@ public JsonNode getBillingKeyInfo(String billingKey) {
   }
 
   // 결제수단 삭제
-  public JsonNode deleteBillingKey(DeletePaymentMethodRequestDto req, String billingKey) {
-    // 요청 url 설정
-    String requestUrl =
-        API_HOSTNAME + "/billing-keys/" + billingKey + "?reason=" + req.getReason();
+public JsonNode deleteBillingKey(DeletePaymentMethodRequestDto req, String billingKey) {
+    // 요청 URL 설정
+    String requestUrl = API_HOSTNAME + "/billing-keys/" + billingKey
+            + "?reason=" + UriUtils.encode(req.getReason(), StandardCharsets.UTF_8);
 
-    // header 설정
+    // Header 설정
     HttpHeaders headers = new HttpHeaders();
     headers.set("Authorization", "PortOne " + API_SECRET);
     headers.setContentType(MediaType.APPLICATION_JSON);
-
-    // 요청 request param, header 설정
     HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-    // 요청 전송
-    ResponseEntity<String> response =
-        restTemplate.exchange(requestUrl, HttpMethod.DELETE, entity, String.class);
-    log.info("[PortOneClient] deleteBillingKey 요청 전송후 응답옴:{}", "삭제 완료");
     try {
-      // JSON 파싱 오류 발생 가능성 있음
-      return objectMapper.readTree(response.getBody());
-    } catch (JsonProcessingException e) {
-      throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "응답 파싱 중 오류가 발생했습니다.");
+        ResponseEntity<String> response = restTemplate.exchange(
+                requestUrl, HttpMethod.DELETE, entity, String.class);
+
+        log.info("[PortOneClient] deleteBillingKey 응답 수신 상태: {}", response.getStatusCode());
+        log.debug("[PortOneClient] deleteBillingKey 응답 바디: {}", response.getBody());
+
+        return objectMapper.readTree(response.getBody());
+
+    } catch (HttpClientErrorException e) {
+        // 예: 409 Conflict (이미 삭제된 빌링키 등)
+        log.warn("[PortOneClient] PortOne API 오류: {}", e.getResponseBodyAsString());
+
+        try {
+            return objectMapper.readTree(e.getResponseBodyAsString());
+        } catch (JsonProcessingException ex) {
+            throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "포트원 오류 응답 파싱 실패", ex);
+        }
+
+    } catch (Exception e) {
+        throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "PortOne API 호출 실패", e);
     }
-  }
+}
+
 
   private String generateWithTimestamp() {
     String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));

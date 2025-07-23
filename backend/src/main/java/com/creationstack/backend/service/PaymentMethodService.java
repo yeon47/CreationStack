@@ -40,44 +40,42 @@ public class PaymentMethodService {
   // 1. 결제수단 저장
   @Transactional
   public SavePaymentMethodResponseDto save(Long userId, SavePaymentMethodRequestDto req) {
-  try {
-    log.info("req: {}", req);
-    String billingKey = req.getBillingKey();
-    JsonNode card = portOneClient.getBillingKeyInfo(billingKey);
+    try {
+      log.info("req: {}", req);
+      String billingKey = req.getBillingKey();
+      JsonNode card = portOneClient.getBillingKeyInfo(billingKey);
 
-    if (card == null || card.get("name") == null || card.get("number") == null) {
-      throw new IllegalStateException("카드 정보가 누락되었습니다.");
+      if (card == null || card.get("name") == null || card.get("number") == null) {
+        throw new IllegalStateException("카드 정보가 누락되었습니다.");
+      }
+
+      UserDetail userDetail = userDetailRepository.findById(userId)
+          .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+      PaymentMethod paymentMethod = PaymentMethod.builder()
+          .userId(userId)
+          .billingKey(billingKey)
+          .cardName(card.get("name").asText())
+          .cardBrand(card.get("brand").asText())
+          .cardNumber(card.get("number").asText())
+          .cardType(card.get("type").asText())
+          .build();
+
+      log.info("paymentMethod: {}", paymentMethod);
+
+      paymentMethodRepository.save(paymentMethod);
+
+      return new SavePaymentMethodResponseDto(
+          userDetail.getUsername(),
+          paymentMethod.getCardBrand(),
+          paymentMethod.getCardType(),
+          paymentMethod.getCardName(),
+          paymentMethod.getCardNumber());
+    } catch (Exception e) {
+      log.error("결제수단 저장 실패", e); // 기존 예외 기록
+      throw new RuntimeException("결제수단 저장 실패", e);
     }
-
-    UserDetail userDetail = userDetailRepository.findById(userId)
-        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-
-    PaymentMethod paymentMethod = PaymentMethod.builder()
-        .userId(userId)
-        .billingKey(billingKey)
-        .cardName(card.get("name").asText())
-        .cardBrand(card.get("brand").asText())
-        .cardNumber(card.get("number").asText())
-        .cardType(card.get("type").asText())
-        .build();
-
-    log.info("paymentMethod: {}", paymentMethod);
-
-    paymentMethodRepository.save(paymentMethod);
-
-    return new SavePaymentMethodResponseDto(
-        userDetail.getUsername(),
-        paymentMethod.getCardBrand(),
-        paymentMethod.getCardType(),
-        paymentMethod.getCardName(),
-        paymentMethod.getCardNumber()
-    );
-  } catch (Exception e) {
-    log.error("결제수단 저장 실패", e);  // 기존 예외 기록
-    throw new RuntimeException("결제수단 저장 실패", e);
   }
-}
-
 
   // 2. 회원 ID 통해 저장된 결제수단 호출
   public List<PaymentMethodResponseDto> getPaymentMethod(Long userId) {
@@ -85,9 +83,9 @@ public class PaymentMethodService {
         .map(paymentMethod -> new PaymentMethodResponseDto(
             paymentMethod.getPaymentMethodId(), // DB에 저장된 결제수단 고유ID
             paymentMethod.getCardBrand(), // MASTER | VISA
-            paymentMethod.getCardType(), //CREDIT | DEBIT
+            paymentMethod.getCardType(), // CREDIT | DEBIT
             paymentMethod.getCardNumber(), // 0000-0000-****-**00
-            paymentMethod.getCardName() //신한은행, 국민은행
+            paymentMethod.getCardName() // 신한은행, 국민은행
         )).toList();
   }
 
@@ -96,33 +94,44 @@ public class PaymentMethodService {
   public DeletePaymentMethodResponseDto deletePaymentMethod(DeletePaymentMethodRequestDto req) {
     Long paymentMethodId = req.getPaymentMethodId();
 
-    // 카드 있는지 조회
-    PaymentMethod paymentMethod = paymentMethodRepository.findById(paymentMethodId).orElse(null);
-    if(paymentMethod == null) {
-      throw new CustomException(HttpStatus.BAD_REQUEST, "조회되는 결제수단이 없습니다.");
-    }
-    log.info("[PaymentMethodService]  deletePaymentMethod paymentMethod 정보:{}",paymentMethod.getCardName());
+    // 1. 결제수단 조회
+    PaymentMethod paymentMethod = paymentMethodRepository.findById(paymentMethodId)
+        .orElseThrow(() -> new CustomException(HttpStatus.BAD_REQUEST, "조회되는 결제수단이 없습니다."));
+    log.info("[PaymentMethodService] deletePaymentMethod paymentMethod 정보: {}", paymentMethod.getCardName());
 
+    // 2. 연관된 Subscription, Payment에서 연결 해제
     detachPaymentMethodFromRelations(paymentMethod);
 
-    // 빌링키 이용한 포트원 삭제 API 호출
-    JsonNode responseBody = portOneClient.deleteBillingKey(req,paymentMethod.getBillingKey());
-    log.info("[PaymentMethodService]  deletePaymentMethod responseBody:{}",responseBody.get("deletedAt").asText());
+    // 3. 포트원 API 호출
+    JsonNode responseBody = portOneClient.deleteBillingKey(req, paymentMethod.getBillingKey());
 
-    DeletePaymentMethodResponseDto res = DeletePaymentMethodResponseDto.builder()
-        .paymentMethodId(req.getPaymentMethodId()) // 삭제된 paymentmethod의 id
-        .deletedAt(responseBody.get("deletedAt").asText()) // 삭제 시각
-        .message(req.getReason() == null ? "결제수단이 삭제되었습니다." : req.getReason()) // message
-        .build();
-
-    // DB에서 결제수단 삭제 (삭제 안되면 portoneclient 클래스에서 exception 처리)
-    int deletedCount = paymentMethodRepository.deletePaymentMethodByPaymentMethodId(paymentMethodId);
-    if(deletedCount == 0){
-      throw new CustomException(HttpStatus.BAD_REQUEST,"결제수단 삭제 실패");
+    // 4. deletedAt 필드 안전하게 파싱
+    String deletedAt;
+    if (responseBody.has("deletedAt") && !responseBody.get("deletedAt").isNull()) {
+      deletedAt = responseBody.get("deletedAt").asText();
+    } else if (responseBody.has("type") && "BILLING_KEY_ALREADY_DELETED".equals(responseBody.get("type").asText())) {
+      deletedAt = "이미 삭제된 결제수단입니다.";
+    } else {
+      throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "PortOne 응답 파싱 오류: deletedAt 없음 / 예상치 못한 응답 - " + responseBody.toString());
     }
-    log.info("[PaymentMethodService]  deletePaymentMethod 삭제완료:{}",paymentMethodId);
 
-    return res;
+    log.info("[PaymentMethodService] deleteBillingKey 응답 deletedAt: {}", deletedAt);
+
+    // 5. DB에서 결제수단 삭제
+    int deletedCount = paymentMethodRepository.deletePaymentMethodByPaymentMethodId(paymentMethodId);
+    if (deletedCount == 0) {
+      throw new CustomException(HttpStatus.BAD_REQUEST, "결제수단 삭제 실패");
+    }
+
+    log.info("[PaymentMethodService] deletePaymentMethod 삭제완료: {}", paymentMethodId);
+
+    // 6. 응답 구성
+    return DeletePaymentMethodResponseDto.builder()
+        .paymentMethodId(paymentMethodId)
+        .deletedAt(deletedAt)
+        .message(req.getReason() == null ? "결제수단이 삭제되었습니다." : req.getReason())
+        .build();
   }
 
   // 4. paymentMethodId 이용한 결제수단 조회
@@ -134,10 +143,8 @@ public class PaymentMethodService {
     // Subscription에서 결제수단 제거
     List<Subscription> subscriptions = subscriptionRepository.findByPaymentMethod(paymentMethod);
     boolean hasActiveSubscription = subscriptions.stream()
-        .anyMatch(subscription ->
-            subscription.getStatus() != null &&
-                "ACTIVE".equalsIgnoreCase(subscription.getStatus().getName())
-        );
+        .anyMatch(subscription -> subscription.getStatus() != null &&
+            "ACTIVE".equalsIgnoreCase(subscription.getStatus().getName()));
 
     // 활성화된 구독이 연결되어 있으면 결제할 수 없게 함
     if (hasActiveSubscription) {
@@ -155,6 +162,3 @@ public class PaymentMethodService {
         subscriptions.size(), payments.size());
   }
 }
-
-
-
