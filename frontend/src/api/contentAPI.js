@@ -127,13 +127,11 @@ export async function deleteContent(contentId) {
   }
 }
 
-
-
 // 특정 크리에이터의 콘텐츠 목록을 조회하는 API 호출 함수
 export async function getContentsByCreator(creatorId, excludeContentId = null) {
   try {
     let url = `/api/content/creator/${creatorId}`;
-    
+
     // excludeContentId를 숫자로 변환 시도. 유효한 숫자가 아니면 null로 설정.
     const numericExcludeId = Number(excludeContentId);
     const finalExcludeId = isNaN(numericExcludeId) ? null : numericExcludeId;
@@ -164,7 +162,7 @@ export const checkContentAccess = async contentId => {
   });
 };
 
-//컨텐츠 좋아요
+//콘텐츠 좋아요
 export async function toggleContentLike(contentId) {
   try {
     const accessToken = localStorage.getItem('accessToken');

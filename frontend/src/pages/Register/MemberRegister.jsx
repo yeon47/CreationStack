@@ -30,12 +30,12 @@ export const MemberRegister = () => {
     {
       id: 'regular',
       title: '일반 사용자',
-      description: '컨텐츠를 구독하고 학습하고 싶어요',
+      description: '콘텐츠를 구독하고 학습하고 싶어요',
     },
     {
       id: 'creator',
       title: '크리에이터',
-      description: '컨텐츠를 제작하고 공유하고 싶어요',
+      description: '콘텐츠를 제작하고 공유하고 싶어요',
     },
   ];
 

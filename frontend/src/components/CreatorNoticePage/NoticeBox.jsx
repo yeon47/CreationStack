@@ -3,44 +3,46 @@ import styles from './NoticeBox.module.css';
 import Picker from '@emoji-mart/react';
 import { toggleReaction, getReactions } from '@/api/notice.js';
 
-const NoticeBox = ({ notice }) => {
+const NoticeBox = ({ notice, creator }) => {
   const [reactions, setReactions] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
   const [userEmoji, setUserEmoji] = useState(notice.userReactedEmoji || null);
   const [noticeId, setNoticeId] = useState(notice.noticeId || null);
 
   useEffect(() => {
-    console.log(notice);
-    setReactions(notice.initialReactions || []);
+    setReactions(notice.reactions || []);
     setUserEmoji(notice.userReactedEmoji || null);
   }, [notice.initialReactions, notice.userReactedEmoji]);
 
   const handleEmojiClick = async emoji => {
     try {
       await toggleReaction(noticeId, emoji);
-
       setUserEmoji(prev => (prev === emoji ? null : emoji));
 
       const updated = await getReactions(noticeId);
-      setReactions(updated.data); // ✅ 리액션 리스트 갱신
+      setReactions(updated.data);
     } catch (error) {
       console.error('이모지 토글 실패:', error);
     }
   };
 
   const handlePickerSelect = emoji => {
-    handleEmojiClick(emoji.native); // 유니코드 이모지
+    handleEmojiClick(emoji.native);
     setShowPicker(false);
   };
+
+  const createdAt = new Date(notice.createdAt);
+  const date = createdAt.toLocaleDateString('ko-KR');
+  const time = createdAt.toTimeString().substring(0, 5);
 
   return (
     <div className={styles.notice}>
       <div className={styles.date}>
-        <p>{new Date().toLocaleDateString('ko-KR')}</p>
+        <p>{date}</p>
       </div>
       <div className={styles.post_container}>
         <div className={styles.creator_img}>
-          <img src={notice.profileImage} alt="작성자 이미지" />
+          <img src={creator?.profileImageUrl} alt={`${creator?.nickname} 프로필 이미지`} />
         </div>
         <div className={styles.post_card}>
           <div className={styles.post_content_container}>
@@ -53,14 +55,14 @@ const NoticeBox = ({ notice }) => {
             </div>
           </div>
           <div className={styles.post_footer}>
-            <div className={styles.time}>{notice.time}</div>
+            <div className={styles.time}>{time}</div>
             <div className={styles.reaction}>
               {Array.isArray(reactions) &&
-                reactions.map((reaction, index) => (
+                reactions.map(reaction => (
                   <button
-                    key={index}
+                    key={reaction.emoji}
                     onClick={() => handleEmojiClick(reaction.emoji)}
-                    className={`${styles.emojiButton} ${reaction.reacted ? styles.active : ''}`}>
+                    className={`${styles.emojiButton} ${reaction.emoji === userEmoji ? styles.active : ''}`}>
                     {reaction.emoji} {reaction.count}
                   </button>
                 ))}
