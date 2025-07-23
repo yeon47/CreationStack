@@ -44,7 +44,7 @@ export const NavbarCreator = () => {
     } else if (location.pathname.startsWith('/creators')) {
       setActiveMenu('크리에이터');
     } else if (location.pathname.startsWith('/contents')) {
-      setActiveMenu('컨텐츠');
+      setActiveMenu('콘텐츠');
     } else {
       setActiveMenu(''); // 다른 경로일 경우 active 상태 해제
     }
@@ -152,7 +152,7 @@ export const NavbarCreator = () => {
       navigate('/');
     } else if (menu === '크리에이터') {
       navigate('/creators');
-    } else if (menu === '컨텐츠') {
+    } else if (menu === '콘텐츠') {
       navigate('/contents');
     }
   };
@@ -171,7 +171,7 @@ export const NavbarCreator = () => {
     navigate(path);
   };
 
-  const menuItems = ['홈', '크리에이터', '컨텐츠'];
+  const menuItems = ['홈', '크리에이터', '콘텐츠'];
 
   return (
     <nav className={styles.navbarCreator}>

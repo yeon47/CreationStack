@@ -11,7 +11,7 @@ const NoticeBox = ({ notice }) => {
 
   useEffect(() => {
     console.log(notice);
-    setReactions(notice.initialReactions || []);
+    setReactions(notice.reactions || []);
     setUserEmoji(notice.userReactedEmoji || null);
   }, [notice.initialReactions, notice.userReactedEmoji]);
 
@@ -22,7 +22,7 @@ const NoticeBox = ({ notice }) => {
       setUserEmoji(prev => (prev === emoji ? null : emoji));
 
       const updated = await getReactions(noticeId);
-      setReactions(updated.data); // ✅ 리액션 리스트 갱신
+      setReactions(updated.data);
     } catch (error) {
       console.error('이모지 토글 실패:', error);
     }
@@ -56,11 +56,11 @@ const NoticeBox = ({ notice }) => {
             <div className={styles.time}>{notice.time}</div>
             <div className={styles.reaction}>
               {Array.isArray(reactions) &&
-                reactions.map((reaction, index) => (
+                reactions.map(reaction => (
                   <button
-                    key={index}
+                    key={reaction.emoji}
                     onClick={() => handleEmojiClick(reaction.emoji)}
-                    className={`${styles.emojiButton} ${reaction.reacted ? styles.active : ''}`}>
+                    className={`${styles.emojiButton} ${reaction.emoji === userEmoji ? styles.active : ''}`}>
                     {reaction.emoji} {reaction.count}
                   </button>
                 ))}

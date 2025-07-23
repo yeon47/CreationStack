@@ -23,13 +23,26 @@ function CreatorNoticePage() {
 
       const noticesWithReactions = await Promise.all(
         noticeList.map(async notice => {
-          const reactionRes = await getReactions(notice.noticeId);
-          return {
-            ...notice,
-            reactions: reactionRes.data,
-          };
+          try {
+            const reactionRes = await getReactions(notice.noticeId);
+            const userReacted = reactionRes.data.find(r => r.reacted === true);
+
+            return {
+              ...notice,
+              reactions: reactionRes.data,
+              userReactedEmoji: userReacted ? userReacted.emoji : null,
+            };
+          } catch (err) {
+            console.error(`리액션 로딩 실패 (noticeId: ${notice.noticeId})`, err);
+            return {
+              ...notice,
+              reactions: [],
+              userReactedEmoji: null,
+            };
+          }
         })
       );
+
       console.log(noticesWithReactions);
 
       setNotices(noticesWithReactions);
@@ -129,7 +142,7 @@ function CreatorNoticePage() {
           const date = createdAt.toISOString().split('T')[0];
           const time = createdAt.toTimeString().substring(0, 5);
 
-          return <NoticeBox notice={notice} />;
+          return <NoticeBox key={notice.noticeId} notice={notice} />;
         })}
       </div>
     </div>
