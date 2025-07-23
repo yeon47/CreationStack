@@ -38,9 +38,11 @@ const CommentItem = ({
 
   return (
     <div className={`${styles.commentItem} ${isReply ? styles.reply : ''}`}>
-      <div className={styles.avatar}>
+      {comment.profileImageUrl ? (
+        <img src={comment.profileImageUrl} alt="프로필 이미지" className={styles.profileImage} />
+      ) : (
         <div className={styles.avatarCircle}>{comment.nickname ? comment.nickname[0].toUpperCase() : '익'}</div>
-      </div>
+      )}
 
       <div className={styles.commentMain}>
         <div className={styles.commentHeader}>

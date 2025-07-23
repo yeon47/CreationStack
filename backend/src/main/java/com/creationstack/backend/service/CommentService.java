@@ -141,7 +141,8 @@ public class CommentService {
         dto.setCreatedAt(comment.getCreatedAt());
         dto.setIsDeleted(comment.isDeleted());
         dto.setLikeCount(comment.getLikeCount());
-
+        dto.setProfileImageUrl(comment.getUser().getUserDetail().getProfileImageUrl());
+        
         if (userId != null) {
         	dto.setLiked(commentLikeRepository.isActiveLike(userId, comment.getCommentId()));
         } else {

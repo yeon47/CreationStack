@@ -9,11 +9,9 @@ const noticeApi = axios.create({
 noticeApi.interceptors.request.use(config => {
   const accessToken = localStorage.getItem('accessToken');
   console.log(config.headers);
-  console.log('📦 [INTERCEPTOR] token:', accessToken);
 
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
-    console.log('📦 [INTERCEPTOR] 최종 헤더:', config.headers);
   }
 
   return config;

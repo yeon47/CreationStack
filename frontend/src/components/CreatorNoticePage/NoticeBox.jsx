@@ -3,7 +3,7 @@ import styles from './NoticeBox.module.css';
 import Picker from '@emoji-mart/react';
 import { toggleReaction, getReactions } from '@/api/notice.js';
 
-const NoticeBox = ({ notice, creator }) => {
+const NoticeBox = ({ notice, creator, showDate, loginUser }) => {
   const [reactions, setReactions] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
   const [userEmoji, setUserEmoji] = useState(notice.userReactedEmoji || null);
@@ -37,9 +37,11 @@ const NoticeBox = ({ notice, creator }) => {
 
   return (
     <div className={styles.notice}>
-      <div className={styles.date}>
-        <p>{date}</p>
-      </div>
+      {showDate && (
+        <div className={styles.date}>
+          <p>{date}</p>
+        </div>
+      )}
       <div className={styles.post_container}>
         <div className={styles.creator_img}>
           <img src={creator?.profileImageUrl} alt={`${creator?.nickname} 프로필 이미지`} />
@@ -49,10 +51,12 @@ const NoticeBox = ({ notice, creator }) => {
             <div className={styles.post_box}>
               <p className={styles.text}>{notice.content}</p>
             </div>
-            <div className={styles.button_container}>
-              <button className={styles.edit_button}>수정</button>
-              <button className={styles.delete_button}>삭제</button>
-            </div>
+            {loginUser?.userId === creator?.userId && (
+              <div className={styles.button_container}>
+                <button className={styles.edit_button}>수정</button>
+                <button className={styles.delete_button}>삭제</button>
+              </div>
+            )}
           </div>
           <div className={styles.post_footer}>
             <div className={styles.time}>{time}</div>

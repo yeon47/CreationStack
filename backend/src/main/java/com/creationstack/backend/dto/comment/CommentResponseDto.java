@@ -19,5 +19,7 @@ public class CommentResponseDto {
 	private Boolean isDeleted;
 	private boolean isLiked;
 	private int likeCount;
+	private String profileImageUrl;
+
 
 }

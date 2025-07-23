@@ -8,17 +8,40 @@ import { SubscriptionModal } from '../../../components/ManageSubscriptionPage/Su
 import { getPublicUserProfile } from '../../../api/profile';
 import { getContentsByCreator } from '../../../api/contentAPI';
 import { cancelSubscription, getMySubscriptions } from '../../../api/subscription';
+import { getMyProfile } from '../../../api/user';
 
 export const CreatorMainPage = () => {
   const { creatorNickname } = useParams(); // URL에서 닉네임 추출
   const [creator, setCreator] = useState(null);
   const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [myUserId, setMyUserId] = useState(null);
 
   const [modalType, setModalType] = useState(null);
 
+  const fetchMyInfo = async () => {
+    try {
+      const res = await getMyProfile();
+      console.log('✅ getMyProfile 응답:', res.data);
+      setMyUserId(res.data.data.userId);
+    } catch (err) {
+      console.error('내 정보 불러오기 실패', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchMyInfo();
+  }, []);
+
+  useEffect(() => {
+    if (myUserId !== null) {
+      console.log('✅ 내 userId 상태 업데이트됨:', myUserId);
+    }
+  }, [myUserId]);
+
   useEffect(() => {
     if (!creatorNickname) return;
+    const isMe = myUserId === creator?.userId;
 
     const fetchCreatorData = async () => {
       try {
@@ -76,7 +99,18 @@ export const CreatorMainPage = () => {
           isSubscribed: creator.subscribed ?? false,
         }}
         onUnsubscribeClick={() => setModalType('cancel')} // 구독중일 때만 호출됨
-        onNoticeClick={() => setModalType('suggest')}
+        onNoticeClick={() => {
+          if (myUserId === creator.userId) {
+            // 작성자 본인 → 바로 입장
+            window.location.href = `/creator/notice/${creator.nickname}`;
+          } else if (!creator.subscribed) {
+            // 구독 안 했으면 모달
+            setModalType('suggest');
+          } else {
+            // 구독자면 입장
+            window.location.href = `creator//notice/${creator.nickname}`;
+          }
+        }}
       />
       <div className={styles.content}>
         <h1 className={styles.title}>콘텐츠 목록</h1>
