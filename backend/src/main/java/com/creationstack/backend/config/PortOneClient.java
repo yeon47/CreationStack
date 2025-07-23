@@ -1,8 +1,22 @@
 package com.creationstack.backend.config;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+
+import com.creationstack.backend.dto.Payment.DeletePaymentMethodRequestDto;
 import com.creationstack.backend.dto.Payment.PortOneBillingResponseDto;
 import com.creationstack.backend.dto.Payment.PortOnePaymentRequestDto;
-import com.creationstack.backend.dto.Payment.DeletePaymentMethodRequestDto;
 import com.creationstack.backend.dto.Payment.PortOneReservationRequestDto;
 import com.creationstack.backend.dto.Payment.PortOneReservationResponseDto;
 import com.creationstack.backend.dto.Payment.PortOneReservationResponseDto.ScheduleDto;
@@ -10,21 +24,9 @@ import com.creationstack.backend.exception.CustomException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.http.HttpHeaders;
 
 @Component
 @RequiredArgsConstructor
@@ -37,6 +39,11 @@ public class PortOneClient {
   @Value("${portone.apisecret}")
   private String API_SECRET;
 
+  public PortOneClient(@Value("${portone.apisecret}") String API_SECRET) {
+    this.API_SECRET = API_SECRET;
+    log.info("[PortOneClient] Loaded API_SECRET: {}", API_SECRET);
+  }
+
   @Value("${portone.hostname}")
   private String API_HOSTNAME;
 
@@ -44,7 +51,7 @@ public class PortOneClient {
   private String STORE_ID;
 
   // billingkey에 등록된 카드 정보 요청
-  public JsonNode getBillingKeyInfo(String billingKey) {
+public JsonNode getBillingKeyInfo(String billingKey) {
     String requestUrl = API_HOSTNAME + "/billing-keys/" + billingKey;
     HttpHeaders headers = new HttpHeaders();
     headers.set("Authorization", "PortOne " + API_SECRET);
@@ -52,17 +59,60 @@ public class PortOneClient {
 
     HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-    ResponseEntity<String> response =
-        restTemplate.exchange(requestUrl, HttpMethod.GET, entity, String.class);
+    int retry = 0;
+    int maxRetries = 3;
+    long retryDelayMillis = 1000;
 
-    try {
-      JsonNode root = objectMapper.readTree(response.getBody());
-      JsonNode methods = root.get("methods");
-      return methods.get(0).get("card");
-    } catch (Exception e) {
-      throw new RuntimeException("포트원 응답 파싱 실패" + e);
+    while (retry < maxRetries) {
+        try {
+            log.info("[PortOneClient] getBillingKeyInfo 요청 URL: {}", requestUrl);
+            log.info("[PortOneClient] getBillingKeyInfo 요청 헤더: {}", headers);
+
+            ResponseEntity<String> response =
+                restTemplate.exchange(requestUrl, HttpMethod.GET, entity, String.class);
+
+            log.info("[PortOneClient] 응답 상태 코드: {}", response.getStatusCode());
+            log.info("[PortOneClient] 응답 본문: {}", response.getBody());
+
+            if (response.getStatusCode() != HttpStatus.OK) {
+                throw new CustomException(HttpStatus.resolve(response.getStatusCode().value()),
+                    "PortOne API 호출 실패: " + response.getBody());
+            }
+
+            JsonNode root = objectMapper.readTree(response.getBody());
+            JsonNode methods = root.get("methods");
+
+            if (methods == null || !methods.isArray() || methods.size() == 0) {
+                throw new IllegalStateException("methods 정보가 존재하지 않습니다.");
+            }
+
+            JsonNode card = methods.get(0).get("card");
+            if (card == null || card.isNull()) {
+                throw new IllegalStateException("card 정보가 응답에 존재하지 않습니다.");
+            }
+
+            return card;
+
+        } catch (Exception e) {
+            log.warn("[PortOneClient] 카드 정보 조회 실패 (시도 {}): {}", retry + 1, e.getMessage());
+            retry++;
+
+            if (retry < maxRetries) {
+                try {
+                    Thread.sleep(retryDelayMillis);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("스레드 중단됨", ie);
+                }
+            } else {
+                throw new RuntimeException("카드 정보 조회 실패 - 최대 재시도 초과", e);
+            }
+        }
     }
-  }
+
+    throw new IllegalStateException("도달할 수 없는 카드 조회 실패 로직");
+}
+
 
 
   //카드 이용한 결제 진행

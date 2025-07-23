@@ -95,6 +95,7 @@ public class SubscriptionService {
                         subscription.setCreatorId(request.getCreatorId());
                         subscription.setStatus(pendingStatus);
                         subscription.setStartedAt(now);
+                        subscription.setLastPaymentAt(now);
                         subscription.setNextPaymentAt(now.plusMonths(1));
                         subscription.setPaymentMethod(paymentMethod);
                         subscriptionRepository.save(subscription);

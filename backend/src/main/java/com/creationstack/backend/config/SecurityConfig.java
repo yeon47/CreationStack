@@ -56,8 +56,7 @@ public class SecurityConfig {
                                     "/api/creators/**", // 크리에이터 관련 API
                                     "/api/contents/**",
                                     "/api/search/**",
-                                    "/api/billings/**",
-                                    "/api/payments/**",
+                                    
                                     "/api/user/public/**",
                                     "/api/contents/*/comments",  // 댓글 목록 조회
                                     "/api/contents/*/comments/*", // 댓글 수정,삭제,대댓글
