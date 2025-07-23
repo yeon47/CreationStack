@@ -7,7 +7,6 @@ import lombok.Setter;
 @Setter
 public class NoticeCreateDto {
 
-    private String title;
     private String content;
     private String thumbnailUrl;
     private Long creatorId;

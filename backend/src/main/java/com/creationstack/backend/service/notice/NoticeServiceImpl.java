@@ -37,7 +37,6 @@ public class NoticeServiceImpl implements NoticeService {
                 }
                 Notice notice = Notice.builder()
                                 .creator(user)
-                                .title(dto.getTitle())
                                 .content(dto.getContent())
                                 .thumbnailUrl(dto.getThumbnailUrl())
                                 .createdAt(LocalDateTime.now())
@@ -47,7 +46,6 @@ public class NoticeServiceImpl implements NoticeService {
 
                 return NoticeResponseDto.builder()
                                 .noticeId(notice.getNoticeId())
-                                .title(notice.getTitle())
                                 .content(notice.getContent())
                                 .thumbnailUrl(notice.getThumbnailUrl())
                                 .creatorName(user.getUserDetail().getNickname())
@@ -86,7 +84,6 @@ public class NoticeServiceImpl implements NoticeService {
                 return noticeRepository.findByCreator_UserIdOrderByCreatedAtDesc(creatorId).stream()
                     .map(notice -> NoticeResponseDto.builder()
                         .noticeId(notice.getNoticeId())
-                        .title(notice.getTitle())
                         .content(notice.getContent())
                         .thumbnailUrl(notice.getThumbnailUrl())
                         .creatorName(notice.getCreator().getUserDetail().getNickname())
@@ -111,13 +108,11 @@ public class NoticeServiceImpl implements NoticeService {
                         throw new AccessDeniedException("본인이 작성한 공지만 수정할 수 있습니다.");
                 }
 
-                notice.setTitle(dto.getTitle());
                 notice.setContent(dto.getContent());
                 notice.setThumbnailUrl(dto.getThumbnailUrl());
 
                 return NoticeResponseDto.builder()
                                 .noticeId(notice.getNoticeId())
-                                .title(notice.getTitle())
                                 .content(notice.getContent())
                                 .thumbnailUrl(notice.getThumbnailUrl())
                                 .creatorName(notice.getCreator().getUserDetail().getNickname())
