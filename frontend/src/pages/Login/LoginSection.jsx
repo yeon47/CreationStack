@@ -53,9 +53,11 @@ export const LoginSection = () => {
         const nickname = result.data.user.nickname;
         const accessToken = result.data.tokens.accessToken;
         const refreshToken = result.data.tokens.refreshToken;
+        const userId = result.data.user.userId;
 
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('userId', userId);
 
         alert(`${nickname}님 어서오세요.`);
         navigate('/');
