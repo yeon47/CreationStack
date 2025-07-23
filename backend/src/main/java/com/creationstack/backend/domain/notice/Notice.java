@@ -4,9 +4,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.creationstack.backend.domain.user.User;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -37,13 +40,15 @@ public class Notice {
 	@JoinColumn(name = "creator_id")
 	private User creator;
 
-	private String title;
-
+	@Column(nullable = false, columnDefinition = "TEXT")
 	private String content;
 
+	@Column(name = "image_url", length=512)
 	private String thumbnailUrl;
 
-	private LocalDateTime createdAt;
+	@CreationTimestamp // 엔티티가 생성될 때 현재 시간 자동 삽입
+    @Column(name = "created_at") 
+    private LocalDateTime createdAt;
 
 	@OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<NoticeReaction> reactions = new ArrayList<>();

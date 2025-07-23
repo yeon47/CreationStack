@@ -26,6 +26,11 @@ public class PaymentMethodController {
   // 1. 카드 등록 후 결제 수단 반환
   @PostMapping("/api/billings/card")
   public ResponseEntity<SavePaymentMethodResponseDto> savePaymentMethod(Authentication authentication, @RequestBody SavePaymentMethodRequestDto req){
+    log.info("Authentication object: {}", authentication);
+    if (authentication != null) {
+        log.info("Authentication principal: {}", authentication.getPrincipal());
+        log.info("Authentication principal type: {}", authentication.getPrincipal().getClass().getName());
+    }
     Long userId = (Long) authentication.getPrincipal();
     return ResponseEntity.ok(paymentMethodService.save(userId,req));
   }

@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 public class NoticeResponseDto {
 
     private Long noticeId;
-    private String title;
     private String content;
     private String thumbnailUrl;
     private String creatorName;

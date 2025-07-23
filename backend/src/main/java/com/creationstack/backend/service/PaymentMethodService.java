@@ -1,7 +1,12 @@
 package com.creationstack.backend.service;
 
-import com.creationstack.backend.config.PortOneClient;
+import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.creationstack.backend.config.PortOneClient;
 import com.creationstack.backend.domain.payment.Payment;
 import com.creationstack.backend.domain.payment.PaymentMethod;
 import com.creationstack.backend.domain.subscription.Subscription;
@@ -11,20 +16,15 @@ import com.creationstack.backend.dto.Payment.DeletePaymentMethodResponseDto;
 import com.creationstack.backend.dto.Payment.PaymentMethodResponseDto;
 import com.creationstack.backend.dto.Payment.SavePaymentMethodRequestDto;
 import com.creationstack.backend.dto.Payment.SavePaymentMethodResponseDto;
-
 import com.creationstack.backend.exception.CustomException;
 import com.creationstack.backend.repository.PaymentMethodRepository;
 import com.creationstack.backend.repository.PaymentRepository;
 import com.creationstack.backend.repository.SubscriptionRepository;
 import com.creationstack.backend.repository.UserDetailRepository;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,32 +40,44 @@ public class PaymentMethodService {
   // 1. 결제수단 저장
   @Transactional
   public SavePaymentMethodResponseDto save(Long userId, SavePaymentMethodRequestDto req) {
-    try {
-      String billingKey = req.getBillingKey();
-      JsonNode card = portOneClient.getBillingKeyInfo(billingKey);
+  try {
+    log.info("req: {}", req);
+    String billingKey = req.getBillingKey();
+    JsonNode card = portOneClient.getBillingKeyInfo(billingKey);
 
-      UserDetail userDetail = userDetailRepository.findById(userId).orElse(null);
-
-      PaymentMethod paymentMethod = PaymentMethod.builder()
-          .userId(userId) // TODO: 실제 userId 할당
-          .billingKey(billingKey)
-          .cardName(card.get("name").asText())
-          .cardBrand(card.get("brand").asText())
-          .cardNumber(card.get("number").asText())
-          .cardType(card.get("type").asText())
-          .build();
-
-      paymentMethodRepository.save(paymentMethod);
-      assert userDetail != null;
-      SavePaymentMethodResponseDto res = new SavePaymentMethodResponseDto(
-          userDetail.getUsername(), paymentMethod.getCardBrand(), paymentMethod.getCardType(),
-          paymentMethod.getCardName(), paymentMethod.getCardNumber()
-      );
-      return res;
-    } catch (RuntimeException e) {
-      throw new RuntimeException("결제수단 저장 실패");
+    if (card == null || card.get("name") == null || card.get("number") == null) {
+      throw new IllegalStateException("카드 정보가 누락되었습니다.");
     }
+
+    UserDetail userDetail = userDetailRepository.findById(userId)
+        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+    PaymentMethod paymentMethod = PaymentMethod.builder()
+        .userId(userId)
+        .billingKey(billingKey)
+        .cardName(card.get("name").asText())
+        .cardBrand(card.get("brand").asText())
+        .cardNumber(card.get("number").asText())
+        .cardType(card.get("type").asText())
+        .build();
+
+    log.info("paymentMethod: {}", paymentMethod);
+
+    paymentMethodRepository.save(paymentMethod);
+
+    return new SavePaymentMethodResponseDto(
+        userDetail.getUsername(),
+        paymentMethod.getCardBrand(),
+        paymentMethod.getCardType(),
+        paymentMethod.getCardName(),
+        paymentMethod.getCardNumber()
+    );
+  } catch (Exception e) {
+    log.error("결제수단 저장 실패", e);  // 기존 예외 기록
+    throw new RuntimeException("결제수단 저장 실패", e);
   }
+}
+
 
   // 2. 회원 ID 통해 저장된 결제수단 호출
   public List<PaymentMethodResponseDto> getPaymentMethod(Long userId) {
