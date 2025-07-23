@@ -4,6 +4,8 @@ import { Card, CardContent } from '../../components/Member/Card';
 import { Input } from '../../components/Member/Input';
 import { Label } from '../../components/Member/Label';
 import styles from './Login.module.css';
+import logo from '../../assets/img/logo.svg'
+
 
 export const LoginSection = () => {
   const navigate = useNavigate();
@@ -85,9 +87,9 @@ export const LoginSection = () => {
   return (
     <div className={styles.container}>
       <div className={styles.innerContainer}>
-        <div className={styles.mainContent}>
           {/* Blue background section */}
           <div className={styles.blueBackground} />
+        <div className={styles.mainContent}>
 
           {/* Login card */}
           <Card className={styles.loginCard}>
@@ -165,7 +167,9 @@ export const LoginSection = () => {
               {/* Logo */}
               <div className={styles.logoSection}>
                 <div className={styles.logoContainer}>
-                  <div className={styles.logoInner}>{/* 로고 아이콘 또는 이미지 */}</div>
+                  <div className={styles.logoInner}>
+                    <img src={logo} />
+                  </div>
                 </div>
               </div>
 
