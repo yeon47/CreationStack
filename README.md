@@ -1,10 +1,12 @@
-# 🐟 멋쟁이사자처럼 프로젝트 - CreationStack
+# 💬 멋쟁이사자처럼 프로젝트 - CreationStack
 
 ## 프로젝트 소개
 
-![alt text](image.png)
-실무자들이 자신의 경험과 지식을 담은 콘텐츠를 업로드하고, 취업준비생과 같은 사용자들이 이를 구독하여 실질적인 도움을 받을 수 있습니다
-<br><br><br><br><br><br><br><br>
+<img width="1900" height="980" alt="image" src="https://github.com/user-attachments/assets/7e4b4f7f-eac3-4a29-aa80-814d29e6ba1d" />
+
+### 실무자들이 자신의 경험과 지식을 담은 콘텐츠를 업로드하고, 취업준비생과 같은 사용자들이 이를 구독하여 실질적인 도움을 받을 수 있습니다
+
+<br><br><br><br><br><br>
 
 ## 조원 소개
 
@@ -13,7 +15,7 @@
 |                  [**김희연**](https://github.com/Happy-Lotus)                  |                [**김진아**](https://github.com/catapillar0505)                 |                     [**김채연**](https://github.com/yeon47)                     |                   [**윤혜진**](https://github.com/lold2424)                    |                  [**이예은**](https://github.com/petite-coder)                  |                     [**오세민**](https://github.com/semin5)                     |                   [**전효진**](https://github.com/hyojin0911)                   |
 |                       `프로젝트 총괄, 결제 서비스 구현`                        |                              `콘텐츠 서비스 구현`                              |                                `SNS 서비스 구현`                                |              `JWT 이용한 이메일&카카오 로그인 및 지도 화면 구현`               |                    `게시글 카테고리&태그 및 상태 표시 구현`                     |                           `게시글 좋아요/싫어요 구현`                           |                           `게시글 좋아요/싫어요 구현`                           |
 
-<br><br>
+<br><br><br><br><br><br>
 
 ## 기술 스택
 
@@ -21,11 +23,10 @@
 <img src="https://img.shields.io/badge/amazon aws-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white">
 <img src="https://img.shields.io/badge/.ENV-ECD53F?style=for-the-badge&logo=.ENV&logoColor=white"> <br>
 <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white"/><br>
-<img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=React&logoColor=white"/> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=JavaScript&logoColor=white"/>
-<img src="https://img.shields.io/badge/CSS Modules-000000?style=for-the-badge&logo=CSS Modules&logoColor=white"/> <br>
+<img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=React&logoColor=white"/> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=JavaScript&logoColor=white"/> <br>
 <img src="https://img.shields.io/badge/figma-F24E1E?style=for-the-badge&logo=Figma&logoColor=white"/><img src="https://img.shields.io/badge/Intellij IDEA-000000?style=for-the-badge&logo=IntellijIDEA&logoColor=white"/><img src="https://img.shields.io/badge/VS CODE-61DAFB?style=for-the-badge&logo=VSCODE&logoColor=white"/> <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=GitHub&logoColor=white"/> <img src="https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=Notion&logoColor=white"/><img src="https://img.shields.io/badge/KAKAO-FFCD00?style=for-the-badge&logo=KAKAO&logoColor=white"/><img src="https://img.shields.io/badge/PortOne-F24E1E?style=for-the-badge&logo=&logoColor=white"/><br>
 
-<br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br>
 
 ## 기능
 
@@ -142,7 +143,7 @@
 - 페이지네이션을 통해 검색 과정에서 서버 부하를 막을 수 있습니다.
 - 페이지 로딩 속도를 향상시킬 수 있습니다.
 
-<br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br>
 
 ## 프로젝트 설정
 
