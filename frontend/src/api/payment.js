@@ -75,7 +75,6 @@ export const registerBillingKey = async (storeId, channelKey, name, email) => {
         center: true, //sdk 팝업 위치 center 고정
       },
     });
-    alert('이 billingkey를 .env sample billingkey로 사용하세요' + response.billingKey);
     return response;
   } catch (error) {
     throw error;
