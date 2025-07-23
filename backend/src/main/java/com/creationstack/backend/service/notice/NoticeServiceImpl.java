@@ -8,6 +8,7 @@ import com.creationstack.backend.repository.NoticeReactionRepository;
 import com.creationstack.backend.repository.NoticeRepository;
 // import com.creationstack.backend.repository.UserRepository;
 
+import com.creationstack.backend.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 
 import lombok.RequiredArgsConstructor;
@@ -26,9 +27,11 @@ public class NoticeServiceImpl implements NoticeService {
 
         private final NoticeRepository noticeRepository;
         private final NoticeReactionRepository reactionRepository;
+        private final UserRepository userRepository;
         // private final UserRepository userRepository;
 
-        public NoticeResponseDto createNotice(NoticeCreateDto dto, User user) {
+        public NoticeResponseDto createNotice(NoticeCreateDto dto, Long userId) {
+                User user = getCurrentUser(userId);
                 if (user.getRole() != User.UserRole.CREATOR) {
                         throw new AccessDeniedException("공지사항은 크리에이터만 작성할 수 있습니다.");
                 }
@@ -54,7 +57,9 @@ public class NoticeServiceImpl implements NoticeService {
 
         @Override
         @Transactional(readOnly = true)
-        public NoticeDetailDto getNotice(Long noticeId, User user) {
+        public NoticeDetailDto getNotice(Long noticeId,Long userId) {
+                User user = getCurrentUser(userId);
+
                 Notice notice = noticeRepository.findById(noticeId)
                                 .orElseThrow(() -> new EntityNotFoundException("공지사항 없음"));
 
@@ -77,21 +82,23 @@ public class NoticeServiceImpl implements NoticeService {
         }
 
         @Override
-        public List<NoticeResponseDto> getAllNotices() {
-                return noticeRepository.findAllByOrderByCreatedAtDesc().stream()
-                                .map(notice -> NoticeResponseDto.builder()
-                                                .noticeId(notice.getNoticeId())
-                                                .title(notice.getTitle())
-                                                .content(notice.getContent())
-                                                .thumbnailUrl(notice.getThumbnailUrl())
-                                                .creatorName(notice.getCreator().getUserDetail().getNickname())
-                                                .createdAt(notice.getCreatedAt())
-                                                .build())
-                                .collect(Collectors.toList());
+        public List<NoticeResponseDto> getAllNotices(Long creatorId) {
+                return noticeRepository.findByCreator_UserIdOrderByCreatedAtDesc(creatorId).stream()
+                    .map(notice -> NoticeResponseDto.builder()
+                        .noticeId(notice.getNoticeId())
+                        .title(notice.getTitle())
+                        .content(notice.getContent())
+                        .thumbnailUrl(notice.getThumbnailUrl())
+                        .creatorName(notice.getCreator().getUserDetail().getNickname())
+                        .createdAt(notice.getCreatedAt())
+                        .build())
+                    .collect(Collectors.toList());
         }
 
         @Override
-        public NoticeResponseDto updateNotice(Long noticeId, NoticeUpdateDto dto, User user) {
+        public NoticeResponseDto updateNotice(Long noticeId, NoticeUpdateDto dto, Long userId) {
+                User user = getCurrentUser(userId);
+
                 if (user.getRole() != User.UserRole.CREATOR) {
                         throw new AccessDeniedException("공지사항은 크리에이터만 수정할 수 있습니다.");
                 }
@@ -119,7 +126,9 @@ public class NoticeServiceImpl implements NoticeService {
         }
 
         @Override
-        public void deleteNotice(Long noticeId, User user) {
+        public void deleteNotice(Long noticeId, Long userId) {
+                User user = getCurrentUser(userId);
+
                 if (user.getRole() != User.UserRole.CREATOR) {
                         throw new AccessDeniedException("공지사항은 크리에이터만 삭제할 수 있습니다.");
                 }
@@ -133,6 +142,11 @@ public class NoticeServiceImpl implements NoticeService {
 
                 reactionRepository.deleteByNotice(notice);
                 noticeRepository.delete(notice);
+        }
+
+        @Override
+        public void reactToNotice(Long noticeId, Long userId, String emoji) {
+                return;
         }
 
         public void reactToNotice(Long noticeId, User user, String emoji) {
@@ -156,5 +170,11 @@ public class NoticeServiceImpl implements NoticeService {
                 return grouped.entrySet().stream()
                                 .map(e -> new NoticeReactionDto(e.getKey(), e.getValue()))
                                 .collect(Collectors.toList());
+        }
+
+
+        private User getCurrentUser(Long userId) {
+                User user = userRepository.findById(userId).orElse(null);
+                return user;
         }
 }

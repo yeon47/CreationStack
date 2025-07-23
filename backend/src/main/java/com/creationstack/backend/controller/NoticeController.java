@@ -6,6 +6,7 @@ import com.creationstack.backend.service.notice.NoticeService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,22 +23,26 @@ public class NoticeController {
     public ResponseEntity<NoticeResponseDto> createNotice(
             @PathVariable Long creatorId,
             @RequestBody NoticeCreateDto dto,
-            @AuthenticationPrincipal User user) {
+            Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
         dto.setCreatorId(creatorId);
-        return ResponseEntity.ok(noticeService.createNotice(dto, user));
+        return ResponseEntity.ok(noticeService.createNotice(dto, userId));
     }
 
     @GetMapping
-    public ResponseEntity<List<NoticeResponseDto>> getAllNotices() {
-        return ResponseEntity.ok(noticeService.getAllNotices());
+    public ResponseEntity<List<NoticeResponseDto>> getAllNotices(
+        @PathVariable Long creatorId
+    ) {
+        return ResponseEntity.ok(noticeService.getAllNotices(creatorId));
     }
 
     @GetMapping("/{noticeId}")
     public ResponseEntity<NoticeDetailDto> getNotice(
             @PathVariable Long creatorId,
             @PathVariable Long noticeId,
-            @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(noticeService.getNotice(noticeId, user));
+        Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
+        return ResponseEntity.ok(noticeService.getNotice(noticeId, userId));
     }
 
     @PutMapping("/{noticeId}")
@@ -45,16 +50,18 @@ public class NoticeController {
             @PathVariable Long creatorId,
             @PathVariable Long noticeId,
             @RequestBody NoticeUpdateDto dto,
-            @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(noticeService.updateNotice(noticeId, dto, user));
+        Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
+        return ResponseEntity.ok(noticeService.updateNotice(noticeId, dto, userId));
     }
 
     @DeleteMapping("/{noticeId}")
     public ResponseEntity<Void> deleteNotice(
             @PathVariable Long creatorId,
             @PathVariable Long noticeId,
-            @AuthenticationPrincipal User user) {
-        noticeService.deleteNotice(noticeId, user);
+        Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
+        noticeService.deleteNotice(noticeId, userId);
         return ResponseEntity.noContent().build();
     }
 
@@ -63,12 +70,13 @@ public class NoticeController {
             @PathVariable Long creatorId,
             @PathVariable Long noticeId,
             @RequestParam String emoji,
-            @AuthenticationPrincipal User user) {
-        noticeService.reactToNotice(noticeId, user, emoji);
+        Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
+        noticeService.reactToNotice(noticeId, userId, emoji);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{noticeId}/reaction")
+    @GetMapping("/{noticeId}/reactions")
     public ResponseEntity<List<NoticeReactionDto>> getReactions(
             @PathVariable Long creatorId,
             @PathVariable Long noticeId) {

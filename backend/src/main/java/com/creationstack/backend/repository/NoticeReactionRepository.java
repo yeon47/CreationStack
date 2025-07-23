@@ -15,7 +15,6 @@ import com.creationstack.backend.dto.notice.NoticeReactionDto;
 public interface NoticeReactionRepository extends JpaRepository<NoticeReaction, Long> {
 
     Optional<NoticeReaction> findByNoticeAndUser(Notice notice, User user);
-
     List<NoticeReaction> findByNotice(Notice notice);
 
     Long countByNoticeAndEmoji(Notice notice, String emoji);
@@ -25,5 +24,6 @@ public interface NoticeReactionRepository extends JpaRepository<NoticeReaction, 
     @Query("SELECT new com.creationstack.backend.dto.notice.NoticeReactionDto(r.emoji, COUNT(r)) " +
             "FROM NoticeReaction r WHERE r.notice = :notice GROUP BY r.emoji")
     List<NoticeReactionDto> findGroupedByEmoji(@Param("notice") Notice notice);
+
 
 }

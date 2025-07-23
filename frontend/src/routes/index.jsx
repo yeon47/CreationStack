@@ -51,7 +51,7 @@ export default function AppRoutes() {
         <Route path="/content-edit/:contentId" element={<ContentEditPage />} /> {/* 콘텐츠 수정 페이지 라우트 */}
         <Route path="/payments/summary/:creatorNickname" element={<PaymentPage />} />
         <Route path="/profile/edit" element={<ProfileEdit />} />
-        <Route path="/creator/notice/:nickname" element={<CreatorNoticePage />} />
+        <Route path="/creator/notice/:creatorNickname" element={<CreatorNoticePage />} />
       </Route>
 
       <Route path="/login" element={<LoginSection />} />
