@@ -69,9 +69,6 @@ public class SubscriptionService {
                 User creator = userRepository.findById(request.getCreatorId())
                                 .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "대상 사용자가 존재하지 않습니다."));
 
-                log.info("대상 role: {}", creator.getRole());
-                log.info("Role.CREATOR: {}", Role.CREATOR);
-                log.info("creator.getRole() 클래스: {}", creator.getRole().getClass().getName());
                 if (!"CREATOR".equals(creator.getRole().name())) {
                         throw new CustomException(HttpStatus.BAD_REQUEST, "해당 사용자는 크리에이터가 아닙니다.");
                 }

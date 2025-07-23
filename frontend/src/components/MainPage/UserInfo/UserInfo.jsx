@@ -8,7 +8,6 @@ import CreatorIcon from '../../../assets/img/creator-icon.svg';
 // 사용자 메인페이지에서 사용자 정보
 // 대상 페이지의 사용자가 크리에이터인지에따라 다르게 생성(로그인한 사용자 기준 아님)
 export const UserInfo = ({ user, onUnsubscribeClick, onNoticeClick }) => {
-  console.log('user: ', user);
   const { profileImage, nickname, bio, role, job, subscriberCount, isSubscribed } = user;
 
   const navigate = useNavigate();

@@ -23,7 +23,6 @@ const CreatorManagementPage = () => {
       .then(res => {
         const data = res.data;
         setCreator(data);
-        console.log('사용자 정보 응답:', data);
       })
       .catch(err => {
         console.error('크리에이터 정보 불러오기 실패', err);

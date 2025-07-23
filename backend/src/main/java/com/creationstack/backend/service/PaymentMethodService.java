@@ -41,7 +41,6 @@ public class PaymentMethodService {
   @Transactional
   public SavePaymentMethodResponseDto save(Long userId, SavePaymentMethodRequestDto req) {
     try {
-      log.info("req: {}", req);
       String billingKey = req.getBillingKey();
       JsonNode card = portOneClient.getBillingKeyInfo(billingKey);
 
@@ -61,7 +60,6 @@ public class PaymentMethodService {
           .cardType(card.get("type").asText())
           .build();
 
-      log.info("paymentMethod: {}", paymentMethod);
 
       paymentMethodRepository.save(paymentMethod);
 
@@ -97,7 +95,6 @@ public class PaymentMethodService {
     // 1. 결제수단 조회
     PaymentMethod paymentMethod = paymentMethodRepository.findById(paymentMethodId)
         .orElseThrow(() -> new CustomException(HttpStatus.BAD_REQUEST, "조회되는 결제수단이 없습니다."));
-    log.info("[PaymentMethodService] deletePaymentMethod paymentMethod 정보: {}", paymentMethod.getCardName());
 
     // 2. 연관된 Subscription, Payment에서 연결 해제
     detachPaymentMethodFromRelations(paymentMethod);
@@ -116,7 +113,6 @@ public class PaymentMethodService {
           "PortOne 응답 파싱 오류: deletedAt 없음 / 예상치 못한 응답 - " + responseBody.toString());
     }
 
-    log.info("[PaymentMethodService] deleteBillingKey 응답 deletedAt: {}", deletedAt);
 
     // 5. DB에서 결제수단 삭제
     int deletedCount = paymentMethodRepository.deletePaymentMethodByPaymentMethodId(paymentMethodId);
